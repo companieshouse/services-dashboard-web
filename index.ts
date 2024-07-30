@@ -13,34 +13,40 @@ const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
 
 async function fetchDocumentsByNamesAndVersions(queryParams: QueryParameters) {
-  try {
-    await client.connect();
-    const database = client.db("services_dashboard");
-    const collection = database.collection("projects");
+   try {
+     await client.connect();
+     const database = client.db("services_dashboard");
+     const collection = database.collection("projects");
 
-    // Find the documents by names
-    const names = Object.keys(queryParams);
-    const documents = await collection.find({ name: { $in: names } }).toArray();
+     // Build the regex queries for each name
+     const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, 'i'));
 
-    // Filter the versions for each document
-    const result = documents.map(doc => {
-      const filteredVersions = doc.versions.filter((v: any) => queryParams[doc.name].includes(v.version));
-      return {
-        name: doc.name,
-        versions: filteredVersions
-      };
-    });
+     // Find the documents by names using regex
+     const documents = await collection.find({ name: { $in: namePatterns } }).toArray();
 
-    return result;
-  } catch (error) {
-    console.error("Error fetching documents:", error);
-    return [];
-  } finally {
-    await client.close();
-  }
-}
+     // Filter the versions for each document
+     const result = documents.map(doc => {
+       const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
+       if (!matchingKey) {
+         return null;
+       }
+       const filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
+       return {
+         name: doc.name,
+         versions: filteredVersions
+       };
+     }).filter(doc => doc !== null);
 
- app.get('/dashboard', async (req: Request, res: Response) => {
+     return result;
+   } catch (error) {
+     console.error("Error fetching documents:", error);
+     return [];
+   } finally {
+     await client.close();
+   }
+ }
+
+app.get('/dashboard', async (req: Request, res: Response) => {
    const query = req.query.query as string;
 
    if (!query) {
@@ -58,7 +64,7 @@ async function fetchDocumentsByNamesAndVersions(queryParams: QueryParameters) {
 
    const documents = await fetchDocumentsByNamesAndVersions(queryParams);
    res.json(documents);
- });;
+ });
 
 
 app.listen(port, () => {
