@@ -37,9 +37,21 @@ async function fetchDocuments(queryParams?: QueryParameters) {
          }
          let filteredVersions;
          filteredVersions = doc.versions;
+
+         // for versions: handle empty array "[]" and keyword "*" (both meaning ALL versions)
          if ( ! ( queryParams[matchingKey].length === 0 ||
                   queryParams[matchingKey].includes('*'))) {
             filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
+         }
+         // for versions: handle keyword "last" (meaning most recent "lastBomImport")
+         if (queryParams[matchingKey].includes('last')) {
+            const latestVersion = doc.versions.reduce((prev: any, current: any) =>
+                (new Date(current.lastBomImport) > new Date(prev.lastBomImport)) ? current : prev
+            );
+            const versionExists = filteredVersions.some((item: any) => item.version === latestVersion.version);
+            if (!versionExists) {
+               filteredVersions.push(latestVersion);
+            }
          }
          return {
            name: doc.name,
