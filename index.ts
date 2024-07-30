@@ -35,7 +35,12 @@ async function fetchDocuments(queryParams?: QueryParameters) {
          if (!matchingKey) {
            return null;
          }
-         const filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
+         let filteredVersions;
+         filteredVersions = doc.versions;
+         if ( ! ( queryParams[matchingKey].length === 0 ||
+                  queryParams[matchingKey].includes('*'))) {
+            filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
+         }
          return {
            name: doc.name,
            versions: filteredVersions
