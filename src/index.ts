@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+import dotenvExpand from 'dotenv-expand';
+
 import express, { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
 
@@ -5,67 +8,79 @@ interface QueryParameters {
    [name: string]: string[];
  }
 
-const app = express();
-const port = 8083; // You can change this to any port you prefer
+const runningEnv = dotenv.config();
+dotenvExpand.expand(runningEnv)
 
-const uri = "mongodb://localhost:27017";
-// const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-const client = new MongoClient(uri);
+
+const mongoProtocol = process.env.MONGO_PROTOCOL;
+const mongoUser = process.env.MONGO_USER;
+const mongoPassword = process.env.MONGO_PASSWORD;
+const mongoAuth = mongoUser ? `${mongoUser}:${mongoPassword}@` : '';
+const mongoHostPort = process.env.MONGO_HOST_AND_PORT;
+const mongoUri = `${mongoProtocol}://${mongoAuth}${mongoHostPort}`;
+
+console.log(`MONGO URI: ${mongoUri}` );
+
+const app = express();
+const port = process.env.PORT;
+
+// const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(mongoUri);
 
 async function fetchDocuments(queryParams?: QueryParameters) {
    try {
-     await client.connect();
-     const database = client.db("services_dashboard");
-     const collection = database.collection("projects");
+      await client.connect();
+      const database = client.db(process.env.MONGO_DBNAME);
+      const collection = database.collection(process.env.MONGO_COLLECTION_NAME!);
 
-     let documents;
-     if (!queryParams || queryParams.hasOwnProperty('*')) {
-       // Return all documents if no queryParams are provided or if name is "*"
-       documents = await collection.find({}).toArray();
-     } else {
-       // Build the regex queries for each name
-       const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, 'i'));
+      let documents;
+      // Return all documents if no queryParams are provided or if name is "*"
+      if (!queryParams || queryParams.hasOwnProperty('*')) {
+         documents = await collection.find({}).toArray();
+      } else {
+         // Build the regex queries for each name
+         const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, 'i'));
 
-       // Find the documents by names using regex
-       documents = await collection.find({ name: { $in: namePatterns } }).toArray();
+         // Find the documents by names using regex
+         documents = await collection.find({ name: { $in: namePatterns } }).toArray();
 
-       // Filter the versions for each document
-       documents = documents.map(doc => {
-         const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
-         if (!matchingKey) {
-           return null;
-         }
-         let filteredVersions;
-         filteredVersions = doc.versions;
-
-         // for versions: handle empty array "[]" and keyword "*" (both meaning ALL versions)
-         if ( ! ( queryParams[matchingKey].length === 0 ||
-                  queryParams[matchingKey].includes('*'))) {
-            filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
-         }
-         // for versions: handle keyword "last" (meaning most recent "lastBomImport")
-         if (queryParams[matchingKey].includes('last')) {
-            const latestVersion = doc.versions.reduce((prev: any, current: any) =>
-                (new Date(current.lastBomImport) > new Date(prev.lastBomImport)) ? current : prev
-            );
-            const versionExists = filteredVersions.some((item: any) => item.version === latestVersion.version);
-            if (!versionExists) {
-               filteredVersions.push(latestVersion);
+         // Filter the versions for each document
+         documents = documents.map(doc => {
+            const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
+            if (!matchingKey) {
+               return null;
             }
-         }
-         return {
-           name: doc.name,
-           versions: filteredVersions
-         };
-       }).filter(doc => doc !== null);
-     }
+            let filteredVersions;
+            filteredVersions = doc.versions;
+
+            // for versions: handle empty array "[]" and keyword "*" (both meaning ALL versions)
+            if ( ! ( queryParams[matchingKey].length === 0 ||
+                     queryParams[matchingKey].includes('*'))) {
+               filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
+            }
+            // for versions: handle keyword "last" (meaning most recent "lastBomImport")
+            if (queryParams[matchingKey].includes('last')) {
+               const latestVersion = doc.versions.reduce((prev: any, current: any) =>
+                  (new Date(current.lastBomImport) > new Date(prev.lastBomImport)) ? current : prev
+               );
+               const versionExists = filteredVersions.some((item: any) => item.version === latestVersion.version);
+               if (!versionExists) {
+                  filteredVersions.push(latestVersion);
+               }
+            }
+            return {
+               name: doc.name,
+               versions: filteredVersions
+            };
+         }).filter(doc => doc !== null);
+      }
 
      return documents;
    } catch (error) {
-     console.error("Error fetching documents:", error);
-     return [];
+      console.error("Error fetching documents:", error);
+      return [];
    } finally {
-     await client.close();
+      await client.close();
    }
  }
 
@@ -74,12 +89,12 @@ async function fetchDocuments(queryParams?: QueryParameters) {
 
    let queryParams: QueryParameters | undefined;
    if (query) {
-     try {
-       queryParams = JSON.parse(query);
-     } catch (error) {
-       res.status(400).json({ error: "Invalid JSON format for 'query' parameter." });
-       return;
-     }
+      try {
+         queryParams = JSON.parse(query);
+      } catch (error) {
+         res.status(400).json({ error: "Invalid JSON format for 'query' parameter." });
+         return;
+      }
    }
 
    const documents = await fetchDocuments(queryParams);
