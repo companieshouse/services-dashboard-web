@@ -1,0 +1,83 @@
+{% extends "layout.njk" %}
+
+{% block title %}Home{% endblock %}
+
+{% block top %}
+    <h1>Top Layer - A</h1>
+    <a href="{{ selfUrl }}">self url</a>
+{% endblock %}
+
+{% block left %}
+    <ul>
+        <li><a href="#">Menu Item 1</a></li>
+        <li><a href="#">Menu Item 2</a></li>
+        <li><a href="#">Menu Item 3</a></li>
+    </ul>
+{% endblock %}
+
+{% block right %}
+    <h2>Welcome to the Main Content Area</h2>
+    <p>This is where your main content will be displayed.</p>
+   {% for document in documents %}
+      <div class="table-title-1">Project: {{ document.name }}</div>
+      <table>
+         <!-- Headers for the second table (optional) -->
+         <tr>
+               <th>Service</th>
+               <th>Lang</th>
+               <th>Last Version</th>
+               <th>Date</th>
+               <th>Coverage</th>
+               <th>Bugs</th>
+               <th>Code smell</th>
+               <th>Vulnerabilities</th>
+         </tr>
+         <tr>
+               <!-- 1st Column: name as a link -->
+               <td><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+
+               <!-- 3 Columns: gitInfo.lang, gitInfo.lastRelease.version, gitInfo.lastRelease.date -->
+               <td>{{ document.gitInfo.lang }}</td>
+               <td>{{ document.gitInfo.lastRelease.version }}</td>
+               <td>{{ document.gitInfo.lastRelease.date | date('YYYY-MM-DD') }}</td>
+
+               <!-- 4 Columns: sonarMetrics fields -->
+               <td>{{ document.sonarMetrics.coverage }}</td>
+               <td>{{ document.sonarMetrics.bugs }}</td>
+               <td>{{ document.sonarMetrics.code_smells }}</td>
+               <td>{{ document.sonarMetrics.vulnerabilities }}</td>
+         </tr>
+      </table>
+      <div class="table-title-2">Versions Information</div>
+      <table>
+         <!-- Headers for the second table (optional) -->
+         <tr>
+               <th>Version</th>
+               <th>Last BOM Import</th>
+               <th>Critical</th>
+               <th>High</th>
+               <th>Medium</th>
+               <th>Low</th>
+               <th>Vulnerabilities</th>
+               <th>Components</th>
+         </tr>
+
+         <!-- Iterate over each version entry in versions array -->
+         {% for version in document.versions %}
+         <tr>
+               <td>{{ version.version }}</td>
+               <td>{{ version.lastBomImport | date('YYYY-MM-DD HH:mm:ss') }}</td>
+               <td>{{ version.metrics.critical }}</td>
+               <td>{{ version.metrics.high }}</td>
+               <td>{{ version.metrics.medium }}</td>
+               <td>{{ version.metrics.low }}</td>
+               <td>{{ version.metrics.vulnerabilities }}</td>
+               <td>{{ version.metrics.components }}</td>
+         </tr>
+         {% endfor %}
+      </table>
+
+      <!-- Add some space between each document's tables -->
+      <p></p>
+   {% endfor %}
+{% endblock %}

@@ -3,6 +3,9 @@ import dotenvExpand from 'dotenv-expand';
 
 import express, { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
+import nunjucks from 'nunjucks';
+//import dateFilter from 'nunjucks-date-filter';
+const dateFilter = require('nunjucks-date-filter');
 
 interface QueryParameters {
    [name: string]: string[];
@@ -10,7 +13,6 @@ interface QueryParameters {
 
 const runningEnv = dotenv.config();
 dotenvExpand.expand(runningEnv)
-
 
 const mongoProtocol = process.env.MONGO_PROTOCOL;
 const mongoUser = process.env.MONGO_USER;
@@ -20,12 +22,37 @@ const mongoHostPort = process.env.MONGO_HOST_AND_PORT;
 const mongoUri = `${mongoProtocol}://${mongoAuth}${mongoHostPort}`;
 
 console.log(`MONGO URI: ${mongoUri}` );
+const port = process.env.PORT;
+const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
 const app = express();
-const port = process.env.PORT;
+// app.set("view engine", "html");
+app.use(express.static('public'));
 
 // const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
 const client = new MongoClient(mongoUri);
+
+const nunjucksEnv = nunjucks.configure([
+   "views",
+   "node_modules/govuk-frontend",
+   "node_modules/govuk-frontend/components"
+ ], {
+   autoescape: true,
+   express: app,
+ });
+
+ // Add the date filter
+nunjucksEnv.addFilter('date', dateFilter);
+
+function  setSelfUrl (req: Request) : string {
+       // Protocol (e.g.,)
+      const protocol = req.protocol; //  'https'
+      const fullHost = req.get('host');  // Full host 'some_host:some_port'
+      const originalUrl = req.originalUrl;  // The original URL path (e.g., '/endpoint1')
+
+      // Full URL (e.g., 'https://some_host:some_port/endpoint1')
+      return `${protocol}://${fullHost}${originalUrl}`;
+}
 
 async function fetchDocuments(queryParams?: QueryParameters) {
    try {
@@ -84,7 +111,7 @@ async function fetchDocuments(queryParams?: QueryParameters) {
    }
  }
 
- app.get('/dashboard', async (req: Request, res: Response) => {
+ app.get(endpointDashboard!, async (req: Request, res: Response) => {
    const query = req.query.query as string;
 
    let queryParams: QueryParameters | undefined;
@@ -98,10 +125,14 @@ async function fetchDocuments(queryParams?: QueryParameters) {
    }
 
    const documents = await fetchDocuments(queryParams);
-   res.json(documents);
+   // res.json(documents);
+   res.render('dashboard.njk', {
+      documents: documents,
+      selfUrl: setSelfUrl(req),
+   });
  });
 
 
 app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server is running at http://localhost:${port}/dashboard`);
 });
