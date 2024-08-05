@@ -21,7 +21,7 @@
    {% for document in documents %}
       <div class="table-title-1">Project: {{ document.name }}</div>
       <table>
-         <!-- Headers for the second table (optional) -->
+         <!-- Headers for the 1st table -->
          <tr>
                <th>Service</th>
                <th>Lang</th>
@@ -33,15 +33,15 @@
                <th>Vulnerabilities</th>
          </tr>
          <tr>
-               <!-- 1st Column: name as a link -->
+               <!-- 1st Column (link) -->
                <td><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
-               <!-- 3 Columns: gitInfo.lang, gitInfo.lastRelease.version, gitInfo.lastRelease.date -->
+               <!-- 3 Columns (Git info)-->
                <td>{{ document.gitInfo.lang }}</td>
                <td>{{ document.gitInfo.lastRelease.version }}</td>
                <td>{{ document.gitInfo.lastRelease.date | date('YYYY-MM-DD') }}</td>
 
-               <!-- 4 Columns: sonarMetrics fields -->
+               <!-- 4 Columns (sonar Metrics) -->
                <td>{{ document.sonarMetrics.coverage }}</td>
                <td>{{ document.sonarMetrics.bugs }}</td>
                <td>{{ document.sonarMetrics.code_smells }}</td>
@@ -50,7 +50,7 @@
       </table>
       <div class="table-title-2">Versions Information</div>
       <table>
-         <!-- Headers for the second table (optional) -->
+         <!-- Headers for the second table -->
          <tr>
                <th>Version</th>
                <th>Last BOM Import</th>
@@ -66,7 +66,7 @@
          {% for version in document.versions %}
          <tr>
                <td>{{ version.version }}</td>
-               <td>{{ version.lastBomImport | date('YYYY-MM-DD HH:mm:ss') }}</td>
+               <td>{{ version.lastBomImport | date('YYYY-MM-DD') }}</td>
                <td>{{ version.metrics.critical }}</td>
                <td>{{ version.metrics.high }}</td>
                <td>{{ version.metrics.medium }}</td>
