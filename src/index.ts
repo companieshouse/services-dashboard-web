@@ -4,8 +4,7 @@ import dotenvExpand from 'dotenv-expand';
 import express, { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
 import nunjucks from 'nunjucks';
-//import dateFilter from 'nunjucks-date-filter';
-const dateFilter = require('nunjucks-date-filter');
+import * as filters from './utils/date-filter';
 
 interface QueryParameters {
    [name: string]: string[];
@@ -26,7 +25,6 @@ const port = process.env.PORT;
 const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
 const app = express();
-// app.set("view engine", "html");
 app.use(express.static('public'));
 
 // const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -42,7 +40,8 @@ const nunjucksEnv = nunjucks.configure([
  });
 
  // Add the date filter
-nunjucksEnv.addFilter('date', dateFilter);
+nunjucksEnv.addFilter('date', filters.date);
+nunjucksEnv.addFilter('daysAgo', filters.daysAgo);
 
 function  setSelfUrl (req: Request) : string {
        // Protocol (e.g.,)

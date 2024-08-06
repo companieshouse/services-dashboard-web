@@ -1,3 +1,4 @@
+
 body, html {
     margin: 0;
     padding: 0;
@@ -46,6 +47,7 @@ body, html {
 .right {
     flex: 1;
     padding: 20px;
+    background-color: #f4f4f4;
 }
 
 .table-title-1 {
@@ -81,4 +83,66 @@ table, th, td {
 th, td {
    padding: 8px;
    text-align: left;
+}
+
+.front-number {
+   font-size: 10px;
+   font-weight: bold;
+}
+
+.rounded-number {
+   display: inline-block;
+   /* background-color: #ff5722; */
+   color: #ffffff; /* Font color */
+   font-size: 10px; /* Font size */
+   font-weight: bold; /* Font weight */
+   padding: 5px 10px; /* Padding around the text */
+   border-radius: 10px; /* Rounded corners */
+   margin: 2px; /* Space around each element */
+   text-align: center; /* Aligns text horizontally */
+}
+
+.metric-critical-back {
+   background-color: #ef3017;
+}
+.metric-high-back {
+   background-color: #dd6119;
+}
+.metric-medium-back {
+   background-color: #494e49;
+}
+.metric-low-back {
+   background-color: #9e9595;
+}
+.metric-vulnerabilities-back {
+   background-color: #dc32ef;
+}
+.metric-components-back {
+   background-color: #444aef;
+}
+
+
+.metric-critical-front {
+   color: #ef3017;
+}
+.metric-high-front {
+   color: #dd6119;
+}
+.metric-medium-front {
+   color: #494e49;
+}
+.metric-low-front {
+   color: #9e9595;
+}
+.metric-vulnerabilities-front {
+   color: #dc32ef;
+}
+.metric-components-front {
+   color: #444aef;
+}
+
+
+.days-ago {
+ font-style: italic;
+ color: #7689d3;
 }
