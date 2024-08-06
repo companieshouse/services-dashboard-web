@@ -17,120 +17,156 @@
 
 {% block right %}
     <h2>Services</h2>
-   {% for document in documents %}
-      <div class="table-title-1">Project: {{ document.name }}</div>
-      <table>
-         <!-- Headers for the 1st table -->
-         <tr>
-               <th>Service</th>
-               <th>Lang</th>
-               <th>Last Version</th>
-               <th>Date</th>
-               <th>Coverage</th>
-               <th>Bugs</th>
-               <th>Code smell</th>
-               <th>Vulnerabilities</th>
-         </tr>
-         <tr>
-               <!-- 1st Column (link) -->
-               <td><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+   <table id="table-services">
+      <thead>
+      <!-- Headers for Table -->
+      <tr>
+            <th data-column="service-name" data-type="string">Service
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="git-lang" data-type="string">Lang
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="git-version" data-type="string">Last Version
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="git-version-date" data-type="date">Date
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="sonar-coverage" data-type="num">Coverage
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="sonar-bugs" data-type="num">Bugs
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="sonar-code-smell" data-type="num">Code smell
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="sonar-vulnerabilities" data-type="num">Vulnerabilities
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
 
-               <!-- 3 Columns (Git info)-->
-               <td>{{ document.gitInfo.lang }}</td>
-               <td>{{ document.gitInfo.lastRelease.version }}</td>
-               <td><span>{{ document.gitInfo.lastRelease.date | date('YYYY-MM-DD') }}</span> <span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
-
-               <!-- 4 Columns (sonar Metrics) -->
-               <td>{{ document.sonarMetrics.coverage }}</td>
-               <td>{{ document.sonarMetrics.bugs }}</td>
-               <td>{{ document.sonarMetrics.code_smells }}</td>
-               <td>{{ document.sonarMetrics.vulnerabilities }}</td>
-         </tr>
-      </table>
-      <div class="table-title-2">Versions Information</div>
-      <table>
-         <!-- Headers for the second table -->
-         <tr>
-               <th>Version</th>
-               <th>Last BOM Import</th>
-               <th></th>
-               <th></th>
-               <th></th>
-               <th></th>
-               <th></th>
-               <th></th>
-               <!--th>Critical</th>
-               <th>High</th>
-               <th>Medium</th>
-               <th>Low</th>
-               <th>Vulnerabilities</th>
-               <th>Components</th-->
-         </tr>
-
+            <th data-column="dep-track-version" data-type="string">Version
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-bom-date" data-type="date">Last BOM Import
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-critical" data-type="num">
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-high" data-type="num">
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-medium" data-type="num">
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-low" data-type="num">
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-vulnerabilities" data-type="num">
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+            <th data-column="dep-track-components" data-type="num">
+               <span class="column-sort" data-order="asc">▲</span>
+               <span class="column-sort" data-order="desc">▼</span>
+            </th>
+      </thead>
+      <tbody>
+      </tr>
+      {% for document in documents %}
          <!-- Iterate over each version entry in versions array -->
          {% for version in document.versions %}
-         <tr>
-               <td>{{ version.version }}</td>
-               <td><span>{{ version.lastBomImport | date('YYYY-MM-DD')}}</span> <span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
-               <td>
-                  {% if version.metrics.critical != 0 %}
-                     <div class="rounded-number metric-critical-back">
-                  {% else %}
-                     <div class="front-number metric-critical-front">
-                  {% endif %}
-                        <span title="critical">{{ version.metrics.critical }}</span>
-                     </div>
-               </td>
-               <td>
-                  {% if version.metrics.high != 0 %}
-                     <div class="rounded-number metric-high-back">
-                  {% else %}
-                     <div class="front-number metric-high-front">
-                  {% endif %}
-                        <span title="high">{{ version.metrics.high }}</span>
-                     </div>
-               </td>
-               <td>
-                  {% if version.metrics.medium != 0 %}
-                     <div class="rounded-number metric-medium-back">
-                  {% else %}
-                     <div class="front-number metric-medium-front">
-                  {% endif %}
-                        <span title="medium">{{ version.metrics.medium }}</span>
-                     </div>
-               </td>
-               <td>
-                  {% if version.metrics.low != 0 %}
-                     <div class="rounded-number metric-low-back">
-                  {% else %}
-                     <div class="front-number metric-low-front">
-                  {% endif %}
-                        <span title="low">{{ version.metrics.low }}</span>
-                     </div>
-               </td>
-               <td>
-                  {% if version.metrics.vulnerabilities != 0 %}
-                     <div class="rounded-number metric-vulnerabilities-back">
-                  {% else %}
-                     <div class="front-number metric-vulnerabilities-front">
-                  {% endif %}
-                        <span title="vulnerabilities">{{ version.metrics.vulnerabilities }}</span>
-                     </div>
-               </td>
-               <td>
-                  {% if version.metrics.components != 0 %}
-                     <div class="rounded-number metric-components-back">
-                  {% else %}
-                     <div class="front-number metric-components-front">
-                  {% endif %}
-                        <span title="components">{{ version.metrics.components }}</span>
-                     </div>
-               </td>
+            <tr>
+                  <!-- 1st Column (link) -->
+                  <td><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+
+                  <!-- 3 Columns (Git info)-->
+                  <td>{{ document.gitInfo.lang }}</td>
+                  <td>{{ document.gitInfo.lastRelease.version }}</td>
+                  <td><span>{{ document.gitInfo.lastRelease.date | date('YYYY-MM-DD') }}</span> <span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
+
+                  <!-- 4 Columns (sonar Metrics) -->
+                  <td>{{ document.sonarMetrics.coverage }}</td>
+                  <td>{{ document.sonarMetrics.bugs }}</td>
+                  <td>{{ document.sonarMetrics.code_smells }}</td>
+                  <td>{{ document.sonarMetrics.vulnerabilities }}</td>
+
+                  <!-- 8 Columns (Version specific) -->
+                  <td>{{ version.version }}</td>
+                  <td><span>{{ version.lastBomImport | date('YYYY-MM-DD')}}</span> <span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
+                  <td>
+                     {% if version.metrics.critical != 0 %}
+                        <div class="rounded-number metric-critical-back">
+                     {% else %}
+                        <div class="front-number metric-critical-front">
+                     {% endif %}
+                           <span title="critical">{{ version.metrics.critical }}</span>
+                        </div>
+                  </td>
+                  <td>
+                     {% if version.metrics.high != 0 %}
+                        <div class="rounded-number metric-high-back">
+                     {% else %}
+                        <div class="front-number metric-high-front">
+                     {% endif %}
+                           <span title="high">{{ version.metrics.high }}</span>
+                        </div>
+                  </td>
+                  <td>
+                     {% if version.metrics.medium != 0 %}
+                        <div class="rounded-number metric-medium-back">
+                     {% else %}
+                        <div class="front-number metric-medium-front">
+                     {% endif %}
+                           <span title="medium">{{ version.metrics.medium }}</span>
+                        </div>
+                  </td>
+                  <td>
+                     {% if version.metrics.low != 0 %}
+                        <div class="rounded-number metric-low-back">
+                     {% else %}
+                        <div class="front-number metric-low-front">
+                     {% endif %}
+                           <span title="low">{{ version.metrics.low }}</span>
+                        </div>
+                  </td>
+                  <td>
+                     {% if version.metrics.vulnerabilities != 0 %}
+                        <div class="rounded-number metric-vulnerabilities-back">
+                     {% else %}
+                        <div class="front-number metric-vulnerabilities-front">
+                     {% endif %}
+                           <span title="vulnerabilities">{{ version.metrics.vulnerabilities }}</span>
+                        </div>
+                  </td>
+                  <td>
+                     {% if version.metrics.components != 0 %}
+                        <div class="rounded-number metric-components-back">
+                     {% else %}
+                        <div class="front-number metric-components-front">
+                     {% endif %}
+                           <span title="components">{{ version.metrics.components }}</span>
+                        </div>
+                  </td>
          </tr>
          {% endfor %}
-      </table>
-
-      <!-- Add some space between each document's tables -->
-      <p></p>
-   {% endfor %}
+      {% endfor %}
+      </tbody>
+   </table>
 {% endblock %}
