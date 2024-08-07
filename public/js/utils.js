@@ -1,28 +1,27 @@
-  // Attach event listeners to sorting controls
 document.addEventListener('DOMContentLoaded', () => {
-   const table = document.getElementById('table-services');
-   const headers = table.querySelectorAll('th');
-
-   headers.forEach((header, index) => {
-     header.addEventListener('click', function () {
+   // Attach event listeners to each sorting control (asc and desc spans)
+   document.querySelectorAll('.column-sort').forEach((sortButton) => {
+     sortButton.addEventListener('click', function () {
+       const header = this.closest('th');
+       const columnIndex = Array.from(header.parentNode.children).indexOf(header);
        const columnType = header.getAttribute('data-type');
-       const order = this.querySelector('.column-sort').getAttribute('data-order');
-       sortTableByColumn(index, columnType, order);
+       const order = this.getAttribute('data-order');
+       sortTableByColumn(columnIndex, columnType, order);
      });
    });
  });
 
-function sortTableByColumn(columnIndex, columnType, order) {
+ function sortTableByColumn(columnIndex, columnType, order) {
    const table = document.getElementById('table-services');
    const tbody = table.querySelector('tbody');
    const rows = Array.from(tbody.querySelectorAll('tr'));
 
    const sortedRows = rows.sort((a, b) => {
-     const aVal = a.querySelector(`td:nth-child(${columnIndex + 1})`).innerText;
-     const bVal = b.querySelector(`td:nth-child(${columnIndex + 1})`).innerText;
+      const aVal = a.querySelector(`td:nth-child(${columnIndex + 1})`).innerText;
+      const bVal = b.querySelector(`td:nth-child(${columnIndex + 1})`).innerText;
 
       let comparison = 0;
-      if (columnType === 'num') {
+      if (columnType === 'number') {
          comparison = parseFloat(aVal) - parseFloat(bVal);
       } else if (columnType === 'date') {
          let aDate = aVal.split(' ')[0];  // of a value like "2024-07-30 (7 days ago)" keep the 1st part only
@@ -32,12 +31,8 @@ function sortTableByColumn(columnIndex, columnType, order) {
          comparison = aVal.localeCompare(bVal);
       }
 
-
-      // return order === 'asc' ? comparison : -comparison;
-      let diff = order === 'asc' ? comparison : -comparison;
-      console.log(`testing a:${aVal} vs b:${bVal} with ${order} --> ${diff}`);
-      return diff;
-   });
+      return order === 'asc' ? comparison : -comparison;
+      });
 
    // Re-render sorted rows
    tbody.innerHTML = '';

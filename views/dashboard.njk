@@ -21,71 +21,21 @@
       <thead>
       <!-- Headers for Table -->
       <tr>
-            <th data-column="service-name" data-type="string">Service
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="git-lang" data-type="string">Lang
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="git-version" data-type="string">Last Version
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="git-version-date" data-type="date">Date
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="sonar-coverage" data-type="num">Coverage
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="sonar-bugs" data-type="num">Bugs
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="sonar-code-smell" data-type="num">Code smell
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="sonar-vulnerabilities" data-type="num">Vulnerabilities
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-
-            <th data-column="dep-track-version" data-type="string">Version
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-bom-date" data-type="date">Last BOM Import
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-critical" data-type="num">
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-high" data-type="num">
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-medium" data-type="num">
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-low" data-type="num">
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-vulnerabilities" data-type="num">
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
-            <th data-column="dep-track-components" data-type="num">
-               <span class="column-sort" data-order="asc">▲</span>
-               <span class="column-sort" data-order="desc">▼</span>
-            </th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Service") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Lang") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Last Version") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Date") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Coverage") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Bugs") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Code smell") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Vulnerabilities") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("Last BOM Import") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("") }}</th>
+            <th data-column="service-name" data-type="string"> {{ sortable_header("") }}</th>
       </thead>
       <tbody>
       </tr>
@@ -170,3 +120,10 @@
       </tbody>
    </table>
 {% endblock %}
+
+{% macro sortable_header(column_title) %}
+   <span class="column-sort" data-order="asc">▲</span>
+   <span class="column-sort" dta-order="desc">▼</span>
+   <p></p>
+   {{column_title}}
+{% endmacro %}

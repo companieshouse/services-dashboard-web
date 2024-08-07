@@ -146,3 +146,15 @@ th, td {
  font-style: italic;
  color: #7689d3;
 }
+
+
+/* Change the cursor to pointer and add hover effect */
+.column-sort {
+   cursor: pointer;
+   color: inherit; /* maintain the text color */
+ }
+
+ .column-sort:hover {
+   text-decoration: underline;
+   color: blue; /* change the color on hover */
+ }

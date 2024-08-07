@@ -95,7 +95,7 @@ async function fetchDocuments(queryParams?: QueryParameters) {
                }
             }
             return {
-               name: doc.name,
+               ...doc,
                versions: filteredVersions
             };
          }).filter(doc => doc !== null);
