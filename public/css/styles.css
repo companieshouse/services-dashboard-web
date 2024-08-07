@@ -1,4 +1,4 @@
-
+/* ------------ MAIN CONTAINERS ------------ */
 body, html {
     margin: 0;
     padding: 0;
@@ -50,40 +50,48 @@ body, html {
     background-color: #f4f4f4;
 }
 
-.table-title-1 {
-   font-size: 18px;
-   font-weight: bold;
-   color: white;
-   background-color: #4CAF50;
-   padding: 10px;
-   margin-bottom: 5px;
-   text-align: center;
-   border-radius: 5px;
-}
+.table-services-container {
+   width: 100%; /* Adjust the width as necessary */
+   height: 100%; /* Set the height of the container */
+   overflow-y: auto; /* Enable vertical scrolling */
+   border: 1px solid #ddd; /* Optional: Add a border */
+ }
 
-.table-title-2 {
-   font-size: 18px;
-   font-weight: bold;
-   color: white;
-   background-color: #333; /* Dark gray */
-   padding: 10px;
-   margin-bottom: 5px;
-   text-align: center;
-   border-radius: 5px;
-}
-
-table {
+ table {
    width: 100%;
    border-collapse: collapse;
-   margin-bottom: 20px;
+   /* margin-bottom: 20px;  */  /* <--- remove --*/
 }
+
+/*
 table, th, td {
    border: 1px solid black;
 }
+
 th, td {
    padding: 8px;
    text-align: left;
 }
+*/
+ thead th {
+   position: sticky;
+   top: 0;
+   background-color: #f8f8f8; /* Optional: Set background color for the header */
+   z-index: 1; /* Ensure the header stays on top */
+   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional: Add a shadow for better visibility */
+ }
+
+ tbody tr {
+   border-top: 1px solid #ddd;
+ }
+
+ tbody td {
+   padding: 8px; /* Optional: Adjust padding */
+ }
+
+
+
+/* ------------ CSS FOR NUMBERS/ METRICS ------------ */
 
 .front-number {
    font-size: 10px;
@@ -141,12 +149,14 @@ th, td {
    color: #444aef;
 }
 
+/* ------------ CSS FOR DATES ------------ */
 
 .days-ago {
  font-style: italic;
  color: #7689d3;
 }
 
+/* ------------ CSS FOR SORTING THE TABLE ------------ */
 
 /* Change the cursor to pointer and add hover effect */
 .column-sort {
