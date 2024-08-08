@@ -8,26 +8,26 @@
 {% endblock %}
 
 {% block menu %}
-    <form id="filterForm">
-      <!-- Master checkbox to control all .name-checkbox -->
-      <div>
+   <div class="sticky-header">
          <input type="checkbox" id="masterCheckbox">
          <label for="masterCheckbox"><strong>Select All</strong></label>
-      </div>
-      <hr>
-      {% for document in documents %}
+         <hr>
+   </div>
+   <form id="filterForm">
+   <!-- Master checkbox to control all .name-checkbox -->
+   {% for document in documents %}
+      <div>
+         <input type="checkbox" id="{{ document.name }}" class="name-checkbox" checked>
+         <label for="{{ document.name }}">{{ document.name }}</label>
          <div>
-            <input type="checkbox" id="{{ document.name }}" class="name-checkbox" checked>
-            <label for="{{ document.name }}">{{ document.name }}</label>
-            <div>
-               {% for version in document.versions %}
-                  <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="version-checkbox" data-name="{{ document.name }}" checked>
-                  <label for="{{ document.name }}-{{ version.version }}" >{{ version.version }}</label><br>
-               {% endfor %}
-            </div>
+            {% for version in document.versions %}
+               <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="version-checkbox" data-name="{{ document.name }}" checked>
+               <label for="{{ document.name }}-{{ version.version }}" >{{ version.version }}</label><br>
+            {% endfor %}
          </div>
-      {% endfor %}
-    </form>
+      </div>
+   {% endfor %}
+   </form>
 {% endblock %}
 
 {% block content %}
