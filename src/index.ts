@@ -62,7 +62,7 @@ async function fetchDocuments(queryParams?: QueryParameters) {
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
       if (!queryParams || queryParams.hasOwnProperty('*')) {
-         documents = await collection.find({}).toArray();
+         documents = await collection.find({}).sort({ name: 1 }).toArray();
       } else {
          // Build the regex queries for each name
          const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, 'i'));
@@ -100,6 +100,10 @@ async function fetchDocuments(queryParams?: QueryParameters) {
             };
          }).filter(doc => doc !== null);
       }
+      // sort 'versions' array by 'version'
+      documents.forEach(doc => {
+         doc.versions.sort((a:any, b:any) => a.version.localeCompare(b.version));
+      });
 
      return documents;
    } catch (error) {
