@@ -9,6 +9,12 @@
 
 {% block menu %}
     <form id="filterForm">
+      <!-- Master checkbox to control all .name-checkbox -->
+      <div>
+         <input type="checkbox" id="masterCheckbox">
+         <label for="masterCheckbox"><strong>Select All</strong></label>
+      </div>
+      <hr>
       {% for document in documents %}
          <div>
             <input type="checkbox" id="{{ document.name }}" class="name-checkbox" checked>
