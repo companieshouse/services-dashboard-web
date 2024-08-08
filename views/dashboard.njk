@@ -2,20 +2,29 @@
 
 {% block title %}Home{% endblock %}
 
-{% block top %}
+{% block header %}
     <h1>Top Layer - A</h1>
     <a href="{{ selfUrl }}">self url</a>
 {% endblock %}
 
-{% block left %}
-    <ul>
-        <li><a href="#">Menu Item 1</a></li>
-        <li><a href="#">Menu Item 2</a></li>
-        <li><a href="#">Menu Item 3</a></li>
-    </ul>
+{% block menu %}
+    <form id="filterForm">
+      {% for document in documents %}
+         <div>
+            <input type="checkbox" id="{{ document.name }}" class="name-checkbox" checked>
+            <label for="{{ document.name }}">{{ document.name }}</label>
+            <div>
+               {% for version in document.versions %}
+                  <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="version-checkbox" data-name="{{ document.name }}" checked>
+                  <label for="{{ document.name }}-{{ version.version }}" >{{ version.version }}</label><br>
+               {% endfor %}
+            </div>
+         </div>
+      {% endfor %}
+    </form>
 {% endblock %}
 
-{% block right %}
+{% block content %}
    <h2>Services</h2>
    <div class="table-services-container">
       <table id="table-services">
@@ -44,7 +53,7 @@
          {% for document in documents %}
             <!-- Iterate over each version entry in versions array -->
             {% for version in document.versions %}
-               <tr>
+               <tr data-name="{{ document.name }}" data-version="{{ version.version }}">
                      <!-- 1st Column (link) -->
                      <td><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
@@ -130,3 +139,8 @@
    <br>
    {{column_title}}
 {% endmacro %}
+
+{% block footer %}
+   <h1> Footer 2 </h1>
+{% endblock %}
+

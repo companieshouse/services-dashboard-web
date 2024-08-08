@@ -8,18 +8,20 @@
       <script src="/js/utils.js"></script>
 </head>
 <body>
+   <header>
+      {% block header %}Header{% endblock %}
+   </header>
+
     <div class="container">
-        <div class="top">
-            {% block top %}Header{% endblock %}
-        </div>
-        <div class="bottom">
-            <div class="left">
-                {% block left %}Menu{% endblock %}
-            </div>
-            <div class="right">
-                {% block right %}Dashboard{% endblock %}
-            </div>
-        </div>
+      <aside class="menu">
+               {% block menu %}Menu{% endblock %}
+      </aside>
+      <main class="main">
+               {% block content %}Main{% endblock %}
+      </main>
     </div>
+   <footer>
+      {% block footer %}Footer{% endblock %}
+   </footer>
 </body>
 </html>

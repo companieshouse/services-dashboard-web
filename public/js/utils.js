@@ -38,3 +38,47 @@ document.addEventListener('DOMContentLoaded', () => {
    tbody.innerHTML = '';
    sortedRows.forEach(row => tbody.appendChild(row));
  }
+
+
+
+
+// Add handler to check boxes
+ document.addEventListener('DOMContentLoaded', function() {
+     const nameCheckboxes = document.querySelectorAll('.name-checkbox');
+     const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+     const tableRows = document.querySelectorAll('#table-services tbody tr');
+
+     function filterTable() {
+         tableRows.forEach(row => {
+             const name = row.getAttribute('data-name');
+             const version = row.getAttribute('data-version');
+             const isNameChecked = document.getElementById(name).checked;
+             const isVersionChecked = document.getElementById(`${name}-${version}`).checked;
+
+             if (isNameChecked && isVersionChecked) {
+                 row.style.display = '';
+             } else {
+                 row.style.display = 'none';
+             }
+         });
+     }
+
+     nameCheckboxes.forEach(checkbox => {
+         checkbox.addEventListener('change', function() {
+             const name = this.id;
+             const isChecked = this.checked;
+
+             document.querySelectorAll(`.version-checkbox[data-name="${name}"]`).forEach(vCheckbox => {
+                 vCheckbox.checked = isChecked;
+             });
+
+             filterTable();
+         });
+     });
+
+     versionCheckboxes.forEach(checkbox => {
+         checkbox.addEventListener('change', filterTable);
+     });
+
+     filterTable(); // Initial filter on page load
+ });
