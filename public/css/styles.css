@@ -14,16 +14,61 @@ header, footer  {
    padding: 10px 0;
    flex-shrink: 0;
 }
+/* ------------ HEADER LOGO ------------ */
+      .header-container {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         margin-left: 20px; /* Adds space before the SVG and text */
+         padding-right: 20px; /* Adds some padding to the right */
+         width: 100%;
+         box-sizing: border-box; /* Ensures padding and margin are included in the width calculation */
+      }
+
+         .header-left-content {
+            display: flex;
+            align-items: center;
+         }
+
+         .header-logo {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+         }
+
+         .header-logo-text {
+            font-size: 28px;
+            color: white;
+            text-decoration: none;
+         }
+
+         .header-center-content {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+         }
+
+         .header-center-text {
+            font-size: 18px;
+            color: white;
+         }
+
+         .footer-text {
+            font-size: 12px;
+            color: white;
+            text-decoration: none;
+         }
 
 .container {
    display: flex;
    flex: 1;
    overflow: hidden;
+   background-color: white;
 }
 
 
 .menu {
-   background-color: #f4f4f4;
+   background-color: #aca8a8;
    width: 18%;
    min-width: 100px;
    overflow: auto;
@@ -32,15 +77,13 @@ header, footer  {
    flex-shrink: 0;
    position: relative;
 }
-
+/* ------------ CSS FOR MENU ITEMS ------------ */
       .sticky-header {
          position: sticky;
          top: 0;
-         background-color: #f4f4f4;
          padding-bottom: 10px;
          z-index: 10;
       }
-
 
       .menu  div {
          margin-bottom: 10px;
@@ -58,40 +101,35 @@ header, footer  {
 }
 
 
-
-
-
+/* ------------ CSS FOR MAIN TABLE ------------ */
 
 .table-services-container {
-   width: 100%; /* Adjust the width as necessary */
-   height: 100%; /* Set the height of the container */
+   width: 100%;
+   height: 100%;
    overflow-y: auto; /* Enable vertical scrolling */
-   border: 1px solid #ddd; /* Optional: Add a border */
+   border: 1px solid #ddd;
  }
 
- table {
+table {
    width: 100%;
    border-collapse: collapse;
-   /* margin-bottom: 20px;  */  /* <--- remove --*/
 }
 
- thead th {
+thead th {
    position: sticky;
    top: 0;
-   background-color: #f8f8f8; /* Optional: Set background color for the header */
+   background-color: #f8f8f8;
    z-index: 1; /* Ensure the header stays on top */
-   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional: Add a shadow for better visibility */
- }
+   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* shadow for better visibility */
+}
 
- tbody tr {
+tbody tr {
    border-top: 1px solid #ddd;
- }
+}
 
- tbody td {
-   padding: 8px; /* Optional: Adjust padding */
- }
-
-
+tbody td {
+   padding: 8px;
+}
 
 /* ------------ CSS FOR NUMBERS/ METRICS ------------ */
 
@@ -102,10 +140,9 @@ header, footer  {
 
 .rounded-number {
    display: inline-block;
-   /* background-color: #ff5722; */
    color: #ffffff; /* Font color */
-   font-size: 10px; /* Font size */
-   font-weight: bold; /* Font weight */
+   font-size: 10px;
+   font-weight: bold;
    padding: 5px 10px; /* Padding around the text */
    border-radius: 10px; /* Rounded corners */
    margin: 2px; /* Space around each element */

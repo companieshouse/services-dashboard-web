@@ -1,10 +1,22 @@
 {% extends "layout.njk" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Services Dashboard{% endblock %}
 
 {% block header %}
-    <h1>Top Layer - A</h1>
-    <a href="{{ selfUrl }}">self url</a>
+
+   <link rel="SHORTCUT ICON" href="//{{CDN_HOST}}/images/favicon.ico" />
+   <div class="header-container">
+        <div class="header-left-content">
+            <img src="//{{CDN_HOST}}/images/royal-coat-of-arms-white.svg" alt="Logo" class="header-logo">
+            <a href="https://www.gov.uk/government/organisations/companies-house" class="header-logo-text">Companies House</a>
+        </div>
+        <div class="header-center-content">
+            <span class="header-center-text">Services</span>
+        </div>
+   </div>
+   <!--
+      <a href="{{ selfUrl }}">self url</a>
+   -->
 {% endblock %}
 
 {% block menu %}
@@ -31,7 +43,6 @@
 {% endblock %}
 
 {% block content %}
-   <h2>Services</h2>
    <div class="table-services-container">
       <table id="table-services">
          <thead>
@@ -147,6 +158,6 @@
 {% endmacro %}
 
 {% block footer %}
-   <h1> Footer 2 </h1>
+   <span class="footer-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-text">Companies House</a></span>
 {% endblock %}
 

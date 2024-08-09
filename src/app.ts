@@ -40,7 +40,7 @@ const nunjucksEnv = nunjucks.configure([
    express: app,
  });
 
- nunjucksEnv.addGlobal("CDN_HOST", process.env.CDN_HOST);
+ nunjucksEnv.addGlobal("CDN_HOST", process.env.CDN_URL);
 
  // Add the date filter
 nunjucksEnv.addFilter("date", filters.date);
