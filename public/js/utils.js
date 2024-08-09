@@ -1,45 +1,36 @@
-document.addEventListener('DOMContentLoaded', () => {
-   // Attach event listeners to each sorting control (asc and desc spans)
-   document.querySelectorAll('.column-sort').forEach((sortButton) => {
-     sortButton.addEventListener('click', function () {
-       const header = this.closest('th');
-       const columnIndex = Array.from(header.parentNode.children).indexOf(header);
-       const columnType = header.getAttribute('data-type');
-       const order = this.getAttribute('data-order');
-       sortTableByColumn(columnIndex, columnType, order);
+
+ document.addEventListener('DOMContentLoaded', () => {
+   const table = document.getElementById('table-services');
+   const headers = table.querySelectorAll('th');
+   let sortDirection = 1; // 1 for ascending, -1 for descending
+
+   headers.forEach((header, index) => {
+     header.addEventListener('click', () => {
+       const type = header.getAttribute('data-type');
+       const tbody = table.querySelector('tbody');
+       const rows = Array.from(tbody.querySelectorAll('tr'));
+
+       rows.sort((a, b) => {
+         const cellA = a.children[index].textContent.trim();
+         const cellB = b.children[index].textContent.trim();
+
+         if (type === 'num') {
+           return (parseFloat(cellA) - parseFloat(cellB)) * sortDirection;
+         } else if (type === 'date') {
+           return (new Date(cellA) - new Date(cellB)) * sortDirection;
+         } else {
+           return cellA.localeCompare(cellB) * sortDirection;
+         }
+       });
+
+       // Toggle sort direction
+       sortDirection *= -1;
+
+       // Re-attach sorted rows to the table
+       rows.forEach(row => tbody.appendChild(row));
      });
    });
- });
-
- function sortTableByColumn(columnIndex, columnType, order) {
-   const table = document.getElementById('table-services');
-   const tbody = table.querySelector('tbody');
-   const rows = Array.from(tbody.querySelectorAll('tr'));
-
-   const sortedRows = rows.sort((a, b) => {
-      const aVal = a.querySelector(`td:nth-child(${columnIndex + 1})`).innerText;
-      const bVal = b.querySelector(`td:nth-child(${columnIndex + 1})`).innerText;
-
-      let comparison = 0;
-      if (columnType === 'number') {
-         comparison = parseFloat(aVal) - parseFloat(bVal);
-      } else if (columnType === 'date') {
-         let aDate = aVal.split(' ')[0];  // of a value like "2024-07-30 (7 days ago)" keep the 1st part only
-         let bDate = bVal.split(' ')[0];
-         comparison = new Date(aDate).getTime() - new Date(bDate).getTime();
-      } else {  // Default to string comparison
-         comparison = aVal.localeCompare(bVal);
-      }
-
-      return order === 'asc' ? comparison : -comparison;
-      });
-
-   // Re-render sorted rows
-   tbody.innerHTML = '';
-   sortedRows.forEach(row => tbody.appendChild(row));
- }
-
-
+});
 
 
 // Add handler to check boxes

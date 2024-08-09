@@ -48,22 +48,22 @@
          <thead>
          <!-- Headers for Table -->
          <tr>
-               <th data-column="service-name" data-type="string"> {{ sortable_header("Service") }}</th>
-               <th data-column="service-name" data-type="string"> {{ sortable_header("Lang") }}</th>
-               <th data-column="service-name" data-type="string"> {{ sortable_header("Last Version") }}</th>
-               <th data-column="service-name" data-type="date">   {{ sortable_header("Date") }}</th>
-               <th data-column="service-name" data-type="string"> {{ sortable_header("Coverage") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("Bugs") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("Code smell") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("Vulnerabilities") }}</th>
-               <th data-column="service-name" data-type="string"> {{ sortable_header("Version") }}</th>
-               <th data-column="service-name" data-type="date">   {{ sortable_header("Last BOM Import") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("") }}</th>
-               <th data-column="service-name" data-type="number"> {{ sortable_header("") }}</th>
+               <th data-type="string"> Service</th>
+               <th data-type="string"> Lang</th>
+               <th data-type="string"> Last Version</th>
+               <th data-type="date">   Date</th>
+               <th data-type="string"> Coverage</th>
+               <th data-type="number"> Bugs</th>
+               <th data-type="number"> Code smell</th>
+               <th data-type="number"> Vulnerabilities</th>
+               <th data-type="string"> Version</th>
+               <th data-type="date">   Last BOM Import</th>
+               <th data-type="number"></th>
+               <th data-type="number"></th>
+               <th data-type="number"></th>
+               <th data-type="number"></th>
+               <th data-type="number"></th>
+               <th data-type="number"></th>
          </thead>
          <tbody>
          </tr>
@@ -149,13 +149,6 @@
       </table>
    </div>
 {% endblock %}
-
-{% macro sortable_header(column_title) %}
-   <span class="column-sort" data-order="asc">▲</span>
-   <span class="column-sort" dta-order="desc">▼</span>
-   <br>
-   {{column_title}}
-{% endmacro %}
 
 {% block footer %}
    <span class="footer-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-text">Companies House</a></span>

@@ -121,7 +121,17 @@ thead th {
    background-color: #f8f8f8;
    z-index: 1; /* Ensure the header stays on top */
    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* shadow for better visibility */
+   font-size: 16px;
 }
+   th {
+      cursor: pointer;
+   }
+   th.sort-asc::after {
+      content: " \2191"; /* Up arrow */
+   }
+   th.sort-desc::after {
+      content: " \2193"; /* Down arrow */
+   }
 
 tbody tr {
    border-top: 1px solid #ddd;
