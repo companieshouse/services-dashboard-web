@@ -14,7 +14,7 @@
          const cellA = a.children[index].textContent.trim();
          const cellB = b.children[index].textContent.trim();
 
-         if (type === 'num') {
+         if (type === 'number') {
            return (parseFloat(cellA) - parseFloat(cellB)) * sortDirection;
          } else if (type === 'date') {
            return (new Date(cellA) - new Date(cellB)) * sortDirection;
