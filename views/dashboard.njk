@@ -72,23 +72,23 @@
             {% for version in document.versions %}
                <tr data-name="{{ document.name }}" data-version="{{ version.version }}">
                      <!-- 1st Column (link) -->
-                     <td><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+                     <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
                      <!-- 3 Columns (Git info)-->
-                     <td>{{ document.gitInfo.lang }}</td>
-                     <td>{{ document.gitInfo.lastRelease.version }}</td>
-                     <td><span>{{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
+                     <td class="td_git-lang">{{ document.gitInfo.lang }}</td>
+                     <td class="td-git-version">{{ document.gitInfo.lastRelease.version }}</td>
+                     <td class="td-git-date"><span>{{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
 
                      <!-- 4 Columns (sonar Metrics) -->
-                     <td>{{ document.sonarMetrics.coverage }}</td>
-                     <td>{{ document.sonarMetrics.bugs }}</td>
-                     <td>{{ document.sonarMetrics.code_smells }}</td>
-                     <td>{{ document.sonarMetrics.vulnerabilities }}</td>
+                     <td class="td-met-coverage">{{ document.sonarMetrics.coverage }}</td>
+                     <td class="td-met-bugs">{{ document.sonarMetrics.bugs }}</td>
+                     <td class="td-met-smells">{{ document.sonarMetrics.code_smells }}</td>
+                     <td class="td-met-vulnerabilities">{{ document.sonarMetrics.vulnerabilities }}</td>
 
                      <!-- 8 Columns (Version specific) -->
-                     <td>{{ version.version }}</td>
-                     <td><span>{{ version.lastBomImport | date("YYYY-MM-DD")}}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
-                     <td>
+                     <td class="td-version">{{ version.version }}</td>
+                     <td class="td-bom-import"><span>{{ version.lastBomImport | date("YYYY-MM-DD")}}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
+                     <td class="td-critical">
                         {% if version.metrics.critical != 0 %}
                            <div class="rounded-number metric-critical-back">
                         {% else %}
@@ -97,7 +97,7 @@
                               <span title="critical">{{ version.metrics.critical }}</span>
                            </div>
                      </td>
-                     <td>
+                     <td class="td-sonar-high">
                         {% if version.metrics.high != 0 %}
                            <div class="rounded-number metric-high-back">
                         {% else %}
@@ -106,7 +106,7 @@
                               <span title="high">{{ version.metrics.high }}</span>
                            </div>
                      </td>
-                     <td>
+                     <td class="td-sonar-medium">
                         {% if version.metrics.medium != 0 %}
                            <div class="rounded-number metric-medium-back">
                         {% else %}
@@ -115,7 +115,7 @@
                               <span title="medium">{{ version.metrics.medium }}</span>
                            </div>
                      </td>
-                     <td>
+                     <td class="td-sonar-low">
                         {% if version.metrics.low != 0 %}
                            <div class="rounded-number metric-low-back">
                         {% else %}
@@ -124,7 +124,7 @@
                               <span title="low">{{ version.metrics.low }}</span>
                            </div>
                      </td>
-                     <td>
+                     <td class="td-sonar-vulnerabilities">
                         {% if version.metrics.vulnerabilities != 0 %}
                            <div class="rounded-number metric-vulnerabilities-back">
                         {% else %}
@@ -133,7 +133,7 @@
                               <span title="vulnerabilities">{{ version.metrics.vulnerabilities }}</span>
                            </div>
                      </td>
-                     <td>
+                     <td class="td-sonar-components">
                         {% if version.metrics.components != 0 %}
                            <div class="rounded-number metric-components-back">
                         {% else %}
