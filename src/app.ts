@@ -1,10 +1,10 @@
-import dotenv from 'dotenv';
-import dotenvExpand from 'dotenv-expand';
+import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
 
-import express, { Request, Response } from 'express';
-import { MongoClient } from 'mongodb';
-import nunjucks from 'nunjucks';
-import * as filters from './utils/date-filter';
+import express, { Request, Response } from "express";
+import { MongoClient } from "mongodb";
+import nunjucks from "nunjucks";
+import * as filters from "./utils/date-filter";
 
 interface QueryParameters {
    [name: string]: string[];
@@ -16,7 +16,7 @@ dotenvExpand.expand(runningEnv)
 const mongoProtocol = process.env.MONGO_PROTOCOL;
 const mongoUser = process.env.MONGO_USER;
 const mongoPassword = process.env.MONGO_PASSWORD;
-const mongoAuth = mongoUser ? `${mongoUser}:${mongoPassword}@` : '';
+const mongoAuth = mongoUser ? `${mongoUser}:${mongoPassword}@` : "";
 const mongoHostPort = process.env.MONGO_HOST_AND_PORT;
 const mongoUri = `${mongoProtocol}://${mongoAuth}${mongoHostPort}`;
 
@@ -24,8 +24,9 @@ console.log(`MONGO URI: ${mongoUri}` );
 const port = process.env.PORT;
 const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
+
 const app = express();
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
 const client = new MongoClient(mongoUri);
@@ -39,17 +40,19 @@ const nunjucksEnv = nunjucks.configure([
    express: app,
  });
 
+ nunjucksEnv.addGlobal("CDN_HOST", process.env.CDN_HOST);
+
  // Add the date filter
-nunjucksEnv.addFilter('date', filters.date);
-nunjucksEnv.addFilter('daysAgo', filters.daysAgo);
+nunjucksEnv.addFilter("date", filters.date);
+nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
 
 function  setSelfUrl (req: Request) : string {
        // Protocol (e.g.,)
-      const protocol = req.protocol; //  'https'
-      const fullHost = req.get('host');  // Full host 'some_host:some_port'
-      const originalUrl = req.originalUrl;  // The original URL path (e.g., '/endpoint1')
+      const protocol = req.protocol; //  "https"
+      const fullHost = req.get("host");  // Full host "some_host:some_port"
+      const originalUrl = req.originalUrl;  // The original URL path (e.g., "/endpoint1")
 
-      // Full URL (e.g., 'https://some_host:some_port/endpoint1')
+      // Full URL (e.g., "https://some_host:some_port/endpoint1")
       return `${protocol}://${fullHost}${originalUrl}`;
 }
 
@@ -61,11 +64,11 @@ async function fetchDocuments(queryParams?: QueryParameters) {
 
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
-      if (!queryParams || queryParams.hasOwnProperty('*')) {
+      if (!queryParams || queryParams.hasOwnProperty("*")) {
          documents = await collection.find({}).sort({ name: 1 }).toArray();
       } else {
          // Build the regex queries for each name
-         const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, 'i'));
+         const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, "i"));
 
          // Find the documents by names using regex
          documents = await collection.find({ name: { $in: namePatterns } }).toArray();
@@ -81,11 +84,11 @@ async function fetchDocuments(queryParams?: QueryParameters) {
 
             // for versions: handle empty array "[]" and keyword "*" (both meaning ALL versions)
             if ( ! ( queryParams[matchingKey].length === 0 ||
-                     queryParams[matchingKey].includes('*'))) {
+                     queryParams[matchingKey].includes("*"))) {
                filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
             }
             // for versions: handle keyword "last" (meaning most recent "lastBomImport")
-            if (queryParams[matchingKey].includes('last')) {
+            if (queryParams[matchingKey].includes("last")) {
                const latestVersion = doc.versions.reduce((prev: any, current: any) =>
                   (new Date(current.lastBomImport) > new Date(prev.lastBomImport)) ? current : prev
                );
@@ -100,7 +103,7 @@ async function fetchDocuments(queryParams?: QueryParameters) {
             };
          }).filter(doc => doc !== null);
       }
-      // sort 'versions' array by 'version'
+      // sort "versions" array by "version"
       documents.forEach(doc => {
          doc.versions.sort((a:any, b:any) => a.version.localeCompare(b.version));
       });
@@ -129,7 +132,7 @@ async function fetchDocuments(queryParams?: QueryParameters) {
 
    const documents = await fetchDocuments(queryParams);
    // res.json(documents);
-   res.render('dashboard.njk', {
+   res.render("dashboard.njk", {
       documents: documents,
       selfUrl: setSelfUrl(req),
    });

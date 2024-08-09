@@ -66,7 +66,7 @@
                      <!-- 3 Columns (Git info)-->
                      <td>{{ document.gitInfo.lang }}</td>
                      <td>{{ document.gitInfo.lastRelease.version }}</td>
-                     <td><span>{{ document.gitInfo.lastRelease.date | date('YYYY-MM-DD') }}</span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
+                     <td><span>{{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
 
                      <!-- 4 Columns (sonar Metrics) -->
                      <td>{{ document.sonarMetrics.coverage }}</td>
@@ -76,7 +76,7 @@
 
                      <!-- 8 Columns (Version specific) -->
                      <td>{{ version.version }}</td>
-                     <td><span>{{ version.lastBomImport | date('YYYY-MM-DD')}}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
+                     <td><span>{{ version.lastBomImport | date("YYYY-MM-DD")}}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
                      <td>
                         {% if version.metrics.critical != 0 %}
                            <div class="rounded-number metric-critical-back">
