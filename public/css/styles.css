@@ -219,3 +219,11 @@ tbody td {
    text-decoration: underline;
    color: blue; /* change the color on hover */
  }
+
+ /* ------------ CSS FOR RUNTIME LIST ------------ */
+
+.td-runtime-info {
+   margin-left: 0;     /* Remove left margin */
+   padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
+   list-style-position: inside; /* Ensure bullet points align with the text */
+  }

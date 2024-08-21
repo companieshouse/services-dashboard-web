@@ -49,15 +49,19 @@
          <!-- Headers for Table -->
          <tr>
                <th data-type="string"> Service</th>
+
                <th data-type="string"> Owner</th>
                <th data-type="string"> Lang</th>
-               <th data-type="string"> Last Version</th>
+               <th data-type="string"> Last Release</th>
                <th data-type="date">   Date</th>
+
                <th data-type="string"> Coverage</th>
                <th data-type="number"> Bugs</th>
                <th data-type="number"> Code smell</th>
                <th data-type="number"> Vulnerabilities</th>
+
                <th data-type="string"> Version</th>
+               <th data-type="string"> Runtime</th>
                <th data-type="date">   Last BOM Import</th>
                <th data-type="number"></th>
                <th data-type="number"></th>
@@ -87,8 +91,14 @@
                      <td class="td-met-smells">{{ document.sonarMetrics.code_smells }}</td>
                      <td class="td-met-vulnerabilities">{{ document.sonarMetrics.vulnerabilities }}</td>
 
-                     <!-- 8 Columns (Version specific) -->
+                     <!-- 9 Columns (Version specific) -->
                      <td class="td-version">{{ version.version }}</td>
+                     <td class="td-runtime">
+                        {% if version.runtime.length > 1 %}
+                           <ul class="td-runtime-info"> {% for info in version.runtime %} <li>{{ info }}</li> {% endfor %} </ul>
+                        {% else %}
+                           {{ version.runtime[0] }}
+                        {% endif %}
                      <td class="td-bom-import"><span>{{ version.lastBomImport | date("YYYY-MM-DD")}}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
                      <td class="td-critical">
                         {% if version.metrics.critical != 0 %}

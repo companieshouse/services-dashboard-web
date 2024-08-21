@@ -106,6 +106,12 @@ async function fetchDocuments(queryParams?: QueryParameters) {
       // sort "versions" array by "version"
       documents.forEach(doc => {
          doc.versions.sort((a:any, b:any) => a.version.localeCompare(b.version));
+         // Modify each version's runtime into an array
+         doc.versions.forEach((version:any) => {
+            if (version.runtime) {
+               version.runtime = version.runtime.split(' ');
+            }
+         });
       });
 
      return documents;
