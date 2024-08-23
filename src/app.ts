@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
 
 import express, { Request, Response } from "express";
-import { MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import nunjucks from "nunjucks";
 import * as filters from "./utils/date-filter";
 
@@ -24,6 +24,7 @@ console.log(`MONGO URI: ${mongoUri}` );
 const port = process.env.PORT;
 const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
+const maxDaysRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINKS);
 
 const app = express();
 app.use(express.static("public"));
@@ -56,11 +57,10 @@ function  setSelfUrl (req: Request) : string {
       return `${protocol}://${fullHost}${originalUrl}`;
 }
 
-async function fetchDocuments(queryParams?: QueryParameters) {
+
+async function fetchDocuments(database: Db, queryParams?: QueryParameters, linkName?: string) {
    try {
-      await client.connect();
-      const database = client.db(process.env.MONGO_DBNAME);
-      const collection = database.collection(process.env.MONGO_COLLECTION_NAME!);
+      const collection = database.collection(process.env.MONGO_COLLECTION_PROJECTS!);
 
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
@@ -113,18 +113,45 @@ async function fetchDocuments(queryParams?: QueryParameters) {
             }
          });
       });
-
      return documents;
    } catch (error) {
       console.error("Error fetching documents:", error);
       return [];
-   } finally {
-      await client.close();
    }
  }
 
- app.get(endpointDashboard!, async (req: Request, res: Response) => {
+ async function  getState (db: Db, linkName: string|undefined) :  Promise<string>  {
+   let state = '';
+   if (linkName !== undefined ) {
+      const now = new Date()
+      const collection = db.collection(process.env.MONGO_COLLECTION_CONFIG!);
+      // 1. Search for the entry with "name" = "linkName" & also update its "lastUsed" to "now"
+      const entry = await collection.findOneAndUpdate(
+         { "state_links.name": linkName },
+         { $set: { "state_links.$.lastUsed": now }}
+      );
+
+      if (entry) {
+         // 2. Get its state link
+         const stateLink = entry.state_links.find((link: any) => link.name === linkName);
+         if (stateLink) {
+             state = stateLink.state;
+         }
+      }
+      // 3. Remove all entries whose "lastUsed" value is older than the defined time
+      const maxAgeDate = new Date(now.getTime() - maxDaysRetentionStateLinks * 24 * 60 * 60 * 1000);
+
+      await collection.updateMany(
+            {},
+            { $pull: { state_links: { lastUsed: { $lt: maxAgeDate } } } } as any
+      );
+   }
+   return state;
+}
+
+app.get(endpointDashboard!, async (req: Request, res: Response) => {
    const query = req.query.query as string;
+   const linkName = req.query.state as string;
 
    let queryParams: QueryParameters | undefined;
    if (query) {
@@ -135,13 +162,20 @@ async function fetchDocuments(queryParams?: QueryParameters) {
          return;
       }
    }
-
-   const documents = await fetchDocuments(queryParams);
-   // res.json(documents);
-   res.render("dashboard.njk", {
-      documents: documents,
-      selfUrl: setSelfUrl(req),
-   });
+   try {
+      await client.connect();
+      const database = client.db(process.env.MONGO_DBNAME);
+      const documents = await fetchDocuments(database, queryParams, linkName);
+      const state     = await getState(database, linkName);
+         res.render("dashboard.njk", {
+            documents: documents,
+            selfUrl: setSelfUrl(req),
+         });
+   } catch (error) {
+      console.error(error);
+   } finally {
+      client.close();
+   }
  });
 
 

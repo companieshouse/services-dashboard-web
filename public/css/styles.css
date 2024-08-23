@@ -137,12 +137,21 @@ tbody td {
    padding: 8px;
 }
 
+/* ------------ CSS FOR TABLE HEADER ------------ */
+.header-sonar-metric {
+   writing-mode: vertical-rl;
+}
+.header-dt-metric {
+   writing-mode: vertical-rl;
+}
+
 /* ------------ CSS FOR TABLE TD ------------ */
 .td-name a {
    font-size: 10px;
    color: rgb(224, 118, 52);
    text-decoration: none;
 }
+
 /* ------------ CSS FOR NUMBERS/ METRICS ------------ */
 
 .front-number {
