@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
 
 import express, { Request, Response } from "express";
-import { Db, MongoClient } from "mongodb";
+import { Db, MongoClient, ObjectId } from "mongodb";
 import nunjucks from "nunjucks";
 import * as filters from "./utils/date-filter";
 
@@ -24,7 +24,7 @@ console.log(`MONGO URI: ${mongoUri}` );
 const port = process.env.PORT;
 const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
-const maxDaysRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINKS);
+const MilliSecRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
 const app = express();
 app.use(express.static("public"));
@@ -58,7 +58,7 @@ function  setSelfUrl (req: Request) : string {
 }
 
 
-async function fetchDocuments(database: Db, queryParams?: QueryParameters, linkName?: string) {
+async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    try {
       const collection = database.collection(process.env.MONGO_COLLECTION_PROJECTS!);
 
@@ -120,64 +120,105 @@ async function fetchDocuments(database: Db, queryParams?: QueryParameters, linkN
    }
  }
 
- async function  getState (db: Db, linkName: string|undefined) :  Promise<string>  {
+
+async function getState(db: Db, linkId: string|undefined): Promise<string> {
    let state = '';
-   if (linkName !== undefined ) {
-      const now = new Date()
-      const collection = db.collection(process.env.MONGO_COLLECTION_CONFIG!);
-      // 1. Search for the entry with "name" = "linkName" & also update its "lastUsed" to "now"
-      const entry = await collection.findOneAndUpdate(
-         { "state_links.name": linkName },
-         { $set: { "state_links.$.lastUsed": now }}
-      );
+   if (linkId !== undefined ) {
+      try {
+         const collection = db.collection(process.env.MONGO_COLLECTION_LINKS!);
+         const objectId   = new ObjectId(linkId);
+         const now = new Date()
 
-      if (entry) {
-         // 2. Get its state link
-         const stateLink = entry.state_links.find((link: any) => link.name === linkName);
-         if (stateLink) {
-             state = stateLink.state;
+         // 1.3 find the link and update its "lastUsed" timestamp to now
+         const document = await collection.findOneAndUpdate(
+            { _id: objectId },
+            { $set: { lastUsed: now } },
+            { returnDocument: 'after' }
+         );
+
+         // 2.3 get ready to return its state
+         if (document && document.value) {
+            state = document.value.state;
          }
-      }
-      // 3. Remove all entries whose "lastUsed" value is older than the defined time
-      const maxAgeDate = new Date(now.getTime() - maxDaysRetentionStateLinks * 24 * 60 * 60 * 1000);
+         // 3.3 tidy up the collection (removing old entries)
+         const cutoffDate = new Date(now.getTime() - MilliSecRetentionStateLinks);
+         await collection.deleteMany({ lastUsed: { $lt: cutoffDate } });
 
-      await collection.updateMany(
-            {},
-            { $pull: { state_links: { lastUsed: { $lt: maxAgeDate } } } } as any
-      );
+      } catch (error) {
+         console.log(`Error getting link state: ${error}`);
+      }
    }
    return state;
 }
 
-app.get(endpointDashboard!, async (req: Request, res: Response) => {
-   const query = req.query.query as string;
-   const linkName = req.query.state as string;
-
-   let queryParams: QueryParameters | undefined;
-   if (query) {
+async function addState(db: Db, state: string): Promise<string> {
+   let linkId = '';
+   if (state) {
       try {
-         queryParams = JSON.parse(query);
+         const collection = db.collection(process.env.MONGO_COLLECTION_LINKS!);
+
+         console.log(`debug 1: ${state}`);
+         // Find the document with the matching state
+         const document = await collection.findOneAndUpdate(
+            { state: state },
+            { $set: { lastUsed: new Date() } },
+            { returnDocument: 'after', upsert: true } // upsert creates a new document if none exists
+         );
+         if (document) {
+            console.log(`debug 2: ${document}`);
+            // const x = JSON.parse({"o":document});
+            // if (document.value) {
+            if (document._id) {
+                  console.log(`debug 3: ${document}`);
+               linkId = document._id.toString();
+            }
+         }
       } catch (error) {
-         res.status(400).json({ error: "Invalid JSON format for 'query' parameter." });
-         return;
+         console.log(`Error creating link state: ${error}`);
       }
    }
+   console.log(`Returning id: ${linkId}`);
+   return linkId;
+}
+
+app.get(endpointDashboard!, async (req: Request, res: Response) => {
+   const saveState = req.query.savestate as string;
+
    try {
       await client.connect();
       const database = client.db(process.env.MONGO_DBNAME);
-      const documents = await fetchDocuments(database, queryParams, linkName);
-      const state     = await getState(database, linkName);
+      if (saveState) {
+            console.log('Received string: ',saveState);
+            const linkId = await addState(database, saveState);
+            res.json({linkId});  // syntactic sugar for "linkId":linkId ( > ES6)
+      }
+      else {
+         const query     = req.query.query as string;
+         const linkId    = req.query.linkid as string;
+         let queryParams: QueryParameters | undefined;
+         if (query) {
+            try {
+               queryParams = JSON.parse(query);
+            } catch (error) {
+               res.status(400).json({ "error": `Invalid JSON format for 'query' parameter: ${error}` });
+               return;
+            }
+         }
+         if (linkId) {
+            const state = await getState(database, linkId);
+         }
+         const documents = await fetchDocuments(database, queryParams);
          res.render("dashboard.njk", {
             documents: documents,
             selfUrl: setSelfUrl(req),
          });
+      }
    } catch (error) {
       console.error(error);
    } finally {
       client.close();
    }
  });
-
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}/dashboard`);
