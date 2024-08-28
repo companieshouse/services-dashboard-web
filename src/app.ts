@@ -137,8 +137,9 @@ async function getState(db: Db, linkId: string|undefined): Promise<string> {
          );
 
          // 2.3 get ready to return its state
-         if (document && document.value) {
-            state = document.value.state;
+         if (document) {
+            console.log(`Reading - state: ${document.state}`);
+            state = document.state;
          }
          // 3.3 tidy up the collection (removing old entries)
          const cutoffDate = new Date(now.getTime() - MilliSecRetentionStateLinks);
@@ -151,13 +152,12 @@ async function getState(db: Db, linkId: string|undefined): Promise<string> {
    return state;
 }
 
-async function addState(db: Db, state: string): Promise<string> {
-   let linkId = '';
+async function addState(db: Db, state: string): Promise<string | undefined> {
+   let linkId = undefined;
    if (state) {
       try {
          const collection = db.collection(process.env.MONGO_COLLECTION_LINKS!);
 
-         console.log(`debug 1: ${state}`);
          // Find the document with the matching state
          const document = await collection.findOneAndUpdate(
             { state: state },
@@ -165,13 +165,7 @@ async function addState(db: Db, state: string): Promise<string> {
             { returnDocument: 'after', upsert: true } // upsert creates a new document if none exists
          );
          if (document) {
-            console.log(`debug 2: ${document}`);
-            // const x = JSON.parse({"o":document});
-            // if (document.value) {
-            if (document._id) {
-                  console.log(`debug 3: ${document}`);
                linkId = document._id.toString();
-            }
          }
       } catch (error) {
          console.log(`Error creating link state: ${error}`);
@@ -190,11 +184,14 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
       if (saveState) {
             console.log('Received string: ',saveState);
             const linkId = await addState(database, saveState);
-            res.json({linkId});  // syntactic sugar for "linkId":linkId ( > ES6)
+            (linkId !== undefined) ?
+               res.send(linkId) :
+               res.status(400).send('Error saving link');
       }
       else {
          const query     = req.query.query as string;
          const linkId    = req.query.linkid as string;
+         let   state     = '';
          let queryParams: QueryParameters | undefined;
          if (query) {
             try {
@@ -205,11 +202,14 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
             }
          }
          if (linkId) {
-            const state = await getState(database, linkId);
+            console.log('reading state from: ',linkId);
+            state = await getState(database, linkId);
+            console.log('ready with state: ',state);
          }
          const documents = await fetchDocuments(database, queryParams);
          res.render("dashboard.njk", {
             documents: documents,
+            state: state,
             selfUrl: setSelfUrl(req),
          });
       }

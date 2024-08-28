@@ -85,19 +85,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
    filterTable(); // Initial filter on page load
 
-   document.getElementById('button-share').addEventListener('click', () => {
-      const base64State = generateState();
+  document.getElementById('button-share').addEventListener('click', async () => {
+      try {
+         const base64State = generateState();
+         const response = await fetch(`/dashboard?savestate=${base64State}`);
+         if (response.ok) {
+            const linkId = await response.text();
+            const currentUrl = window.location.href;
+            const shareUrl = `${currentUrl}?linkid=${encodeURIComponent(linkId)}`;
+            console.log(shareUrl);
+            navigator.clipboard.writeText(shareUrl);
+            showShareResponse('link copied to clipboard', 'ok');
+         } else {
+            showShareResponse('Error creating link', 'error');
+         }
+      } catch (error) {
+         showShareResponse('Error creating link', 'error');
+      }
+   });
 
-      fetch(`/dashboard?savestate=${base64State}`)
-          .then(response => response.json())
-          .then(data => {
-               const currentUrl = window.location.href;
-               const shareUrl = `${currentUrl}?linkid=${encodeURIComponent(data.linkId)}`;
-               console.log(shareUrl)
-            }
-         )
-          .catch(error => console.error('Error share state link :', error));
-  });
 });
 
 
@@ -160,4 +166,27 @@ function decompressFromBase64(base64String) {
    const decompressedData = pako.inflate(compressedData, { to: 'string' });
 
    return decompressedData;
+}
+
+
+function showShareResponse(message, type) {
+   const statusMessage = document.getElementById('share-status-message');
+   const statusIcon    = document.getElementById('share-status-icon');
+   const statusText    = document.getElementById('share-status-text');
+
+   statusText.textContent = message;
+   if (type === 'ok') {
+       statusMessage.className = 'ok';
+       statusIcon.textContent = '✅';
+   } else {
+       statusMessage.className = 'error';
+       statusIcon.textContent = '❌';
+   }
+   // Show the message
+   statusMessage.style.display = 'block';
+
+   // Hide the message after 2 seconds
+   setTimeout(() => {
+       statusMessage.style.display = 'none';
+   }, 2000);
 }

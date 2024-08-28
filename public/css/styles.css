@@ -30,6 +30,18 @@ header, footer  {
             align-items: center;
          }
 
+         .header-center-content {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+         }
+
+         .header-right-content {
+            position: absolute;
+            right: 5%;
+            transform: translateX(5%);
+         }
+
          .header-logo {
             width: 50px;
             height: auto;
@@ -40,12 +52,6 @@ header, footer  {
             font-size: 28px;
             color: white;
             text-decoration: none;
-         }
-
-         .header-center-content {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
          }
 
          .header-center-text {
@@ -236,3 +242,30 @@ tbody td {
    padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
    list-style-position: inside; /* Ensure bullet points align with the text */
   }
+
+ /* ------------ CSS FOR SHARE BUTTON & RESPONSE ------------ */
+
+  #share-status-message {
+   display: none; /* Hidden by default */
+   margin-top: 10px;
+   padding: 5px 10px;
+   border-radius: 4px;
+   font-size: 14px;
+   position: relative;
+}
+
+#share-status-message.ok {
+   background-color: #d4edda;
+   color: #155724;
+   border: 1px solid #c3e6cb;
+}
+
+#share-status-message.error {
+   background-color: #f8d7da;
+   color: #721c24;
+   border: 1px solid #f5c6cb;
+}
+
+#share-status-icon {
+   margin-right: 5px;
+}
