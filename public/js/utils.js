@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('button-share').addEventListener('click', async () => {
       try {
          const base64State = generateState();
-         const response = await fetch(`/dashboard?savestate=${base64State}`);
+         const response = await fetch(`/dashboard?savestate=${encodeURIComponent(base64State)}`);
          if (response.ok) {
             const linkId = await response.text();
             const currentUrl = window.location.href;
@@ -179,7 +179,7 @@ function compressToBase64(inputString) {
    // 3.3 Convert the binary string to a Base64 encoded string
    const base64String = btoa(binaryString);
 
-   console.log(base64String);
+   console.log(`produced base64: [${base64String}]`);
    return base64String;
 }
 
