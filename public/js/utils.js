@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       checkbox.addEventListener('change', filterTable);
    });
 
+   sourceState();
    filterTable(); // Initial filter on page load
 
   document.getElementById('button-share').addEventListener('click', async () => {
@@ -92,7 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
          if (response.ok) {
             const linkId = await response.text();
             const currentUrl = window.location.href;
-            const shareUrl = `${currentUrl}?linkid=${encodeURIComponent(linkId)}`;
+            // Get the base URL without query parameters
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
             console.log(shareUrl);
             navigator.clipboard.writeText(shareUrl);
             showShareResponse('link copied to clipboard', 'ok');
@@ -106,7 +109,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+function sourceState() {
 
+   let state =  window.shareLinkState;  // coming from Nunjucks/layout.njk
+   console.log(`loading state:${state}`);
+      if (state) {
+      // get csv values
+      const csvValues = decompressFromBase64(state).split(',');
+      console.log(`loading state as:${csvValues[0]}`);
+
+      // Get the first value which is either "+" or "-"
+      const operation = csvValues[0];
+
+      // Get the list of checkbox IDs
+      const checkboxIds = csvValues.slice(1);
+
+      // Select all checkboxes
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      // Determine the initial state we want to operate on
+      const checkedValue = (operation === "+") ? false : true;
+
+      // Init with that state
+      checkboxes.forEach(checkbox => checkbox.checked = checkedValue);
+
+      // Toggle the state for the checkboxes whose IDs are in the list
+      checkboxIds.forEach(id => {
+         const checkbox = document.getElementById(id);
+         if (checkbox) checkbox.checked = !checkedValue;
+      });
+   }
+}
 
 function generateState() {
    // Select only the checkboxes with the specified classes
