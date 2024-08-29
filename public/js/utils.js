@@ -1,135 +1,6 @@
-//-----------------------------------
-// attach sort handlers to table headers
-//-----------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-   const table = document.getElementById('table-services');
-   const headers = table.querySelectorAll('th');
-   let sortDirection = 1; // 1 for ascending, -1 for descending
-
-   headers.forEach((header, index) => {
-     header.addEventListener('click', () => {
-       const type = header.getAttribute('data-type');
-       const tbody = table.querySelector('tbody');
-       const rows = Array.from(tbody.querySelectorAll('tr'));
-
-       rows.sort((a, b) => {
-         const cellA = a.children[index].textContent.trim();
-         const cellB = b.children[index].textContent.trim();
-
-         if (type === 'number') {
-           return (parseFloat(cellA) - parseFloat(cellB)) * sortDirection;
-         } else if (type === 'date') {
-           return (new Date(cellA) - new Date(cellB)) * sortDirection;
-         } else {
-           return cellA.localeCompare(cellB) * sortDirection;
-         }
-       });
-
-       // Toggle sort direction
-       sortDirection *= -1;
-
-       // Re-attach sorted rows to the table
-       rows.forEach(row => tbody.appendChild(row));
-     });
-   });
-});
-
-//-----------------------------------
-// function to get all the name & version checkboxes
-//-----------------------------------
-function getAllCheckboxes() {
-   // Select only the checkboxes with the specified classes
-   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
-   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
-
-   // Combine into 1 array
-   return [...nameCheckboxes, ...versionCheckboxes];
-}
-
-
-//-----------------------------------
-// Add handler to check boxes
-//-----------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-   const masterCheckbox = document.getElementById('masterCheckbox');
-   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
-   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
-   const tableRows = document.querySelectorAll('#table-services tbody tr');
-
-   function filterTable() {
-      tableRows.forEach(row => {
-         const name = row.getAttribute('data-name');
-         const version = row.getAttribute('data-version');
-         const isNameChecked = document.getElementById(name).checked;
-         const isVersionChecked = document.getElementById(`${name}-${version}`).checked;
-
-         if (isNameChecked && isVersionChecked) {
-               row.style.display = '';
-         } else {
-               row.style.display = 'none';
-         }
-      });
-   }
-   //-------------
-   //  attach to NAME - checkboxes
-   //-------------
-   masterCheckbox.addEventListener('change', () => {
-      const isChecked = this.checked;
-      nameCheckboxes.forEach(checkbox => {
-         checkbox.checked = isChecked;
-      });
-      versionCheckboxes.forEach(checkbox => {
-         checkbox.checked = isChecked;
-      });
-      filterTable();
-   });
-
-   //-------------
-   //  attach to VERSION - checkboxes
-   //-------------
-   nameCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', () => {
-         const name = this.id;
-         const isChecked = this.checked;
-
-         document.querySelectorAll(`.version-checkbox[data-name="${name}"]`).forEach(vCheckbox => {
-               vCheckbox.checked = isChecked;
-         });
-
-         filterTable();
-      });
-   });
-
-   versionCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', filterTable);
-   });
-   // sourceState();
-   filterTable(); // Initial filter on page load
-});
-
-//-----------------------------------
-// Add handler to (share/create link)-BUTTON
-//-----------------------------------
-// document.getElementById('button-share').addEventListener('click', async () => {
-//       try {
-//          const base64State = generateState();
-//          const response = await fetch(`/dashboard?savestate=${encodeURIComponent(base64State)}`);
-//          if (response.ok) {
-//             const linkId = await response.text();
-//             const currentUrl = window.location.href;
-//             // Get the base URL without query parameters
-//             const baseUrl = window.location.origin + window.location.pathname;
-//             const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
-//             console.log(shareUrl);
-//             navigator.clipboard.writeText(shareUrl);
-//             showShareResponse('link copied to clipboard', 'ok');
-//          } else {
-//             showShareResponse('Error creating link', 'error');
-//          }
-//       } catch (error) {
-//          showShareResponse('Error creating link', 'error');
-//       }
-//    });
+//======================================
+//       STANDALONE/ GENERALE UTILITIES:
+//======================================
 
 
 //-----------------------------------
@@ -165,7 +36,7 @@ function sourceState() {
 
    let state =  window.shareLinkState;  // coming from Nunjucks/layout.njk
    console.log(`loading state:${state}`);
-      if (state) {
+   if (state) {
       // get csv values
       const csvValues = decompressFromBase64(state).split(',');
       console.log(`loading state as:${csvValues[0]}`);
@@ -187,6 +58,12 @@ function sourceState() {
          const checkbox = document.getElementById(id);
          if (checkbox) checkbox.checked = !checkedValue;
       });
+   } else {
+      // without a state, show all checkboxes (= set master checkbox & trigger its handler)
+      const masterCheckbox = document.getElementById('masterCheckbox');
+      masterCheckbox.checked = true;
+      const event = new Event('change');
+      masterCheckbox.dispatchEvent(event);
    }
 }
 
@@ -254,3 +131,153 @@ function decompressFromBase64(base64String) {
 
    return decompressedData;
 }
+
+//-----------------------------------
+// function to get all the name & version checkboxes
+//-----------------------------------
+function getAllCheckboxes() {
+   // Select only the checkboxes with the specified classes
+   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
+   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+
+   // Combine into 1 array
+   return [...nameCheckboxes, ...versionCheckboxes];
+}
+
+
+
+
+
+
+//======================================
+//       ONLOAD / INIT  CODE:
+//======================================
+
+//-----------------------------------
+// attach most handlers
+//-----------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+
+   //-------------
+   // 1 - attach sort handlers to table headers
+   //-------------
+   const table = document.getElementById('table-services');
+   const headers = table.querySelectorAll('th');
+   let sortDirection = 1; // 1 for ascending, -1 for descending
+
+   headers.forEach((header, index) => {
+     header.addEventListener('click', () => {
+       const type = header.getAttribute('data-type');
+       const tbody = table.querySelector('tbody');
+       const rows = Array.from(tbody.querySelectorAll('tr'));
+
+       rows.sort((a, b) => {
+         const cellA = a.children[index].textContent.trim();
+         const cellB = b.children[index].textContent.trim();
+
+         if (type === 'number') {
+           return (parseFloat(cellA) - parseFloat(cellB)) * sortDirection;
+         } else if (type === 'date') {
+           return (new Date(cellA) - new Date(cellB)) * sortDirection;
+         } else {
+           return cellA.localeCompare(cellB) * sortDirection;
+         }
+       });
+
+       // Toggle sort direction
+       sortDirection *= -1;
+
+       // Re-attach sorted rows to the table
+       rows.forEach(row => tbody.appendChild(row));
+     });
+   });
+
+   //-------------
+   // 2 - attach checkboxes handlers
+   //-------------
+   const masterCheckbox = document.getElementById('masterCheckbox');
+   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
+   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+   const tableRows = document.querySelectorAll('#table-services tbody tr');
+
+   function filterTable() {
+      tableRows.forEach(row => {
+         const name = row.getAttribute('data-name');
+         const version = row.getAttribute('data-version');
+         const isNameChecked = document.getElementById(name).checked;
+         const isVersionChecked = document.getElementById(`${name}-${version}`).checked;
+
+         if (isNameChecked && isVersionChecked) {
+               row.style.display = '';
+         } else {
+               row.style.display = 'none';
+         }
+      });
+   }
+   //-------------
+   //  2.1 - attach to MASTER - checkbox
+   //-------------
+   masterCheckbox.addEventListener('change', function () {
+      const isChecked = this.checked;
+      nameCheckboxes.forEach(checkbox => {
+         checkbox.checked = isChecked;
+      });
+      versionCheckboxes.forEach(checkbox => {
+         checkbox.checked = isChecked;
+      });
+      filterTable();
+   });
+
+   //-------------
+   //  2.2 - attach to NAME - checkboxes
+   //-------------
+   nameCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function () {
+         const name = this.id;
+         const isChecked = this.checked;
+
+         document.querySelectorAll(`.version-checkbox[data-name="${name}"]`).forEach(vCheckbox => {
+               vCheckbox.checked = isChecked;
+         });
+
+         filterTable();
+      });
+   });
+
+   //-------------
+   //  2.3 - attach to VERSION - checkboxes
+   //-------------
+   versionCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', filterTable);
+   });
+
+   // Initial filter on page load
+   sourceState();
+   filterTable();
+
+
+   //-----------------------------------
+   // 3 - Add handler to (share/create link)-BUTTON
+   //-----------------------------------
+   document.getElementById('button-share').addEventListener('click', async () => {
+      try {
+         const base64State = generateState();
+         const response = await fetch(`/dashboard?savestate=${encodeURIComponent(base64State)}`);
+         if (response.ok) {
+            const linkId = await response.text();
+            const currentUrl = window.location.href;
+            // Get the base URL without query parameters
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
+            console.log(shareUrl);
+            navigator.clipboard.writeText(shareUrl);
+            showShareResponse('link copied to clipboard', 'ok');
+         } else {
+            showShareResponse('Error creating link', 'error');
+         }
+      } catch (error) {
+         showShareResponse('Error creating link', 'error');
+      }
+   });
+
+});
