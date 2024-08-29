@@ -152,10 +152,22 @@ tbody td {
 }
 
 /* ------------ CSS FOR TABLE TD ------------ */
+.td-name a,
+.td_git-owner a,
+.td_git-lang a,
+.td-git-version a,
+.td-git-date a {
+   color: rgb(0, 0, 0);
+   text-decoration: none;
+}
 .td-name a {
    font-size: 10px;
    color: rgb(224, 118, 52);
+}
+
+.sonar-link  {
    text-decoration: none;
+   color: inherit; /* Inherit color from parent */
 }
 
 /* ------------ CSS FOR NUMBERS/ METRICS ------------ */

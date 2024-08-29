@@ -18,3 +18,7 @@ export const daysAgo = (date: string | Date): string => {
     return `${diffInDays} days ago`;
   }
 };
+
+export const urlEncode = (arg: string): string => {
+   return encodeURIComponent(arg);
+};
