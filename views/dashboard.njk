@@ -89,16 +89,16 @@
                      <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
                      <!-- 4 Columns (Git info)-->
-                     <td class="td_git-owner"><a href="{{ document.gitInfo.repo }}/settings/custom-properties">{{ document.gitInfo.owner }}</a></td>
-                     <td class="td_git-lang"><a href="{{ document.gitInfo.repo }}">{{ document.gitInfo.lang }}</a></td>
-                     <td class="td-git-version"><a href="{{ document.gitInfo.repo }}/releases">{{ document.gitInfo.lastRelease.version }}</a></td>
-                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">{{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
+                     <td class="td_git-owner">     <a href="{{ document.gitInfo.repo }}/settings/custom-properties">{{ document.gitInfo.owner }}</a></td>
+                     <td class="td_git-lang">      <a href="{{ document.gitInfo.repo }}">                           {{ document.gitInfo.lang }}</a></td>
+                     <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">                  {{ document.gitInfo.lastRelease.version }}</a></td>
+                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">                  {{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
 
                      <!-- 4 Columns (sonar Metrics) -->
-                     <td class="td-met-coverage">{{ document.sonarMetrics.coverage }}</td>
-                     <td class="td-met-bugs">{{ document.sonarMetrics.bugs }}</td>
-                     <td class="td-met-smells">{{ document.sonarMetrics.code_smells }}</td>
-                     <td class="td-met-vulnerabilities">{{ document.sonarMetrics.vulnerabilities }}</td>
+                     <td class="td-met-coverage">       {{ sonarLink(document.sonarKey, document.sonarMetrics.coverage) }}</td>
+                     <td class="td-met-bugs">           {{ sonarLink(document.sonarKey, document.sonarMetrics.bugs) }}</td>
+                     <td class="td-met-smells">         {{ sonarLink(document.sonarKey, document.sonarMetrics.code_smells) }}</td>
+                     <td class="td-met-vulnerabilities">{{ sonarLink(document.sonarKey, document.sonarMetrics.vulnerabilities) }}</td>
 
                      <!-- 9 Columns (Version specific) -->
                      <td class="td-version">{{ version.version }}</td>
@@ -108,14 +108,14 @@
                         {% else %}
                            {{ version.runtime[0] }}
                         {% endif %}
-                     <td class="td-bom-import"><span>{{ version.lastBomImport | date("YYYY-MM-DD")}}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
+                     <td class="td-bom-import"><span>{{ depTrackLink(version.uuid, version.lastBomImport | date("YYYY-MM-DD")) }}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
                      <td class="td-critical">
                         {% if version.metrics.critical != 0 %}
                            <div class="rounded-number metric-critical-back">
                         {% else %}
                            <div class="front-number metric-critical-front">
                         {% endif %}
-                              <span title="critical">{{ sonarLink(document.sonarKey, version.metrics.critical) }}</span>
+                              <span title="critical">{{ depTrackLink(version.uuid, version.metrics.critical) }}</span>
                            </div>
                      </td>
                      <td class="td-sonar-high">
@@ -124,7 +124,7 @@
                         {% else %}
                            <div class="front-number metric-high-front">
                         {% endif %}
-                              <span title="high">{{ sonarLink(document.sonarKey, version.metrics.high) }}</span>
+                              <span title="high">{{ depTrackLink(version.uuid, version.metrics.high) }}</span>
                            </div>
                      </td>
                      <td class="td-sonar-medium">
@@ -133,7 +133,7 @@
                         {% else %}
                            <div class="front-number metric-medium-front">
                         {% endif %}
-                              <span title="medium">{{ sonarLink(document.sonarKey, version.metrics.medium) }}</span>
+                              <span title="medium">{{ depTrackLink(version.uuid, version.metrics.medium) }}</span>
                            </div>
                      </td>
                      <td class="td-sonar-low">
@@ -142,7 +142,7 @@
                         {% else %}
                            <div class="front-number metric-low-front">
                         {% endif %}
-                              <span title="low">{{ sonarLink(document.sonarKey, version.metrics.low) }}</span>
+                              <span title="low">{{ depTrackLink(version.uuid, version.metrics.low) }}</span>
                            </div>
                      </td>
                      <td class="td-sonar-vulnerabilities">
@@ -151,7 +151,7 @@
                         {% else %}
                            <div class="front-number metric-vulnerabilities-front">
                         {% endif %}
-                              <span title="vulnerabilities">{{ sonarLink(document.sonarKey, version.metrics.vulnerabilities) }}</span>
+                              <span title="vulnerabilities">{{ depTrackLink(version.uuid, version.metrics.vulnerabilities) }}</span>
                            </div>
                      </td>
                      <td class="td-sonar-components">
@@ -160,7 +160,7 @@
                         {% else %}
                            <div class="front-number metric-components-front">
                         {% endif %}
-                              <span title="components">{{ sonarLink(document.sonarKey, version.metrics.components) }}</span>
+                              <span title="components">{{ depTrackLink(version.uuid, version.metrics.components, "components") }}</span>
                            </div>
                      </td>
             </tr>
@@ -174,6 +174,14 @@
 {% block footer %}
    <span class="footer-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-text">Companies House</a></span>
 {% endblock %}
+
+{% macro depTrackLink(uuid, val, arg) %}
+    {% if uuid %}
+        <a class="deptrack-link" href="{{ depTrackUri }}/projects/{{ uuid }}/{{ arg }}">{{val}}</a>
+    {% else %}
+        {{ val }}
+    {% endif %}
+{% endmacro %}
 
 {% macro sonarLink(sonarKey, val) %}
     {% if sonarKey %}

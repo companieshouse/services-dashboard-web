@@ -20,9 +20,9 @@ const mongoAuth = mongoUser ? `${mongoUser}:${mongoPassword}@` : "";
 const mongoHostPort = process.env.MONGO_HOST_AND_PORT;
 const mongoUri = `${mongoProtocol}://${mongoAuth}${mongoHostPort}`;
 
-const sonarUri =  process.env.SONAR_SERVER;
+const depTrackUri =  process.env.DEP_TRACK_SERVER;
+const sonarUri    =  process.env.SONAR_SERVER;
 
-console.log(`MONGO URI: ${mongoUri}` );
 const port = process.env.PORT;
 const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
@@ -48,17 +48,6 @@ const nunjucksEnv = nunjucks.configure([
  // Add the date filter
 nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
-
-// function  setSelfUrl (req: Request) : string {
-//        // Protocol (e.g.,)
-//       const protocol = req.protocol; //  "https"
-//       const fullHost = req.get("host");  // Full host "some_host:some_port"
-//       const originalUrl = req.originalUrl;  // The original URL path (e.g., "/endpoint1")
-
-//       // Full URL (e.g., "https://some_host:some_port/endpoint1")
-//       return `${protocol}://${fullHost}${originalUrl}`;
-// }
-
 
 async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    try {
@@ -212,6 +201,7 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
          res.render("dashboard.njk", {
             documents: documents,
             state: state,
+            depTrackUri: depTrackUri,
             sonarUri: sonarUri,
          });
       }
