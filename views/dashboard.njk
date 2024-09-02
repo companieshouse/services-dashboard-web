@@ -55,29 +55,39 @@
    <div class="table-services-container">
       <table id="table-services">
          <thead>
-         <!-- Headers for Table -->
-         <tr>
-               <th data-type="string"> Service</th>
+         <!-- Headers for Col groups -->
+            <tr>
+               <th class="group-header group-service"  colspan="1"></th>
+               <th class="group-header group-git"      colspan="4">Git info</th>
+               <th class="group-header group-sonar"    colspan="4">Sonar</th>
+               <th class="group-header group-version"  colspan="2">Version info</th>
+               <th class="group-header group-deptrack" colspan="7">Dependency Track</th>
+            </tr>
+         <!-- Col Headers -->
+            <tr>
+                  <th class="col-header header-service" data-type="string"> Service</th>
 
-               <th data-type="string"> Owner</th>
-               <th data-type="string"> Lang</th>
-               <th data-type="string"> Last Release</th>
-               <th data-type="date">   Date</th>
+                  <th class="col-header header-git" data-type="string"> Owner</th>
+                  <th class="col-header header-git" data-type="string"> Lang</th>
+                  <th class="col-header header-git" data-type="string"> Last Release</th>
+                  <th class="col-header header-git" data-type="date">   Date</th>
 
-               <th data-type="string" class="header-sonar-metric"> Coverage</th>
-               <th data-type="number" class="header-sonar-metric"> Bugs</th>
-               <th data-type="number" class="header-sonar-metric"> Code smell</th>
-               <th data-type="number" class="header-sonar-metric"> Vulnerabilities</th>
+                  <th class="col-header header-sonar-metric" data-type="string"> Coverage</th>
+                  <th class="col-header header-sonar-metric" data-type="number"> Bugs</th>
+                  <th class="col-header header-sonar-metric" data-type="number"> Code smell</th>
+                  <th class="col-header header-sonar-metric" data-type="number"> Vulnerabilities</th>
 
-               <th data-type="string"> Version</th>
-               <th data-type="string"> Runtime</th>
-               <th data-type="date">   Last BOM Import</th>
-               <th data-type="number" class="header-dt-metric">Critical</th>
-               <th data-type="number" class="header-dt-metric">High</th>
-               <th data-type="number" class="header-dt-metric">Medium</th>
-               <th data-type="number" class="header-dt-metric">Low</th>
-               <th data-type="number" class="header-dt-metric">Vulner.</th>
-               <th data-type="number" class="header-dt-metric">Compon.</th>
+                  <th class="col-header header-version"   data-type="string"> Version</th>
+                  <th class="col-header header-version"   data-type="string"> Runtime</th>
+
+                  <th class="col-header header-deptrack" data-type="date"  >Last BOM Import</th>
+                  <th class="col-header header-deptrack header-dt-metric" data-type="number">Critical</th>
+                  <th class="col-header header-deptrack header-dt-metric" data-type="number">High</th>
+                  <th class="col-header header-deptrack header-dt-metric" data-type="number">Medium</th>
+                  <th class="col-header header-deptrack header-dt-metric" data-type="number">Low</th>
+                  <th class="col-header header-deptrack header-dt-metric" data-type="number">Vulner.</th>
+                  <th class="col-header header-deptrack header-dt-metric" data-type="number">Compon.</th>
+            </tr>
          </thead>
          <tbody>
          </tr>

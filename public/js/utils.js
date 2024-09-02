@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
    // 1 - attach sort handlers to table headers
    //-------------
    const table = document.getElementById('table-services');
-   const headers = table.querySelectorAll('th');
+   const headers = table.querySelectorAll('.col-header');
    let sortDirection = 1; // 1 for ascending, -1 for descending
 
    headers.forEach((header, index) => {

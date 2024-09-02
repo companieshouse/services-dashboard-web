@@ -121,14 +121,43 @@ table {
    border-collapse: collapse;
 }
 
-thead th {
+thead {
    position: sticky;
    top: 0;
    background-color: #f8f8f8;
    z-index: 1; /* Ensure the header stays on top */
    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* shadow for better visibility */
+}
+
+.group-header {
+   font-size: 14px;
+}
+
+.group-service,
+.group-sonar,
+.group-deptrack {
+   background-color: #e1b4b4;
+}
+
+.group-git,
+.group-version{
+   background-color: #f6a8a8;
+}
+
+.col-header {
    font-size: 16px;
    cursor: pointer;
+}
+
+.header-service,
+.header-sonar-metric,
+.header-deptrack {
+   background-color: #9e9c9c;
+}
+
+.header-git,
+.header-version{
+   background-color: #c7c6c6;
 }
 
  #sortableTable th:hover {
