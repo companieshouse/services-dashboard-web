@@ -61,6 +61,7 @@
                <th class="group-header group-git"      colspan="4">Git info</th>
                <th class="group-header group-sonar"    colspan="4">Sonar</th>
                <th class="group-header group-version"  colspan="2">Version info</th>
+               <th class="group-header group-ecs"      colspan="1">ECS</th>
                <th class="group-header group-deptrack" colspan="7">Dependency Track</th>
             </tr>
          <!-- Col Headers -->
@@ -79,6 +80,8 @@
 
                   <th class="col-header header-version"   data-type="string"> Version</th>
                   <th class="col-header header-version"   data-type="string"> Runtime</th>
+
+                  <th class="col-header header-ecs"   data-type="string"> cidev</th>
 
                   <th class="col-header header-deptrack" data-type="date"  >Last BOM Import</th>
                   <th class="col-header header-deptrack header-dt-metric" data-type="number">Critical</th>
@@ -118,6 +121,9 @@
                         {% else %}
                            {{ version.runtime[0] }}
                         {% endif %}
+
+                     <td class="td-ecs"> {% for version in document.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
+
                      <td class="td-bom-import"><span>{{ depTrackLink(version.uuid, version.lastBomImport | date("YYYY-MM-DD")) }}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
                      <td class="td-critical">
                         {% if version.metrics.critical != 0 %}
@@ -128,7 +134,7 @@
                               <span title="critical">{{ depTrackLink(version.uuid, version.metrics.critical) }}</span>
                            </div>
                      </td>
-                     <td class="td-sonar-high">
+                     <td class="td-deptrack-high">
                         {% if version.metrics.high != 0 %}
                            <div class="rounded-number metric-high-back">
                         {% else %}
@@ -137,7 +143,7 @@
                               <span title="high">{{ depTrackLink(version.uuid, version.metrics.high) }}</span>
                            </div>
                      </td>
-                     <td class="td-sonar-medium">
+                     <td class="td-deptrack-medium">
                         {% if version.metrics.medium != 0 %}
                            <div class="rounded-number metric-medium-back">
                         {% else %}
@@ -146,7 +152,7 @@
                               <span title="medium">{{ depTrackLink(version.uuid, version.metrics.medium) }}</span>
                            </div>
                      </td>
-                     <td class="td-sonar-low">
+                     <td class="td-deptrack-low">
                         {% if version.metrics.low != 0 %}
                            <div class="rounded-number metric-low-back">
                         {% else %}
@@ -155,7 +161,7 @@
                               <span title="low">{{ depTrackLink(version.uuid, version.metrics.low) }}</span>
                            </div>
                      </td>
-                     <td class="td-sonar-vulnerabilities">
+                     <td class="td-deptrack-vulnerabilities">
                         {% if version.metrics.vulnerabilities != 0 %}
                            <div class="rounded-number metric-vulnerabilities-back">
                         {% else %}
@@ -164,7 +170,7 @@
                               <span title="vulnerabilities">{{ depTrackLink(version.uuid, version.metrics.vulnerabilities) }}</span>
                            </div>
                      </td>
-                     <td class="td-sonar-components">
+                     <td class="td-deptrack-components">
                         {% if version.metrics.components != 0 %}
                            <div class="rounded-number metric-components-back">
                         {% else %}
