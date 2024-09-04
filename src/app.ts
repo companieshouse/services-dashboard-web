@@ -13,17 +13,17 @@ interface QueryParameters {
 const runningEnv = dotenv.config();
 dotenvExpand.expand(runningEnv)
 
-const mongoProtocol = process.env.MONGO_PROTOCOL;
-const mongoUser = process.env.MONGO_USER;
-const mongoPassword = process.env.MONGO_PASSWORD;
-const mongoAuth = mongoUser ? `${mongoUser}:${mongoPassword}@` : "";
-const mongoHostPort = process.env.MONGO_HOST_AND_PORT;
-const mongoUri = `${mongoProtocol}://${mongoAuth}${mongoHostPort}`;
+const MONGO_PROTOCOL = process.env.MONGO_PROTOCOL;
+const MONGO_USER = process.env.MONGO_USER;
+const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
+const MONGO_AUTH = MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : "";
+const MONGO_HOST_AND_PORT = process.env.MONGO_HOST_AND_PORT;
+const MONGO_URI = `${MONGO_PROTOCOL}://${MONGO_AUTH}${MONGO_HOST_AND_PORT}`;
 
-const depTrackUri =  process.env.DEP_TRACK_SERVER;
-const sonarUri    =  process.env.SONAR_SERVER;
+const DEP_TRACK_URI =  process.env.DEP_TRACK_SERVER;
+const SONAR_URI     =  process.env.SONAR_SERVER;
 
-const port = process.env.PORT;
+const PORT = process.env.PORT;
 const endpointDashboard = process.env.ENDPOINT_DASHBOARD;
 
 const MilliSecRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
@@ -31,8 +31,8 @@ const MilliSecRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINK
 const app = express();
 app.use(express.static("public"));
 
-// const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-const client = new MongoClient(mongoUri);
+// const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const mongoClient = new MongoClient(MONGO_URI);
 
 const nunjucksEnv = nunjucks.configure([
    "views",
@@ -170,8 +170,8 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
    const saveState = req.query.savestate as string;
 
    try {
-      await client.connect();
-      const database = client.db(process.env.MONGO_DBNAME);
+      await mongoClient.connect();
+      const database = mongoClient.db(process.env.MONGO_DBNAME);
       if (saveState) {
             console.log('Received string: ',saveState);
             const linkId = await addState(database, saveState);
@@ -201,17 +201,17 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
          res.render("dashboard.njk", {
             documents: documents,
             state: state,
-            depTrackUri: depTrackUri,
-            sonarUri: sonarUri,
+            depTrackUri: DEP_TRACK_URI,
+            sonarUri: SONAR_URI,
          });
       }
    } catch (error) {
       console.error(error);
    } finally {
-      client.close();
+      mongoClient.close();
    }
  });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}/dashboard`);
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}/dashboard`);
 });
