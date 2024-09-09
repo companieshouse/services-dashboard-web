@@ -175,9 +175,8 @@ tbody td {
 }
 
 /* ------------ CSS FOR TABLE HEADER ------------ */
-.header-sonar-metric {
-   writing-mode: vertical-rl;
-}
+.header-sonar-metric,
+.header-ecs,
 .header-dt-metric {
    writing-mode: vertical-rl;
 }
@@ -195,7 +194,11 @@ tbody td {
    font-size: 10px;
    color: rgb(224, 118, 52);
 }
-
+.td-version {
+   font-size: 12px;
+   background-color: #ddd;
+   color: rgb(224, 118, 52);
+}
 .deptrack-link,
 .sonar-link  {
    text-decoration: none;

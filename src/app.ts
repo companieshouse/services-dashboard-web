@@ -31,7 +31,6 @@ const MilliSecRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINK
 const app = express();
 app.use(express.static("public"));
 
-// const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 const mongoClient = new MongoClient(MONGO_URI);
 
 const nunjucksEnv = nunjucks.configure([
@@ -171,7 +170,7 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
 
    try {
       await mongoClient.connect();
-      const database = mongoClient.db(process.env.MONGO_DBNAME);
+      const database = mongoClient.db(process.env.MONGO_DB_NAME);
       if (saveState) {
             console.log('Received string: ',saveState);
             const linkId = await addState(database, saveState);
