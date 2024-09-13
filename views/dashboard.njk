@@ -130,7 +130,7 @@
                      <td class="td-ecs">  <li> </li></td>
 
                      <!-- 7 Columns Dep Track (Version specific) -->
-                     <td class="td-bom-import"><span>{{ depTrackLink(version.uuid, version.lastBomImport | date("YYYY-MM-DD")) }}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
+                     <td class="td-bom-import"><span>{{ depTrackLink(version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
                      <td class="td-critical">
                         {{DepTrackMetrics(version.metrics.critical, "critical", version.uuid)}}
                      </td>
@@ -169,6 +169,14 @@
     {% endif %}
 {% endmacro %}
 
+{% macro depTrackLink(metricVal, uuid, arg) %}
+    {% if uuid %}
+        <a class="deptrack-link" href="{{ depTrackUri }}/projects/{{ uuid }}/{{ arg }}">{{metricVal}}</a>
+    {% else %}
+        {{ metricVal }}
+    {% endif %}
+{% endmacro %}
+
 {% macro DepTrackMetrics(metricVal, metricClass, uuid, arg) %}
     {% if metricVal != 0 %}
          <div class="rounded-number metric-{{ metricClass }}-back">
@@ -176,11 +184,7 @@
          <div class="front-number metric-{{ metricClass }}-front">
     {% endif %}
             <span title={{ metricClass }}>
-               {% if uuid %}
-                  <a class="deptrack-link" href="{{ depTrackUri }}/projects/{{ uuid }}/{{ arg }}">{{metricVal}}</a>
-               {% else %}
-                  {{ metricVal }}
-               {% endif %}
+            {{depTrackLink(metricVal, uuid, arg)}}
             </span>
          </div>
 {% endmacro %}
