@@ -125,9 +125,9 @@
                         {% endif %}
 
                      <!-- 3 Columns ECS -->
-                     <td class="td-ecs"> {% for version in document.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
-                     <td class="td-ecs">  <li> </li></td>
-                     <td class="td-ecs">  <li> </li></td>
+                     <td class="td-ecs"> {% for version in document.ecs.cidev %}   <li>{{ version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.staging %} <li>{{ version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version }}</li> {% endfor %} </td>
 
                      <!-- 7 Columns Dep Track (Version specific) -->
                      <td class="td-bom-import"><span>{{ depTrackLink(version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
