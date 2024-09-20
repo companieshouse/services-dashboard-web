@@ -3,12 +3,23 @@ import dotenvExpand from "dotenv-expand";
 
 import express, { Request, Response } from "express";
 import { Db, MongoClient, ObjectId } from "mongodb";
+import { unzip } from 'zlib';
+import { promisify } from 'util';
 import nunjucks from "nunjucks";
 import * as filters from "./utils/date-filter";
+
+
+// Convert the zlib.unzip function to return a promise using promisify
+const unzipAsync = promisify(unzip);
 
 interface QueryParameters {
    [name: string]: string[];
  }
+interface StateData {
+   queryArg: string;
+   sort: string;
+   checkboxes: string;
+}
 
 const runningEnv = dotenv.config();
 dotenvExpand.expand(runningEnv)
@@ -30,6 +41,7 @@ const MilliSecRetentionStateLinks = Number(process.env.DAYS_RETENTION_STATE_LINK
 
 const app = express();
 app.use(express.static("public"));
+app.use(express.text());   // to parse text/plain requests
 
 const mongoClient = new MongoClient(MONGO_URI);
 
@@ -165,45 +177,82 @@ async function addState(db: Db, state: string): Promise<string | undefined> {
    return linkId;
 }
 
-app.get(endpointDashboard!, async (req: Request, res: Response) => {
-   const saveState = req.query.savestate as string;
 
+async function getCompressedState(compressedState: string): Promise<object> {
+   // 1. Base64 string -->  binary buffer
+   const compressedDataBuffer = Buffer.from(compressedState, 'base64');
+
+   try {
+      // 2. unzip  --> buff string
+      const stringBuffer = await unzipAsync(compressedDataBuffer);
+
+      // 3. buff string --> string
+      const jsonString = stringBuffer.toString('utf-8');
+      // 4. string --> JSON
+      return JSON.parse(jsonString);
+
+   } catch (error) {
+      throw error;
+   }
+ }
+
+function sourceQueryParams(query: string): QueryParameters | undefined {
+   let   queryParams: QueryParameters | undefined;
+   if (query) {
+      console.log(`sourcing query: ${query}`);
+      try {
+         queryParams = JSON.parse(query);
+      } catch (error) {
+         throw new Error (`Invalid JSON format for 'query' parameter: ${error}`);
+      }
+      return queryParams;
+   }
+
+}
+
+app.post(endpointDashboard!, async (req: Request, res: Response) => {
+   try {
+      const compressedState = req.body;
+      await mongoClient.connect();
+      const database = mongoClient.db(process.env.MONGO_DB_NAME);
+      const linkId = await addState(database, compressedState);
+      (linkId !== undefined) ?
+         res.send(linkId) :
+         res.status(400).send('Error saving link');
+   } catch (error) {
+      console.error(error);
+   } finally {
+      mongoClient.close();
+   }
+});
+
+app.get(endpointDashboard!, async (req: Request, res: Response) => {
    try {
       await mongoClient.connect();
       const database = mongoClient.db(process.env.MONGO_DB_NAME);
-      if (saveState) {
-            console.log('Received string: ',saveState);
-            const linkId = await addState(database, saveState);
-            (linkId !== undefined) ?
-               res.send(linkId) :
-               res.status(400).send('Error saving link');
+      const linkId = req.query.linkid as string;
+      let   query  = req.query.query  as string;
+      let   compressedState = "";
+      let   queryParams: QueryParameters | undefined;
+      try {
+         queryParams = sourceQueryParams(query);
+      } catch (error) {
+         res.status(400).json({ "error": `${error}` });
+         return;
       }
-      else {
-         const query     = req.query.query as string;
-         const linkId    = req.query.linkid as string;
-         let   state     = '';
-         let queryParams: QueryParameters | undefined;
-         if (query) {
-            try {
-               queryParams = JSON.parse(query);
-            } catch (error) {
-               res.status(400).json({ "error": `Invalid JSON format for 'query' parameter: ${error}` });
-               return;
-            }
-         }
-         if (linkId) {
-            console.log('reading state from: ',linkId);
-            state = await getState(database, linkId);
-            console.log('ready with state: ',state);
-         }
-         const documents = await fetchDocuments(database, queryParams);
-         res.render("dashboard.njk", {
-            documents: documents,
-            state: state,
-            depTrackUri: DEP_TRACK_URI,
-            sonarUri: SONAR_URI,
-         });
+      if (linkId) {
+         console.log(`reading state from: ${linkId}`);
+         compressedState = await getState(database, linkId);
+         const clearState = await getCompressedState(compressedState) as StateData;
+         queryParams = sourceQueryParams(clearState.queryArg);
       }
+      const documents = await fetchDocuments(database, queryParams);
+      res.render("dashboard.njk", {
+         documents: documents,
+         state: compressedState,
+         depTrackUri: DEP_TRACK_URI,
+         sonarUri: SONAR_URI,
+      });
    } catch (error) {
       console.error(error);
    } finally {
