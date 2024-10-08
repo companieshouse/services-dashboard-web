@@ -22,10 +22,6 @@
             </div>
          </div>
       </div>
-
-   <!--
-      <a href="{{ selfUrl }}">self url</a>
-   -->
 {% endblock %}
 
 {% block menu %}
@@ -105,7 +101,7 @@
 
                      <!-- 4 Columns (Git info)-->
                      <td class="td_git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
-                     <td class="td_git-lang">      <a href="{{ document.gitInfo.repo }}">                  {{ document.gitInfo.lang }}</a></td>
+                     <td class="td_git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
                      <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.version }}</a></td>
                      <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
 
@@ -159,7 +155,19 @@
 
 {% block footer %}
    <span class="footer-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-text">Companies House</a></span>
+      {# {% for p in config.endol.go %}
+       <li>{{ p.cycle }}</li>
+      {% endfor %} #}
 {% endblock %}
+
+{% macro setLanguage (depTrackLang, gitLang, repo) %}
+  {% if (depTrackLang | lower) === (gitLang | lower) %}
+    <a href="{{ repo }}">{{ gitLang }}</a>
+  {% else %}
+    <li><a href="{{ repo }}">{{ gitLang }}</a></li>
+    <li>{{ depTrackLang }}</li>
+  {% endif %}
+{% endmacro %}
 
 {% macro sonarLink(sonarKey, val) %}
     {% if sonarKey %}

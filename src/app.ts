@@ -30,6 +30,8 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
 const MONGO_AUTH = MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : "";
 const MONGO_HOST_AND_PORT = process.env.MONGO_HOST_AND_PORT;
 const MONGO_URI = `${MONGO_PROTOCOL}://${MONGO_AUTH}${MONGO_HOST_AND_PORT}`;
+const MONGO_COLLECTION_PROJECTS = process.env.MONGO_COLLECTION_PROJECTS;
+const MONGO_COLLECTION_CONFIG   = process.env.MONGO_COLLECTION_CONFIG;
 
 const DEP_TRACK_URI =  process.env.DEP_TRACK_SERVER;
 const SONAR_URI     =  process.env.SONAR_SERVER;
@@ -43,7 +45,10 @@ const app = express();
 app.use(express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 
-const mongoClient = new MongoClient(MONGO_URI);
+const mongoClient = new MongoClient(MONGO_URI, {
+   minPoolSize: 1,
+   waitQueueTimeoutMS: 5000
+ });
 
 const nunjucksEnv = nunjucks.configure([
    "views",
@@ -62,7 +67,7 @@ nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
 
 async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    try {
-      const collection = database.collection(process.env.MONGO_COLLECTION_PROJECTS!);
+      const collection = database.collection(MONGO_COLLECTION_PROJECTS!);
 
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
@@ -122,6 +127,16 @@ async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    }
  }
 
+ async function fetchConfig(database: Db) {
+   try {
+      const collection = database.collection(MONGO_COLLECTION_CONFIG!);
+      const config = await collection.findOne({});
+      return config;
+   } catch (error) {
+      console.error("Error fetching Config:", error);
+      return {};
+   }
+ }
 
 async function getState(db: Db, linkId: string|undefined): Promise<string> {
    let state = '';
@@ -247,7 +262,9 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
          queryParams = sourceQueryParams(clearState.queryArg);
       }
       const documents = await fetchDocuments(database, queryParams);
+      const config = await fetchConfig(database);
       res.render("dashboard.njk", {
+         config: config,
          documents: documents,
          state: compressedState,
          depTrackUri: DEP_TRACK_URI,
