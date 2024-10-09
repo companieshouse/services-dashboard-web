@@ -51,6 +51,7 @@
  .tab-nav {
    background-color: #f4f4f4;
    border-bottom: 1px solid #ccc;
+   z-index: 10;
  }
 
  
@@ -77,26 +78,11 @@
  
  .tab-content {
    flex: 1;
-   /* padding: 20px; */
    padding: 0;
    overflow: auto; /* Enables both vertical and horizontal scrollbars if needed */
    background-color: #fff;
  }
   
- /* .tab-content { 
-   display: flex;
-   flex-direction: column;
-   padding: 0; /* Remove padding if necessary *
-   /* Additional styles specific to tab1 *
- } */
- 
- /* .tab-content.services {
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   /* Inner elements should handle their own scrolling *
- } */
-
  /* ------------ HEADER LOGO ------------ */
       .header-container {
          display: flex;
