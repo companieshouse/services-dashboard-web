@@ -115,8 +115,8 @@
                      <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
                      <!-- 4 Columns (Git info)-->
-                     <td class="td_git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
-                     <td class="td_git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
+                     <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
+                     <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
                      <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.version }}</a></td>
                      <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
 

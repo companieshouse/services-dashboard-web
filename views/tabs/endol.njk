@@ -1,0 +1,60 @@
+<link rel="stylesheet" href="/css/tab-endol.css">
+
+<div class="tab-endol-container">
+  <div class="vertical-menu">
+      <!-- Master checkbox to control all .name-checkbox -->
+      <div class="masterCheckbox">
+            <input type="checkbox" id="masterCheckbox-id">
+            <label for="masterCheckbox-id"><strong>Select All</strong></label>
+            <hr>
+      </div>
+      <form id="filterForm">
+         {% for project, projArray in endols %}
+         <div>
+            <input type="checkbox" id="{{ project }}" class="name-checkbox" checked>
+            <label for="{{ project }}">{{ project }}</label>
+            <div>
+            {% for cycle in projArray %}
+                  <input type="checkbox" id="{{ project }}-{{ cycle.cycle }}" class="version-checkbox" data-name="{{ project }}" checked>
+                  <label for="{{ project }}-{{ cycle.cycle }}" >{{ cycle.cycle }}</label><br>
+               {% endfor %}
+            </div>
+         </div>
+      {% endfor %}
+      </form>
+  </div>
+
+  <div class="table-endol-container">
+    <table id="table-endol">
+
+      <thead>
+         <!-- Col Headers -->
+         <tr>
+            <th class="col-header header-project"         id="col-head-project"         data-type="string">Project</th>
+            <th class="col-header header-cycle"           id="col-head-cycle"           data-type="string">Cycle</th>
+            <th class="col-header header-rel-date"        id="col-head-rel-date"        data-type="string">Release Date</th>
+            <th class="col-header header-lts"             id="col-head-lts"             data-type="string">LTS</th>
+            <th class="col-header header-eol"             id="col-head-eol"             data-type="string">EOL</th>
+            <th class="col-header header-latest"          id="col-head-latest"          data-type="string">Latest</th>
+            <th class="col-header header-latest-rel-date" id="col-head-latest-rel-date" data-type="string">Latest Release Date</th>
+         </tr>
+      </thead>
+      <tbody>
+         {% for project, projArray in endols %}
+            {% for cycle in projArray %}
+            <tr data-name="{{ project }}" data-version="{{ cycle.cycle }}">
+               <td class="td-project">        {{ project }}</td>
+               <td class="td-cycle">          {{ cycle.cycle }}</td>
+               <td class="td-rel-date">       {{ cycle.releaseDate }}</td>
+               <td class="td-lts">            {{ cycle.lts }}</td>
+               <td class="td-eol">            {{ cycle.eol }}</td>
+               <td class="td-latest">         {{ cycle.latest }}</td>
+               <td class="td-latest-rel-date">{{ cycle.latestReleaseDate }}</td>
+            </tr>
+            {% endfor %}
+         {% endfor %}
+      </tbody>
+      </table>
+    </table>
+  </div>
+</div>

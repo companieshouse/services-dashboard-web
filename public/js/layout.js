@@ -22,8 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const html = await response.text();
             tabContent.innerHTML = html;
-            initialiseTabContent();
-      
+
+            // Ensure that the script from the tab content is loaded
+            const scriptTag = document.createElement('script');
+            scriptTag.src = `/js/tab-${selectedTab}.js`;  // Each tab should have its own JS file
+            scriptTag.onload = () => initialiseTabContent();  // Call the tab-specific init function once the script is loaded
+            document.body.appendChild(scriptTag);
+
             // update active tab styling
             tabLinks.forEach(l => l.classList.remove('active'));
             e.target.classList.add('active');
