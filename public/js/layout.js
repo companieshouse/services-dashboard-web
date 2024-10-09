@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const html = await response.text();
             tabContent.innerHTML = html;
-            // initialiseTabContent();
+            initialiseTabContent();
       
             // update active tab styling
             tabLinks.forEach(l => l.classList.remove('active'));
