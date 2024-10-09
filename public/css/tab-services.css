@@ -96,6 +96,24 @@
     .group-deptrack {
       background-color: #f6a8a8;
     }
+
+    .col-header {
+      font-size: 14px;
+      cursor: pointer;
+   }
+   
+   .header-service,
+   .header-sonar-metric,
+   .header-ecs {
+      background-color: #9e9c9c;
+   }
+   
+   .header-git,
+   .header-version,
+   .header-deptrack {
+      background-color: #c7c6c6;
+   }
+
 /* ------------ CSS FOR TABLE HEADER ------------ */
 .header-sonar-metric,
 .header-ecs,
@@ -103,6 +121,29 @@
    writing-mode: vertical-rl;
 }    
 
+/* ------------ CSS FOR TABLE TD ------------ */
+.td-name a,
+.td_git-owner a,
+.td_git-lang a,
+.td-git-version a,
+.td-git-date a {
+   color: rgb(0, 0, 0);
+   text-decoration: none;
+}
+.td-name a {
+   font-size: 10px;
+   color: rgb(224, 118, 52);
+}
+.td-version {
+   font-size: 12px;
+   background-color: #ddd;
+   color: rgb(224, 118, 52);
+}
+.deptrack-link,
+.sonar-link  {
+   text-decoration: none;
+   color: inherit; /* Inherit color from parent */
+}
 
 /* ------------ CSS FOR NUMBERS/ METRICS ------------ */
 
