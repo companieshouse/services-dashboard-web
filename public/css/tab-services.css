@@ -1,0 +1,81 @@
+
+.tab-services-container {
+  display: flex;
+  height: 100%;
+}
+
+.vertical-menu {
+  width: 10%; /* Approximately 10% of horizontal space */
+  min-width: 150px; /* set a minimum width */
+  background-color: #f9f9f9;
+  border-right: 1px solid #ccc;
+  overflow: auto; /* Enables both vertical and horizontal scrolling */
+
+  padding: 10px;
+
+}
+
+.masterCheckbox {
+  position: sticky;
+  top: 0;
+  padding-bottom: 10px;
+  z-index: 10;
+}
+
+.vertical-menu  div {
+  margin-bottom: 10px;
+}
+.vertical-menu  div > div {
+  margin-left: 20px;
+}
+
+/* .vertical-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vertical-menu li {
+  border-bottom: 1px solid #ddd;
+} */
+
+/* .vertical-menu a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+}
+
+.vertical-menu a:hover {
+  background-color: #e0e0e0;
+} */
+
+.table-services-container {
+  width: 90%; /* Approximately 90% of horizontal space */
+  padding: 10px;
+  overflow: auto; /* Enables both vertical and horizontal scrolling */
+}
+
+.table-services-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-services-container th,
+.table-services-container td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+  white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
+}
+
+.table-services-container thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f1f1f1;
+  z-index: 2; /* Ensures header stays above table body */
+}
+
+.table-services-container tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}

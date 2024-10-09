@@ -20,10 +20,15 @@ interface StateData {
    sort: string;
    checkboxes: string;
 }
+interface TabFunction {
+   title: string;
+   fun: (req: Request, res: Response) => void;
+ }
 
 const runningEnv = dotenv.config();
 dotenvExpand.expand(runningEnv)
 
+const APP_TITLE = process.env.APP_TITLE;
 const MONGO_PROTOCOL = process.env.MONGO_PROTOCOL;
 const MONGO_USER = process.env.MONGO_USER;
 const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
@@ -64,6 +69,32 @@ const nunjucksEnv = nunjucks.configure([
  // Add the date filter
 nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
+
+
+function funExample() {
+   console.log("Called funExample");
+}
+
+function funAnother() {
+   console.log("Called funAnother");
+}
+
+// map tab-functions
+const tabsMap: Record<string, TabFunction> = {
+  endol: { 
+    title: "End of Life", 
+    fun: tabEndol 
+  },
+  services: { 
+   title: "Services", 
+   fun: tabServices 
+ },
+ productowner: { 
+    title: "Product Owner", 
+    fun: tabProductOwner 
+  }
+};
+
 
 async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    try {
@@ -242,6 +273,50 @@ app.post(endpointDashboard!, async (req: Request, res: Response) => {
 });
 
 app.get(endpointDashboard!, async (req: Request, res: Response) => {
+   const tabs = Object.entries(tabsMap).map(([key, value]) => {
+      return { key, title: value.title };
+    });
+   res.render("layout.njk", {title: APP_TITLE, tabs});
+});
+
+
+// app.get(endpointDashboard!, async (req: Request, res: Response) => {
+//    try {
+//       await mongoClient.connect();
+//       const database = mongoClient.db(process.env.MONGO_DB_NAME);
+//       const linkId = req.query.linkid as string;
+//       let   query  = req.query.query  as string;
+//       let   compressedState = "";
+//       let   queryParams: QueryParameters | undefined;
+//       try {
+//          queryParams = sourceQueryParams(query);
+//       } catch (error) {
+//          res.status(400).json({ "error": `${error}` });
+//          return;
+//       }
+//       if (linkId) {
+//          console.log(`reading state from: ${linkId}`);
+//          compressedState = await getState(database, linkId);
+//          const clearState = await getCompressedState(compressedState) as StateData;
+//          queryParams = sourceQueryParams(clearState.queryArg);
+//       }
+//       const documents = await fetchDocuments(database, queryParams);
+//       const config = await fetchConfig(database);
+//       res.render("dashboard.njk", {
+//          config: config,
+//          documents: documents,
+//          state: compressedState,
+//          depTrackUri: DEP_TRACK_URI,
+//          sonarUri: SONAR_URI,
+//       });
+//    } catch (error) {
+//       console.error(error);
+//    } finally {
+//       mongoClient.close();
+//    }
+//  });
+
+ async function tabServices (req: Request, res: Response) {
    try {
       await mongoClient.connect();
       const database = mongoClient.db(process.env.MONGO_DB_NAME);
@@ -263,7 +338,7 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
       }
       const documents = await fetchDocuments(database, queryParams);
       const config = await fetchConfig(database);
-      res.render("dashboard.njk", {
+      res.render("tabs/services.njk", {
          config: config,
          documents: documents,
          state: compressedState,
@@ -275,7 +350,22 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
    } finally {
       mongoClient.close();
    }
- });
+ }
+
+ async function tabEndol (req: Request, res: Response) {
+}
+async function tabProductOwner (req: Request, res: Response) {
+}
+
+ // Tab Routes
+app.get(`${endpointDashboard}/tab/:tabName`, (req: Request, res: Response) => {
+   const tabName = req.params.tabName;
+   if (tabsMap[tabName]) {
+       tabsMap[tabName].fun(req, res); 
+   } else {
+      res.status(404).send('Tab not found');
+   }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}/dashboard`);

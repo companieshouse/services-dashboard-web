@@ -84,7 +84,7 @@ function sourceState() {
       }
    } else {
       // without a state, show all checkboxes (= set master checkbox & trigger its handler)
-      const masterCheckbox = document.getElementById('masterCheckbox');
+      const masterCheckbox = document.getElementById('masterCheckbox-id');
       masterCheckbox.checked = true;
       const event = new Event('change');
       masterCheckbox.dispatchEvent(event);
@@ -195,8 +195,8 @@ function getQueryArg() {
 //-----------------------------------
 // attach most handlers
 //-----------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-
+// document.addEventListener('DOMContentLoaded', () => {
+function initialiseTabContent() {
    //-------------
    // 1 - attach sort handlers to table headers
    //-------------
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
    //-------------
    // 2 - attach checkboxes handlers
    //-------------
-   const masterCheckbox = document.getElementById('masterCheckbox');
+   const masterCheckbox = document.getElementById('masterCheckbox-id');
    const nameCheckboxes = document.querySelectorAll('.name-checkbox');
    const versionCheckboxes = document.querySelectorAll('.version-checkbox');
    const tableRows = document.querySelectorAll('#table-services tbody tr');
@@ -331,4 +331,4 @@ document.addEventListener('DOMContentLoaded', () => {
          showShareResponse('Error creating link', 'error');
       }
    });
-});
+}
