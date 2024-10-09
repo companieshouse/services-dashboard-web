@@ -165,7 +165,7 @@ async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
       return config;
    } catch (error) {
       console.error("Error fetching Config:", error);
-      return {};
+      return null;
    }
  }
 
@@ -316,7 +316,7 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
 //    }
 //  });
 
- async function tabServices (req: Request, res: Response) {
+async function tabServices (req: Request, res: Response) {
    try {
       await mongoClient.connect();
       const database = mongoClient.db(process.env.MONGO_DB_NAME);
@@ -343,7 +343,7 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
          documents: documents,
          state: compressedState,
          depTrackUri: DEP_TRACK_URI,
-         sonarUri: SONAR_URI,
+         sonarUri: SONAR_URI
       });
    } catch (error) {
       console.error(error);
@@ -352,7 +352,18 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
    }
  }
 
- async function tabEndol (req: Request, res: Response) {
+async function tabEndol (req: Request, res: Response) {
+   try {
+      await mongoClient.connect();
+      const database = mongoClient.db(process.env.MONGO_DB_NAME);
+      const config = await fetchConfig(database);
+      const endols = config?.endol ?? {};
+      res.render("tabs/endol.njk", {endols});
+   } catch (error) {
+      console.error(error);
+   } finally {
+      mongoClient.close();
+   }
 }
 async function tabProductOwner (req: Request, res: Response) {
 }
