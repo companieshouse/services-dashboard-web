@@ -79,3 +79,139 @@
 .table-services-container tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
+
+
+    .group-header {
+      font-size: 14px;
+    }
+
+    .group-service,
+    .group-sonar,
+    .group-ecs {
+      background-color: #e1b4b4;
+    }
+
+    .group-git,
+    .group-version,
+    .group-deptrack {
+      background-color: #f6a8a8;
+    }
+/* ------------ CSS FOR TABLE HEADER ------------ */
+.header-sonar-metric,
+.header-ecs,
+.header-dt-metric {
+   writing-mode: vertical-rl;
+}    
+
+
+/* ------------ CSS FOR NUMBERS/ METRICS ------------ */
+
+.front-number {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.rounded-number {
+  display: inline-block;
+  color: #ffffff; /* Font color */
+  font-size: 10px;
+  font-weight: bold;
+  padding: 5px 10px; /* Padding around the text */
+  border-radius: 10px; /* Rounded corners */
+  margin: 2px; /* Space around each element */
+  text-align: center; /* Aligns text horizontally */
+}
+
+.metric-critical-back {
+  background-color: #ef3017;
+}
+.metric-high-back {
+  background-color: #dd6119;
+}
+.metric-medium-back {
+  background-color: #494e49;
+}
+.metric-low-back {
+  background-color: #9e9595;
+}
+.metric-vulnerabilities-back {
+  background-color: #dc32ef;
+}
+.metric-components-back {
+  background-color: #444aef;
+}
+
+
+.metric-critical-front {
+  color: #ef3017;
+}
+.metric-high-front {
+  color: #dd6119;
+}
+.metric-medium-front {
+  color: #494e49;
+}
+.metric-low-front {
+  color: #9e9595;
+}
+.metric-vulnerabilities-front {
+  color: #dc32ef;
+}
+.metric-components-front {
+  color: #444aef;
+}
+
+/* ------------ CSS FOR DATES ------------ */
+
+.days-ago {
+font-style: italic;
+color: #7689d3;
+}
+
+/* ------------ CSS FOR SORTING THE TABLE ------------ */
+
+/* Change the cursor to pointer and add hover effect */
+.column-sort {
+  cursor: pointer;
+  color: inherit; /* maintain the text color */
+}
+
+.column-sort:hover {
+  text-decoration: underline;
+  color: blue; /* change the color on hover */
+}
+
+/* ------------ CSS FOR RUNTIME LIST ------------ */
+
+.td-runtime-info {
+  margin-left: 0;     /* Remove left margin */
+  padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
+  list-style-position: inside; /* Ensure bullet points align with the text */
+ }
+
+/* ------------ CSS FOR SHARE BUTTON & RESPONSE ------------ */
+
+ #share-status-message {
+  display: none; /* Hidden by default */
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  position: relative;
+}
+
+#share-status-message.ok {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+#share-status-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+#share-status-icon {
+  margin-right: 5px;
+}
