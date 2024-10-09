@@ -77,7 +77,8 @@
  
  .tab-content {
    flex: 1;
-   padding: 20px;
+   /* padding: 20px; */
+   padding: 0;
    overflow: auto; /* Enables both vertical and horizontal scrollbars if needed */
    background-color: #fff;
  }

@@ -2,6 +2,7 @@
 .tab-services-container {
   display: flex;
   height: 100%;
+  padding-top: 0;
 }
 
 .vertical-menu {
@@ -29,27 +30,6 @@
   margin-left: 20px;
 }
 
-/* .vertical-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.vertical-menu li {
-  border-bottom: 1px solid #ddd;
-} */
-
-/* .vertical-menu a {
-  display: block;
-  padding: 10px 15px;
-  text-decoration: none;
-  color: #333;
-}
-
-.vertical-menu a:hover {
-  background-color: #e0e0e0;
-} */
-
 .table-services-container {
   width: 90%; /* Approximately 90% of horizontal space */
   padding: 10px;
@@ -73,18 +53,28 @@
   position: sticky;
   top: 0;
   background-color: #f1f1f1;
-  z-index: 2; /* Ensures header stays above table body */
+  z-index: 3; /* Ensures headers stay above the table body */
+  padding: 10px;
+}
+.table-services-container thead tr:nth-child(2) th {
+  top: 40px; /* value based on the height of the first row */
+  z-index: 4; /* This ensures the second row stays above the first */
 }
 
 .table-services-container tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
+.table-services-container tbody tr td {
+  z-index: 1; /* Ensure table body rows stay behind headers */
+}
 
     .group-header {
       font-size: 14px;
-    }
 
+      /* define height for group header row for better alignment */
+      height: 40px;
+    }
     .group-service,
     .group-sonar,
     .group-ecs {
