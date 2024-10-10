@@ -2,36 +2,21 @@
 .tab-endol-container {
   display: flex;
   height: 100%;
+  padding-top: 0;
 }
 
 .vertical-menu {
-  width: 10%; /* Approximately 10% of horizontal space */
+  width: 15%; /* Approximately 15% of horizontal space */
   min-width: 150px; /* set a minimum width */
   background-color: #f9f9f9;
   border-right: 1px solid #ccc;
   overflow: auto; /* Enables both vertical and horizontal scrolling */
 
   padding: 10px;
-
 }
-
-.masterCheckbox {
-  position: sticky;
-  top: 0;
-  padding-bottom: 10px;
-  z-index: 10;
-}
-
-.vertical-menu  div {
-  margin-bottom: 10px;
-}
-.vertical-menu  div > div {
-  margin-left: 20px;
-}
-
 
 .table-endol-container {
-  width: 90%; /* Approximately 90% of horizontal space */
+  width: 85%; /* Approximately 85% of horizontal space */
   padding: 10px;
   overflow: auto; /* Enables both vertical and horizontal scrolling */
 }
@@ -41,7 +26,13 @@
   border-collapse: collapse;
 }
 
-.table-endol-container th,
+.table-endol-container th {
+  padding: 0;
+  /* border: 1px solid #ccc; */
+  text-align: center;
+  white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
+}
+
 .table-endol-container td {
   padding: 10px;
   border: 1px solid #ccc;
@@ -53,71 +44,14 @@
   position: sticky;
   top: 0;
   background-color: #f1f1f1;
-  z-index: 2; /* Ensures header stays above table body */
+  z-index: 3; /* Ensures header stays above table body */
+  padding: 0;
 }
 
 .table-endol-container tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-    .col-header {
-      font-size: 14px;
-      cursor: pointer;
-   }
-
-   /* .header-service,
-   .header-sonar-metric,
-   .header-ecs {
-      background-color: #9e9c9c;
-   }
-
-   .header-git,
-   .header-version,
-   .header-deptrack {
-      background-color: #c7c6c6;
-   } */
-
-/* ------------ CSS FOR TABLE TD ------------ */
-/* .td-name a,
-.td_git-owner a,
-.td_git-lang a,
-.td-git-version a,
-.td-git-date a {
-   color: rgb(0, 0, 0);
-   text-decoration: none;
-}
-.td-name a {
-   font-size: 10px;
-   color: rgb(224, 118, 52);
-}
-.td-version {
-   font-size: 12px;
-   background-color: #ddd;
-   color: rgb(224, 118, 52);
-}
-.deptrack-link,
-.sonar-link  {
-   text-decoration: none;
-   color: inherit; /* Inherit color from parent *
-} */
-
-
-/* ------------ CSS FOR DATES ------------ */
-
-.days-ago {
-font-style: italic;
-color: #7689d3;
-}
-
-/* ------------ CSS FOR SORTING THE TABLE ------------ */
-
-/* Change the cursor to pointer and add hover effect */
-.column-sort {
-  cursor: pointer;
-  color: inherit; /* maintain the text color */
-}
-
-.column-sort:hover {
-  text-decoration: underline;
-  color: blue; /* change the color on hover */
+.table-endol-container tbody tr td {
+  z-index: 1; /* Ensure table body rows stay behind headers */
 }

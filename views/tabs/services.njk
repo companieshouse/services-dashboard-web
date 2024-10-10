@@ -1,3 +1,5 @@
+{% from "macros.njk" import addDaysAgo %}
+
 {% macro setLanguage (depTrackLang, gitLang, repo) %}
   {% if (depTrackLang | lower) === (gitLang | lower) %}
     <a href="{{ repo }}">{{ gitLang }}</a>
@@ -96,7 +98,7 @@
                   <th class="col-header header-ecs" id="col-head-ecs-stag"    data-type="string"><span>staging</span></th>
                   <th class="col-header header-ecs" id="col-head-ecs-live"    data-type="string"><span>live</span></th>
 
-                  <th class="col-header header-deptrack"  id="col-head-deptk-date"data-type="date"  >Last BOM</th>
+                  <th class="col-header header-deptrack"  id="col-head-deptk-date" data-type="date"  >Last BOM</th>
                   <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
                   <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
                   <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
@@ -118,7 +120,7 @@
                      <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
                      <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
                      <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.version }}</a></td>
-                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span><br><span class="days-ago">({{ document.gitInfo.lastRelease.date | daysAgo }})</span></td>
+                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.lastRelease.date ) }}</td>
 
                      <!-- 4 Columns (sonar Metrics) -->
                      <td class="td-met-coverage">       {{ sonarLink(document.sonarKey, document.sonarMetrics.coverage) }}</td>
@@ -141,7 +143,7 @@
                      <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version }}</li> {% endfor %} </td>
 
                      <!-- 7 Columns Dep Track (Version specific) -->
-                     <td class="td-bom-import"><span>{{ depTrackLink(version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br><span class="days-ago">({{ version.lastBomImport | daysAgo }})</span></td>
+                     <td class="td-bom-import"><span>{{ depTrackLink(version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span>{{addDaysAgo( version.lastBomImport ) }}</td>
                      <td class="td-critical">
                         {{DepTrackMetrics(version.metrics.critical, "critical", version.uuid)}}
                      </td>

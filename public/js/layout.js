@@ -38,4 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
          }
       });
    });
+
+   if (tabLinks.length > 1) {
+      // Trigger the click on the first link
+      tabLinks[1].click();
+    }
  });
