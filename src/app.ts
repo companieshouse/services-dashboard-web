@@ -338,7 +338,7 @@ async function tabServices (req: Request, res: Response) {
       }
       const documents = await fetchDocuments(database, queryParams);
       const config = await fetchConfig(database);
-      res.render("tabs/services.njk", {
+      res.render("tabs/tab-services.njk", {
          config: config,
          documents: documents,
          state: compressedState,
@@ -358,7 +358,7 @@ async function tabEndol (req: Request, res: Response) {
       const database = mongoClient.db(process.env.MONGO_DB_NAME);
       const config = await fetchConfig(database);
       const endols = config?.endol ?? {};
-      res.render("tabs/endol.njk", {endols});
+      res.render("tabs/tab-endol.njk", {endols});
    } catch (error) {
       console.error(error);
    } finally {

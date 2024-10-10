@@ -1,68 +1,12 @@
+/* public/css/tab/tab-services.css */
 
-.tab-services-container {
-  display: flex;
-  height: 100%;
-  padding-top: 0;
-}
-
-.vertical-menu {
-  width: 15%; /* Approximately 15% of horizontal space */
-  min-width: 150px; /* set a minimum width */
-  background-color: #ddd;
-  border-right: 1px solid #ccc;
-  overflow: auto; /* Enables both vertical and horizontal scrolling */
-
-  padding: 10px;
-}
-
-.table-services-container {
-  width: 85%; /* Approximately 85% of horizontal space */
-  padding: 10px;
-  overflow: auto; /* Enables both vertical and horizontal scrolling */
-}
-
-.table-services-container table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table-services-container th {
-  padding: 0;
-  /* border: 1px solid #ccc; */
-  text-align: center;
-  white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
-}
-
-.table-services-container td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-  white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
-}
-
-
-.table-services-container thead th {
-  position: sticky;
-  top: 0;
-  border: 1px solid black;
-  background-color: #f1f1f1;
-  z-index: 3; /* Ensures headers stay above the table body */
-  padding: 0;
-}
-.table-services-container thead tr:nth-child(2) th {
+.tab-container-main-col thead tr:nth-child(2) th {
   top: 40px; /* value based on the height of the first row */
   z-index: 4; /* This ensures the second row stays above the first */
 }
 
-.table-services-container tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
 
-.table-services-container tbody tr td {
-  z-index: 1; /* Ensure table body rows stay behind headers */
-}
-
-    .group-header {
+.group-header {
       font-size: 14px;
 
       /* define height for group header row for better alignment */

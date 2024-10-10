@@ -11,8 +11,58 @@
    height: 100%;
    font-family: Arial, sans-serif;
  }
+/* ------------ HEADER  ------------ */
 
- .fixed-header {
+.header-container {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-left: 20px; /* Adds space before the SVG and text */
+   padding-right: 20px; /* Adds some padding to the right */
+   width: 100%;
+   box-sizing: border-box; /* Ensures padding and margin are included in the width calculation */
+}
+
+.header-left-content {
+   display: flex;
+   align-items: center;
+}
+
+.header-center-content {
+   position: absolute;
+   left: 50%;
+   transform: translateX(-50%);
+}
+
+.header-right-content {
+   position: absolute;
+   right: 5%;
+   transform: translateX(5%);
+}
+
+.header-logo {
+   width: 50px;
+   height: auto;
+   margin-right: 10px;
+}
+
+.header-logo-text {
+   font-size: 28px;
+   color: white;
+   text-decoration: none;
+}
+
+.header-center-text {
+   font-size: 18px;
+   color: white;
+}
+
+.col-header {
+   font-size: 14px;
+   cursor: pointer;
+}
+
+.fixed-header {
    position: fixed;
    top: 0;
    left: 0;
@@ -26,7 +76,14 @@
    z-index: 1000;
  }
 
- .fixed-footer {
+/* ------------ FOOTER  ------------ */
+.footer-text {
+   font-size: 12px;
+   color: white;
+   text-decoration: none;
+}
+
+.fixed-footer {
    position: fixed;
    bottom: 0;
    left: 0;
@@ -38,9 +95,10 @@
    align-items: center;
    justify-content: center;
    z-index: 1000;
- }
+}
 
- .main-content {
+/* ------------ MAIN AREA  ------------ */
+.main-content {
    display: flex;
    flex-direction: column;
    height: 100%;
@@ -48,7 +106,8 @@
    padding-bottom: 40px; /* Height of footer */
  }
 
- .tab-nav {
+/* ------------ TABS AREA  ------------ */
+.tab-nav {
    background-color: #f4f4f4;
    border-bottom: 1px solid #ccc;
    z-index: 10;
@@ -83,83 +142,88 @@
    background-color: #fff;
  }
 
+/* ------------ SINGLE TAB AREA  ------------ */
+.tab-container {
+   display: flex;
+   height: 100%;
+   padding-top: 0;
+   }
 
- .masterCheckbox {
+/* ------------ SINGLE TAB - LEFT COL  ------------ */
+.tab-container-left-col {
+   width: 15%; /* Approximately 15% of horizontal space */
+   min-width: 150px; /* set a minimum width */
+   background-color: #ddd;
+   border-right: 1px solid #ccc;
+   overflow: auto; /* Enables both vertical and horizontal scrolling */
+   
+   padding: 10px;
+   }
+.tab-container-left-col  div {
+   margin-bottom: 10px;
+}
+.tab-container-left-col  div > div {
+   margin-left: 20px;
+}
+/* ------------ SINGLE TAB - LEFT COL - CHECK BOX ------------ */
+
+.masterCheckbox {
    position: sticky;
    top: 0;
    padding-bottom: 10px;
    background-color: #cccccc;
    border-bottom: 1px solid #ccc;
    z-index: 10;
- }
+}
 
- .vertical-menu  div {
-   margin-bottom: 10px;
- }
- .vertical-menu  div > div {
-   margin-left: 20px;
- }
- .label-name-checkbox {
+.label-name-checkbox {
    color: rgb(224, 118, 52);
+}
+
+/* ------------ SINGLE TAB - MAIN COL  ------------ */
+
+.tab-container-main-col {
+   width: 85%; /* Approximately 85% of horizontal space */
+   padding: 10px;
+   overflow: auto; /* Enables both vertical and horizontal scrolling */
+}
+
+.tab-container-main-col table {
+   width: 100%;
+   border-collapse: collapse;
  }
+ 
+.tab-container-main-col th {
+   padding: 0;
+   /* border: 1px solid #ccc; */
+   text-align: center;
+   white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
+}
 
- /* ------------ HEADER  ------------ */
+.tab-container-main-col td {
+   padding: 10px;
+   border: 1px solid #ccc;
+   text-align: left;
+   white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
+}
 
-      .header-container {
-         display: flex;
-         justify-content: space-between;
-         align-items: center;
-         margin-left: 20px; /* Adds space before the SVG and text */
-         padding-right: 20px; /* Adds some padding to the right */
-         width: 100%;
-         box-sizing: border-box; /* Ensures padding and margin are included in the width calculation */
-      }
+.tab-container-main-col thead th {
+   position: sticky;
+   top: 0;
+   border: 1px solid black;
+   background-color: #f1f1f1;
+   z-index: 3; /* Ensures headers stay above the table body */
+   padding: 0;
+}
 
-      .header-left-content {
-         display: flex;
-         align-items: center;
-      }
+.tab-container-main-col tbody tr:nth-child(even) {
+   background-color: #f9f9f9;
+}
 
-      .header-center-content {
-         position: absolute;
-         left: 50%;
-         transform: translateX(-50%);
-      }
+.tab-container-main-col tbody tr td {
+   z-index: 1; /* Ensure table body rows stay behind headers */
+}
 
-      .header-right-content {
-         position: absolute;
-         right: 5%;
-         transform: translateX(5%);
-      }
-
-      .header-logo {
-         width: 50px;
-         height: auto;
-         margin-right: 10px;
-      }
-
-      .header-logo-text {
-         font-size: 28px;
-         color: white;
-         text-decoration: none;
-      }
-
-      .header-center-text {
-         font-size: 18px;
-         color: white;
-      }
-
-      .col-header {
-         font-size: 14px;
-         cursor: pointer;
-      }
-
- /* ------------ FOOTER  ------------ */
-      .footer-text {
-         font-size: 12px;
-         color: white;
-         text-decoration: none;
-      }
 
 /* ------------ CSS FOR SORTING THE TABLE ------------ */
 
