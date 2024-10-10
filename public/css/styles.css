@@ -99,6 +99,9 @@
  .vertical-menu  div > div {
    margin-left: 20px;
  }
+ .label-name-checkbox {
+   color: rgb(224, 118, 52);
+ }
 
  /* ------------ HEADER  ------------ */
 

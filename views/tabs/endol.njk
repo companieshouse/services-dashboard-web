@@ -14,11 +14,11 @@
          {% for project, projArray in endols %}
          <div>
             <input type="checkbox" id="{{ project }}" class="name-checkbox" checked>
-            <label for="{{ project }}">{{ project }}</label>
+            <label for="{{ project }}" class="label-name-checkbox">{{ project }}</label>
             <div>
             {% for cycle in projArray %}
                   <input type="checkbox" id="{{ project }}-{{ cycle.cycle }}" class="version-checkbox" data-name="{{ project }}" checked>
-                  <label for="{{ project }}-{{ cycle.cycle }}" >{{ cycle.cycle }}</label><br>
+                  <label for="{{ project }}-{{ cycle.cycle }}" class="label-version-checkbox">{{ cycle.cycle }}</label><br>
                {% endfor %}
             </div>
          </div>
