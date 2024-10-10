@@ -35,11 +35,11 @@
    {% for document in documents %}
       <div>
          <input type="checkbox" id="{{ document.name }}" class="name-checkbox" checked>
-         <label for="{{ document.name }}">{{ document.name }}</label>
+         <label for="{{ document.name }}" class="label-name-checkbox">{{ document.name }}</label>
          <div>
             {% for version in document.versions %}
                <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="version-checkbox" data-name="{{ document.name }}" checked>
-               <label for="{{ document.name }}-{{ version.version }}" >{{ version.version }}</label><br>
+               <label for="{{ document.name }}-{{ version.version }}" class="label-version-checkbox">{{ version.version }}</label><br>
             {% endfor %}
          </div>
       </div>

@@ -74,7 +74,7 @@ header, footer  {
 
 
 .menu {
-   background-color: #aca8a8;
+   background-color: #ddd;
    width: 18%;
    min-width: 100px;
    overflow: auto;
@@ -97,6 +97,10 @@ header, footer  {
       .menu  div > div {
          margin-left: 20px;
       }
+      .label-name-checkbox {
+        color: rgb(224, 118, 52);
+      }
+
 
 .content {
    background-color: #e9e9e9;
