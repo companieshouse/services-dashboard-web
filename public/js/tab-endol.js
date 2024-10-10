@@ -13,6 +13,17 @@ var stateQuery = "";
 //       STANDALONE/ GENERALE UTILITIES:
 //======================================
 
+//-----------------------------------
+// function to init all NAME & VERSION checkboxes from the received 'state'
+//-----------------------------------
+function sourceState() {
+
+   // without a state, show all checkboxes (= set master checkbox & trigger its handler)
+   const masterCheckbox = document.getElementById('masterCheckbox-id');
+   masterCheckbox.checked = true;
+   const event = new Event('change');
+   masterCheckbox.dispatchEvent(event);
+}
 
 //-----------------------------------
 // function to sort the table by saved state's info
@@ -152,7 +163,7 @@ function initialiseTabContent() {
    }
 
    // Initial filter on page load
-   // sourceState();
+   sourceState();
    filterTable();
    sortTable();
 
