@@ -276,7 +276,7 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
    const tabs = Object.entries(tabsMap).map(([key, value]) => {
       return { key, title: value.title };
     });
-   res.render("layout.njk", {title: APP_TITLE, tabs});
+   res.render("main.njk", {title: APP_TITLE, tabs});
 });
 
 
