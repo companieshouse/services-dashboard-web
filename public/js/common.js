@@ -7,7 +7,8 @@ var lastSortedColumnId = "";
 var colSortDirection = 1; // 1 for ascending, -1 for descending
 
 // keep info if the page was loaded from a state
-var stateQuery = "";
+// var stateQuery = "";
+// var initState  = undefined;
 
 const INIT_TAB_CHECK_BOXES = 1 << 0
 const INIT_TAB_TABLE       = 1 << 1
@@ -63,9 +64,16 @@ function decompressFromBase64(base64String) {
 //-----------------------------------
 function getQueryArg() {
    const params = new URLSearchParams(window.location.search);
-   return params.get('query') || stateQuery;
+   return params.get('query') || "";
 }
 
+//-----------------------------------
+// function to get the "id" of the active Tab
+//-----------------------------------
+function getActiveTabId() {
+   const activeTab = document.querySelector('a.tab-link.active');
+   return (activeTab) ? activeTab.id : "";
+}
 //-----------------------------------
 // function to generate a snapshot/state of all NAME & VERSION checkboxes
 //-----------------------------------
@@ -85,6 +93,7 @@ function generateState() {
 
    const state = {
       queryArg: getQueryArg(),
+      tabId: getActiveTabId(),
       sort: `${lastSortedColumnId},${colSortDirection}`,
       checkboxes:  (checkedIds.length > uncheckedIds.length) ?
                         uncheckedIds.join(',') :
@@ -96,15 +105,27 @@ function generateState() {
 //-----------------------------------
 // function to init all NAME & VERSION checkboxes from the received 'state'
 //-----------------------------------
-function sourceState() {
+function sourceState(compressedState) {
 
-   let state =  window.shareLinkState;  // coming from Nunjucks/layout.njk
-   console.log(`loading state:${state}`);
-   if (state) {
-      state = decompressFromBase64(state);
+   // let state =  window.shareLinkState;  // coming from Nunjucks
+   let jsonState = undefined;
+   // initState = undefined;
+   console.log("loading state:",jsonState);
+   if (compressedState) {
       try {
-         state = JSON.parse(state);
+         let state = decompressFromBase64(compressedState);
+         jsonState = JSON.parse(state);
+         console.log("sourcing state:", state);
+      }
+      catch (error) {
+            console.error(`state string: "${state}" invalid JSON.`, error);
+      }
+   }
+   return jsonState;
+}
 
+function loadTabFromState(tabId, state) {
+   if (state !== undefined && state.tabId === tabId) {
          // get csv values
          const csvValues = state.checkboxes.split(',');
          console.log(`loading checkboxes state as:${csvValues[0]}`);
@@ -130,17 +151,9 @@ function sourceState() {
          [lastSortedColumnId, colSortDirection] = state.sort.split(',');
 
          // source query info
-         stateQuery = state.queryArg;
-      }
-      catch (error) {
-         console.error(`state string: "${state}" invalid JSON.`, error);
-      }
+         // stateQuery = state.queryArg;
    } else {
-      // without a state, show all checkboxes (= set master checkbox & trigger its handler)
-      const masterCheckbox = document.getElementById('masterCheckbox-id');
-      masterCheckbox.checked = true;
-      const event = new Event('change');
-      masterCheckbox.dispatchEvent(event);
+      setAllCheckboxes();
    }
 }
 
@@ -272,6 +285,7 @@ function initMenuCheckBoxes() {
    });
    sortTabTable();
 }
+
 //-----------------------------------
 // function to get all the name & version checkboxes
 //-----------------------------------
@@ -282,6 +296,15 @@ function getAllCheckboxes() {
 
    // Combine into 1 array
    return [...nameCheckboxes, ...versionCheckboxes];
+}
+//-----------------------------------
+// function to set 'checked' all name & version checkboxes
+//-----------------------------------
+function setAllCheckboxes() {
+   const masterCheckbox = document.getElementById('masterCheckbox-id');
+   masterCheckbox.checked = true;
+   const event = new Event('change');
+   masterCheckbox.dispatchEvent(event);
 }
 //==============================
 // Tab area - CHECK BOXES (end)
@@ -355,30 +378,13 @@ function showShareResponse(message, type) {
 //-----------------------------------
 // Main init function for tab contents
 //-----------------------------------
-function mainInit(initList) {
-
-   initShareButton();   // currently on main page - should be always initialised
-
-   let filterTable = false
+function mainInit(tabId, initList) {
 
    if ((initList  & INIT_TAB_CHECK_BOXES_AND_TABLE) === INIT_TAB_CHECK_BOXES_AND_TABLE) {
       initTabTable();
       initMenuCheckBoxes();
-      filterTable = true
-   }
-   if (initList  & SOURCE_STATE) {
-      sourceState();
-   }
-   if (filterTable) {
+      loadTabFromState(tabId, window.jsonState);
       filterTabTable();
       sortTabTable();
    }
-}
-
-//-----------------------------------
-// to inti according to what Tab gets loaded.
-// Function to be overridden in every Tab.s js
-//-----------------------------------
-function initialiseTabContent() {
-   mainInit(0);    // general init only
 }

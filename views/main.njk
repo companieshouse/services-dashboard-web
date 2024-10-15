@@ -4,7 +4,7 @@
    <meta charset="UTF-8">
    <title>{{ title }}</title>
    <link rel="stylesheet" href="/css/styles.css">
-   <script> window.shareLinkState = "{{ state | safe }}"; </script>
+   <script> window.compressedState = "{{ compressedState | default('') }}"; </script>
    <script src="/js/libs/pako/2.0.4/pako.min.js"></script>
    <script src="/js/common.js"></script>
    <script src="/js/main.js"></script>
@@ -35,7 +35,7 @@
       <nav class="tab-nav">
          <ul>
          {% for tab in tabs %}
-            <li><a href="#" class="tab-link" data-tab="{{ tab.key }}">{{ tab.title }}</a></li>
+            <li><a href="#" class="tab-link" data-tab="{{ tab.key }}" id="tab-{{ tab.key }}-id">{{ tab.title }}</a></li>
          {% endfor %}
          </ul>         
       </nav>

@@ -95,7 +95,6 @@ const tabsMap: Record<string, TabFunction> = {
   }
 };
 
-
 async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    try {
       const collection = database.collection(MONGO_COLLECTION_PROJECTS!);
@@ -223,25 +222,6 @@ async function addState(db: Db, state: string): Promise<string | undefined> {
    return linkId;
 }
 
-
-async function getCompressedState(compressedState: string): Promise<object> {
-   // 1. Base64 string -->  binary buffer
-   const compressedDataBuffer = Buffer.from(compressedState, 'base64');
-
-   try {
-      // 2. unzip  --> buff string
-      const stringBuffer = await unzipAsync(compressedDataBuffer);
-
-      // 3. buff string --> string
-      const jsonString = stringBuffer.toString('utf-8');
-      // 4. string --> JSON
-      return JSON.parse(jsonString);
-
-   } catch (error) {
-      throw error;
-   }
- }
-
 function sourceQueryParams(query: string): QueryParameters | undefined {
    let   queryParams: QueryParameters | undefined;
    if (query) {
@@ -253,7 +233,6 @@ function sourceQueryParams(query: string): QueryParameters | undefined {
       }
       return queryParams;
    }
-
 }
 
 app.post(endpointDashboard!, async (req: Request, res: Response) => {
@@ -272,50 +251,34 @@ app.post(endpointDashboard!, async (req: Request, res: Response) => {
    }
 });
 
+// handler of main page
 app.get(endpointDashboard!, async (req: Request, res: Response) => {
+   const linkId = req.query.linkid as string;
+   let   compressedState = "";
+   if (linkId) {
+      try {
+         await mongoClient.connect();
+         const database = mongoClient.db(process.env.MONGO_DB_NAME);
+         console.log(`reading state from: ${linkId}`);
+         compressedState = await getState(database, linkId);
+      } catch (error) {
+         console.error(error);
+      } finally {
+         mongoClient.close();
+      }
+   }
+
    const tabs = Object.entries(tabsMap).map(([key, value]) => {
       return { key, title: value.title };
-    });
-   res.render("main.njk", {title: APP_TITLE, tabs});
+      });
+
+   res.render("main.njk", {title: APP_TITLE,
+      tabs,
+      compressedState
+   });
 });
 
-
-// app.get(endpointDashboard!, async (req: Request, res: Response) => {
-//    try {
-//       await mongoClient.connect();
-//       const database = mongoClient.db(process.env.MONGO_DB_NAME);
-//       const linkId = req.query.linkid as string;
-//       let   query  = req.query.query  as string;
-//       let   compressedState = "";
-//       let   queryParams: QueryParameters | undefined;
-//       try {
-//          queryParams = sourceQueryParams(query);
-//       } catch (error) {
-//          res.status(400).json({ "error": `${error}` });
-//          return;
-//       }
-//       if (linkId) {
-//          console.log(`reading state from: ${linkId}`);
-//          compressedState = await getState(database, linkId);
-//          const clearState = await getCompressedState(compressedState) as StateData;
-//          queryParams = sourceQueryParams(clearState.queryArg);
-//       }
-//       const documents = await fetchDocuments(database, queryParams);
-//       const config = await fetchConfig(database);
-//       res.render("dashboard.njk", {
-//          config: config,
-//          documents: documents,
-//          state: compressedState,
-//          depTrackUri: DEP_TRACK_URI,
-//          sonarUri: SONAR_URI,
-//       });
-//    } catch (error) {
-//       console.error(error);
-//    } finally {
-//       mongoClient.close();
-//    }
-//  });
-
+// handler of "Services"-tab
 async function tabServices (req: Request, res: Response) {
    try {
       await mongoClient.connect();
@@ -330,12 +293,7 @@ async function tabServices (req: Request, res: Response) {
          res.status(400).json({ "error": `${error}` });
          return;
       }
-      if (linkId) {
-         console.log(`reading state from: ${linkId}`);
-         compressedState = await getState(database, linkId);
-         const clearState = await getCompressedState(compressedState) as StateData;
-         queryParams = sourceQueryParams(clearState.queryArg);
-      }
+
       const documents = await fetchDocuments(database, queryParams);
       const config = await fetchConfig(database);
       res.render("tabs/tab-services.njk", {
@@ -352,6 +310,7 @@ async function tabServices (req: Request, res: Response) {
    }
  }
 
+ // handler of "End of Life"-tab
 async function tabEndol (req: Request, res: Response) {
    try {
       await mongoClient.connect();
@@ -365,6 +324,8 @@ async function tabEndol (req: Request, res: Response) {
       mongoClient.close();
    }
 }
+
+// handler of "Product Owner"-tab
 async function tabProductOwner (req: Request, res: Response) {
 }
 
