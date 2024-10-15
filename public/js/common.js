@@ -6,14 +6,9 @@
 var lastSortedColumnId = "";
 var colSortDirection = 1; // 1 for ascending, -1 for descending
 
-// keep info if the page was loaded from a state
-// var stateQuery = "";
-// var initState  = undefined;
-
 const INIT_TAB_CHECK_BOXES = 1 << 0
 const INIT_TAB_TABLE       = 1 << 1
 const INIT_TAB_CHECK_BOXES_AND_TABLE = INIT_TAB_CHECK_BOXES | INIT_TAB_TABLE
-const SOURCE_STATE     = 1 << 2
 
 //======================================
 //       STANDALONE/ GENERALE UTILITIES:
@@ -57,6 +52,14 @@ function decompressFromBase64(base64String) {
    const decompressedData = pako.inflate(compressedData, { to: 'string' });
 
    return decompressedData;
+}
+
+//-----------------------------------
+// function to read ALL the url's args
+//-----------------------------------
+function getAllUrlArgs() {
+   const params = new URLSearchParams(window.location.search);
+   return params.toString();
 }
 
 //-----------------------------------
@@ -109,7 +112,6 @@ function sourceState(compressedState) {
 
    // let state =  window.shareLinkState;  // coming from Nunjucks
    let jsonState = undefined;
-   // initState = undefined;
    console.log("loading state:",jsonState);
    if (compressedState) {
       try {

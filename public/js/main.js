@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedTab = e.target.getAttribute('data-tab');
 
             try {
-               const queryString = (state && state.queryArg) ? `?${state.queryArg}` : "";
+               let queryString = (state && state.tabId === link.id) ?  state.queryArg : getAllUrlArgs();
+               queryString = (queryString) ? `?${queryString}` : "";
 
                const response = await fetch(`/dashboard/tab/${selectedTab}${queryString}`);
                if (!response.ok) {
