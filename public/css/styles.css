@@ -1,277 +1,229 @@
-/* ------------ MAIN CONTAINERS ------------ */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    font-family: Arial, sans-serif;
-}
-header, footer  {
-   background-color: #333;
-   color: white;
-   text-align: center;
-   padding: 10px 0;
-   flex-shrink: 0;
-}
-/* ------------ HEADER LOGO ------------ */
-      .header-container {
-         display: flex;
-         justify-content: space-between;
-         align-items: center;
-         margin-left: 20px; /* Adds space before the SVG and text */
-         padding-right: 20px; /* Adds some padding to the right */
-         width: 100%;
-         box-sizing: border-box; /* Ensures padding and margin are included in the width calculation */
-      }
+/* public/css/styles.css */
 
-         .header-left-content {
-            display: flex;
-            align-items: center;
-         }
-
-         .header-center-content {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-         }
-
-         .header-right-content {
-            position: absolute;
-            right: 5%;
-            transform: translateX(5%);
-         }
-
-         .header-logo {
-            width: 50px;
-            height: auto;
-            margin-right: 10px;
-         }
-
-         .header-logo-text {
-            font-size: 28px;
-            color: white;
-            text-decoration: none;
-         }
-
-         .header-center-text {
-            font-size: 18px;
-            color: white;
-         }
-
-         .footer-text {
-            font-size: 12px;
-            color: white;
-            text-decoration: none;
-         }
-
-.container {
-   display: flex;
-   flex: 1;
-   overflow: hidden;
-   background-color: white;
-}
-
-
-.menu {
-   background-color: #ddd;
-   width: 18%;
-   min-width: 100px;
-   overflow: auto;
-   padding: 10px;
+/* Reset styles */
+* {
+   margin: 0;
+   padding: 0;
    box-sizing: border-box;
-   flex-shrink: 0;
-   position: relative;
-}
-/* ------------ CSS FOR MENU ITEMS ------------ */
-      .sticky-header {
-         position: sticky;
-         top: 0;
-         padding-bottom: 10px;
-         z-index: 10;
-      }
-
-      .menu  div {
-         margin-bottom: 10px;
-      }
-      .menu  div > div {
-         margin-left: 20px;
-      }
-      .label-name-checkbox {
-        color: rgb(224, 118, 52);
-      }
-
-
-.content {
-   background-color: #e9e9e9;
-   width: 82%;
-   overflow:  auto;
-   padding: 10px;
-   box-sizing: border-box;
-}
-
-
-/* ------------ CSS FOR MAIN TABLE ------------ */
-
-.table-services-container {
-   width: 100%;
-   height: 100%;
-   overflow-y: auto; /* Enable vertical scrolling */
-   border: 1px solid #ddd;
  }
 
-table {
+ body, html {
+   height: 100%;
+   font-family: Arial, sans-serif;
+ }
+/* ------------ HEADER  ------------ */
+
+.header-container {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-left: 20px; /* Adds space before the SVG and text */
+   padding-right: 20px; /* Adds some padding to the right */
    width: 100%;
-   border-collapse: collapse;
+   box-sizing: border-box; /* Ensures padding and margin are included in the width calculation */
 }
 
-thead {
-   position: sticky;
-   top: 0;
-   background-color: #f8f8f8;
-   z-index: 1; /* Ensure the header stays on top */
-   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* shadow for better visibility */
+.header-left-content {
+   display: flex;
+   align-items: center;
 }
 
-.group-header {
-   font-size: 14px;
+.header-center-content {
+   position: absolute;
+   left: 50%;
+   transform: translateX(-50%);
 }
 
-.group-service,
-.group-sonar,
-.group-ecs {
-   background-color: #e1b4b4;
+.header-right-content {
+   position: absolute;
+   right: 5%;
+   transform: translateX(5%);
 }
 
-.group-git,
-.group-version,
-.group-deptrack {
-   background-color: #f6a8a8;
+.header-logo {
+   width: 50px;
+   height: auto;
+   margin-right: 10px;
+}
+
+.header-logo-text {
+   font-size: 28px;
+   color: white;
+   text-decoration: none;
+}
+
+.header-center-text {
+   font-size: 18px;
+   color: white;
 }
 
 .col-header {
-   font-size: 16px;
+   font-size: 14px;
    cursor: pointer;
 }
 
-.header-service,
-.header-sonar-metric,
-.header-ecs {
-   background-color: #9e9c9c;
-}
-
-.header-git,
-.header-version,
-.header-deptrack {
-   background-color: #c7c6c6;
-}
-
- #sortableTable th:hover {
-   background-color: #ddd;
+.fixed-header {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 60px; /* Fixed height */
+   background-color: #333;
+   color: #fff;
+   display: flex;
+   align-items: center;
+   padding: 0 20px;
+   z-index: 1000;
  }
 
-tbody tr {
-   border-top: 1px solid #ddd;
-}
-
-tbody td {
-   padding: 8px;
-}
-
-/* ------------ CSS FOR TABLE HEADER ------------ */
-.header-sonar-metric,
-.header-ecs,
-.header-dt-metric {
-   writing-mode: vertical-rl;
-}
-
-/* ------------ CSS FOR TABLE TD ------------ */
-.td-name a,
-.td_git-owner a,
-.td_git-lang a,
-.td-git-version a,
-.td-git-date a {
-   color: rgb(0, 0, 0);
-   text-decoration: none;
-}
-.td-name a {
-   font-size: 10px;
-   color: rgb(224, 118, 52);
-}
-.td-version {
+/* ------------ FOOTER  ------------ */
+.footer-text {
    font-size: 12px;
+   color: white;
+   text-decoration: none;
+}
+
+.fixed-footer {
+   position: fixed;
+   bottom: 0;
+   left: 0;
+   width: 100%;
+   height: 40px; /* Fixed height */
+   background-color: #333;
+   color: #fff;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 1000;
+}
+
+/* ------------ MAIN AREA  ------------ */
+.main-content {
+   display: flex;
+   flex-direction: column;
+   height: 100%;
+   padding-top: 60px; /* Height of header */
+   padding-bottom: 40px; /* Height of footer */
+ }
+
+/* ------------ TABS AREA  ------------ */
+.tab-nav {
+   background-color: #f4f4f4;
+   border-bottom: 1px solid #ccc;
+   z-index: 10;
+ }
+
+
+ .tab-nav ul {
+   list-style: none;
+   display: flex;
+ }
+
+ .tab-nav li {
+   margin-right: 10px;
+ }
+
+ .tab-nav a {
+   display: block;
+   padding: 15px 20px;
+   text-decoration: none;
+   color: #333;
+ }
+
+ .tab-nav a.active {
    background-color: #ddd;
+   font-weight: bold;
+ }
+
+ .tab-content {
+   flex: 1;
+   padding: 0;
+   overflow: auto; /* Enables both vertical and horizontal scrollbars if needed */
+   background-color: #fff;
+ }
+
+/* ------------ SINGLE TAB AREA  ------------ */
+.tab-container {
+   display: flex;
+   height: 100%;
+   padding-top: 0;
+   }
+
+/* ------------ SINGLE TAB - LEFT COL  ------------ */
+.tab-container-left-col {
+   width: 15%; /* Approximately 15% of horizontal space */
+   min-width: 150px; /* set a minimum width */
+   background-color: #ddd;
+   border-right: 1px solid #ccc;
+   overflow: auto; /* Enables both vertical and horizontal scrolling */
+   
+   padding: 10px;
+   }
+.tab-container-left-col  div {
+   margin-bottom: 10px;
+}
+.tab-container-left-col  div > div {
+   margin-left: 20px;
+}
+/* ------------ SINGLE TAB - LEFT COL - CHECK BOX ------------ */
+
+.masterCheckbox {
+   position: sticky;
+   top: 0;
+   padding-bottom: 10px;
+   background-color: #cccccc;
+   border-bottom: 1px solid #ccc;
+   z-index: 10;
+}
+
+.label-name-checkbox {
    color: rgb(224, 118, 52);
 }
-.deptrack-link,
-.sonar-link  {
-   text-decoration: none;
-   color: inherit; /* Inherit color from parent */
+
+/* ------------ SINGLE TAB - MAIN COL  ------------ */
+
+.tab-container-main-col {
+   width: 85%; /* Approximately 85% of horizontal space */
+   padding: 10px;
+   overflow: auto; /* Enables both vertical and horizontal scrolling */
 }
 
-/* ------------ CSS FOR NUMBERS/ METRICS ------------ */
-
-.front-number {
-   font-size: 10px;
-   font-weight: bold;
+.tab-container-main-col table {
+   width: 100%;
+   border-collapse: collapse;
+ }
+ 
+.tab-container-main-col th {
+   padding: 0;
+   /* border: 1px solid #ccc; */
+   text-align: center;
+   white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
 }
 
-.rounded-number {
-   display: inline-block;
-   color: #ffffff; /* Font color */
-   font-size: 10px;
-   font-weight: bold;
-   padding: 5px 10px; /* Padding around the text */
-   border-radius: 10px; /* Rounded corners */
-   margin: 2px; /* Space around each element */
-   text-align: center; /* Aligns text horizontally */
+.tab-container-main-col td {
+   padding: 10px;
+   border: 1px solid #ccc;
+   text-align: left;
+   white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
 }
 
-.metric-critical-back {
-   background-color: #ef3017;
-}
-.metric-high-back {
-   background-color: #dd6119;
-}
-.metric-medium-back {
-   background-color: #494e49;
-}
-.metric-low-back {
-   background-color: #9e9595;
-}
-.metric-vulnerabilities-back {
-   background-color: #dc32ef;
-}
-.metric-components-back {
-   background-color: #444aef;
+.tab-container-main-col thead th {
+   position: sticky;
+   top: 0;
+   border: 1px solid black;
+   background-color: #f1f1f1;
+   z-index: 3; /* Ensures headers stay above the table body */
+   padding: 0;
 }
 
-
-.metric-critical-front {
-   color: #ef3017;
-}
-.metric-high-front {
-   color: #dd6119;
-}
-.metric-medium-front {
-   color: #494e49;
-}
-.metric-low-front {
-   color: #9e9595;
-}
-.metric-vulnerabilities-front {
-   color: #dc32ef;
-}
-.metric-components-front {
-   color: #444aef;
+.tab-container-main-col tbody tr:nth-child(even) {
+   background-color: #f9f9f9;
 }
 
-/* ------------ CSS FOR DATES ------------ */
-
-.days-ago {
- font-style: italic;
- color: #7689d3;
+.tab-container-main-col tbody tr td {
+   z-index: 1; /* Ensure table body rows stay behind headers */
 }
+
 
 /* ------------ CSS FOR SORTING THE TABLE ------------ */
 
@@ -286,37 +238,36 @@ tbody td {
    color: blue; /* change the color on hover */
  }
 
- /* ------------ CSS FOR RUNTIME LIST ------------ */
-
-.td-runtime-info {
-   margin-left: 0;     /* Remove left margin */
-   padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
-   list-style-position: inside; /* Ensure bullet points align with the text */
-  }
-
  /* ------------ CSS FOR SHARE BUTTON & RESPONSE ------------ */
 
-  #share-status-message {
+#share-status-message {
    display: none; /* Hidden by default */
    margin-top: 10px;
    padding: 5px 10px;
    border-radius: 4px;
    font-size: 14px;
    position: relative;
-}
+ }
 
-#share-status-message.ok {
+ #share-status-message.ok {
    background-color: #d4edda;
    color: #155724;
    border: 1px solid #c3e6cb;
-}
+ }
 
-#share-status-message.error {
+ #share-status-message.error {
    background-color: #f8d7da;
    color: #721c24;
    border: 1px solid #f5c6cb;
-}
+ }
 
-#share-status-icon {
+ #share-status-icon {
    margin-right: 5px;
+ }
+
+/* ------------ CSS FOR DATES ------------ */
+
+.days-ago {
+   font-style: italic;
+   color: #7689d3;
 }

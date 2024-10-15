@@ -1,0 +1,6 @@
+{% macro addDaysAgo (date) %}
+   {% set value = date | daysAgo %}
+      {% if value %}
+         <br><span class="days-ago">({{ value }})</span>
+      {% endif %}
+{% endmacro %}

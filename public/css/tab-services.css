@@ -1,0 +1,135 @@
+/* public/css/tab/tab-services.css */
+
+.tab-container-main-col thead tr:nth-child(2) th {
+  top: 40px; /* value based on the height of the first row */
+  z-index: 4; /* This ensures the second row stays above the first */
+}
+
+
+.group-header {
+      font-size: 14px;
+
+      /* define height for group header row for better alignment */
+      height: 40px;
+    }
+    .group-service,
+    .group-sonar,
+    .group-ecs {
+      background-color: #e1b4b4;
+    }
+
+    .group-git,
+    .group-version,
+    .group-deptrack {
+      background-color: #f6a8a8;
+    }
+   
+   .header-service,
+   .header-sonar-metric,
+   .header-ecs {
+      background-color: #9e9c9c;
+   }
+   
+   .header-git,
+   .header-version,
+   .header-deptrack {
+      background-color: #c7c6c6;
+   }
+
+/* ------------ CSS FOR TABLE HEADER ------------ */
+.header-sonar-metric span,
+.header-ecs span,
+.header-dt-metric span {
+   writing-mode: vertical-rl;
+   transform: scale(1);
+}    
+
+/* ------------ CSS FOR TABLE TD ------------ */
+.td-name a,
+.td-git-owner a,
+.td-git-lang a,
+.td-git-version a,
+.td-git-date a {
+   color: rgb(0, 0, 0);
+   text-decoration: none;
+}
+.td-name a {
+   font-size: 10px;
+   color: rgb(224, 118, 52);
+}
+.td-version {
+   font-size: 12px;
+   background-color: #ddd;
+   color: rgb(224, 118, 52);
+}
+.deptrack-link,
+.sonar-link  {
+   text-decoration: none;
+   color: inherit; /* Inherit color from parent */
+}
+
+/* ------------ CSS FOR NUMBERS/ METRICS ------------ */
+
+.front-number {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.rounded-number {
+  display: inline-block;
+  color: #ffffff; /* Font color */
+  font-size: 10px;
+  font-weight: bold;
+  padding: 5px 10px; /* Padding around the text */
+  border-radius: 10px; /* Rounded corners */
+  margin: 2px; /* Space around each element */
+  text-align: center; /* Aligns text horizontally */
+}
+
+.metric-critical-back {
+  background-color: #ef3017;
+}
+.metric-high-back {
+  background-color: #dd6119;
+}
+.metric-medium-back {
+  background-color: #494e49;
+}
+.metric-low-back {
+  background-color: #9e9595;
+}
+.metric-vulnerabilities-back {
+  background-color: #dc32ef;
+}
+.metric-components-back {
+  background-color: #444aef;
+}
+
+
+.metric-critical-front {
+  color: #ef3017;
+}
+.metric-high-front {
+  color: #dd6119;
+}
+.metric-medium-front {
+  color: #494e49;
+}
+.metric-low-front {
+  color: #9e9595;
+}
+.metric-vulnerabilities-front {
+  color: #dc32ef;
+}
+.metric-components-front {
+  color: #444aef;
+}
+
+/* ------------ CSS FOR RUNTIME LIST ------------ */
+
+.td-runtime-info {
+  margin-left: 0;     /* Remove left margin */
+  padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
+  list-style-position: inside; /* Ensure bullet points align with the text */
+ }
+

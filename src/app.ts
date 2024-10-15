@@ -20,10 +20,15 @@ interface StateData {
    sort: string;
    checkboxes: string;
 }
+interface TabFunction {
+   title: string;
+   fun: (req: Request, res: Response) => void;
+ }
 
 const runningEnv = dotenv.config();
 dotenvExpand.expand(runningEnv)
 
+const APP_TITLE = process.env.APP_TITLE;
 const MONGO_PROTOCOL = process.env.MONGO_PROTOCOL;
 const MONGO_USER = process.env.MONGO_USER;
 const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
@@ -64,6 +69,31 @@ const nunjucksEnv = nunjucks.configure([
  // Add the date filter
 nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
+
+
+function funExample() {
+   console.log("Called funExample");
+}
+
+function funAnother() {
+   console.log("Called funAnother");
+}
+
+// map tab-functions
+const tabsMap: Record<string, TabFunction> = {
+  endol: { 
+    title: "End of Life", 
+    fun: tabEndol 
+  },
+  services: { 
+   title: "Services", 
+   fun: tabServices 
+ },
+ productowner: { 
+    title: "Product Owner", 
+    fun: tabProductOwner 
+  }
+};
 
 async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
    try {
@@ -134,7 +164,7 @@ async function fetchDocuments(database: Db, queryParams?: QueryParameters) {
       return config;
    } catch (error) {
       console.error("Error fetching Config:", error);
-      return {};
+      return null;
    }
  }
 
@@ -192,25 +222,6 @@ async function addState(db: Db, state: string): Promise<string | undefined> {
    return linkId;
 }
 
-
-async function getCompressedState(compressedState: string): Promise<object> {
-   // 1. Base64 string -->  binary buffer
-   const compressedDataBuffer = Buffer.from(compressedState, 'base64');
-
-   try {
-      // 2. unzip  --> buff string
-      const stringBuffer = await unzipAsync(compressedDataBuffer);
-
-      // 3. buff string --> string
-      const jsonString = stringBuffer.toString('utf-8');
-      // 4. string --> JSON
-      return JSON.parse(jsonString);
-
-   } catch (error) {
-      throw error;
-   }
- }
-
 function sourceQueryParams(query: string): QueryParameters | undefined {
    let   queryParams: QueryParameters | undefined;
    if (query) {
@@ -222,7 +233,6 @@ function sourceQueryParams(query: string): QueryParameters | undefined {
       }
       return queryParams;
    }
-
 }
 
 app.post(endpointDashboard!, async (req: Request, res: Response) => {
@@ -241,7 +251,35 @@ app.post(endpointDashboard!, async (req: Request, res: Response) => {
    }
 });
 
+// handler of main page
 app.get(endpointDashboard!, async (req: Request, res: Response) => {
+   const linkId = req.query.linkid as string;
+   let   compressedState = "";
+   if (linkId) {
+      try {
+         await mongoClient.connect();
+         const database = mongoClient.db(process.env.MONGO_DB_NAME);
+         console.log(`reading state from: ${linkId}`);
+         compressedState = await getState(database, linkId);
+      } catch (error) {
+         console.error(error);
+      } finally {
+         mongoClient.close();
+      }
+   }
+
+   const tabs = Object.entries(tabsMap).map(([key, value]) => {
+      return { key, title: value.title };
+      });
+
+   res.render("main.njk", {title: APP_TITLE,
+      tabs,
+      compressedState
+   });
+});
+
+// handler of "Services"-tab
+async function tabServices (req: Request, res: Response) {
    try {
       await mongoClient.connect();
       const database = mongoClient.db(process.env.MONGO_DB_NAME);
@@ -255,27 +293,51 @@ app.get(endpointDashboard!, async (req: Request, res: Response) => {
          res.status(400).json({ "error": `${error}` });
          return;
       }
-      if (linkId) {
-         console.log(`reading state from: ${linkId}`);
-         compressedState = await getState(database, linkId);
-         const clearState = await getCompressedState(compressedState) as StateData;
-         queryParams = sourceQueryParams(clearState.queryArg);
-      }
+
       const documents = await fetchDocuments(database, queryParams);
       const config = await fetchConfig(database);
-      res.render("dashboard.njk", {
+      res.render("tabs/tab-services.njk", {
          config: config,
          documents: documents,
          state: compressedState,
          depTrackUri: DEP_TRACK_URI,
-         sonarUri: SONAR_URI,
+         sonarUri: SONAR_URI
       });
    } catch (error) {
       console.error(error);
    } finally {
       mongoClient.close();
    }
- });
+ }
+
+ // handler of "End of Life"-tab
+async function tabEndol (req: Request, res: Response) {
+   try {
+      await mongoClient.connect();
+      const database = mongoClient.db(process.env.MONGO_DB_NAME);
+      const config = await fetchConfig(database);
+      const endols = config?.endol ?? {};
+      res.render("tabs/tab-endol.njk", {endols});
+   } catch (error) {
+      console.error(error);
+   } finally {
+      mongoClient.close();
+   }
+}
+
+// handler of "Product Owner"-tab
+async function tabProductOwner (req: Request, res: Response) {
+}
+
+ // Tab Routes
+app.get(`${endpointDashboard}/tab/:tabName`, (req: Request, res: Response) => {
+   const tabName = req.params.tabName;
+   if (tabsMap[tabName]) {
+       tabsMap[tabName].fun(req, res); 
+   } else {
+      res.status(404).send('Tab not found');
+   }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}/dashboard`);

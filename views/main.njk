@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>{{ title }}</title>
+   <link rel="stylesheet" href="/css/styles.css">
+   <script> window.compressedState = "{{ compressedState | default('') }}"; </script>
+   <script src="/js/libs/pako/2.0.4/pako.min.js"></script>
+   <script src="/js/common.js"></script>
+   <script src="/js/main.js"></script>
+</head>
+<body>
+   <header class="fixed-header">
+      <link rel="SHORTCUT ICON" href="//{{CDN_HOST}}/images/favicon.ico" />
+      <div class="header-container">
+         <div class="header-left-content">
+               <img src="//{{CDN_HOST}}/images/royal-coat-of-arms-white.svg" alt="Logo" class="header-logo">
+               <a href="https://www.gov.uk/government/organisations/companies-house" class="header-logo-text">Companies House</a>
+         </div>
+         <div class="header-center-content">
+               <span class="header-center-text">Services</span>
+         </div>
+               <div class="header-right-content">
+                  <button id="button-share">share</button>
+                     <div id="share-status-message">
+                        <span id="share-status-icon"></span>
+                        <span id="share-status-text"></span>
+                     </div>
+               </div>
+            </div>
+         </div>
+   </header>
+
+   <div class="main-content">
+      <nav class="tab-nav">
+         <ul>
+         {% for tab in tabs %}
+            <li><a href="#" class="tab-link" data-tab="{{ tab.key }}" id="tab-{{ tab.key }}-id">{{ tab.title }}</a></li>
+         {% endfor %}
+         </ul>         
+      </nav>
+
+      {# Placeholder for the various tabs #}  <div id="tab-content-id" class="tab-content" ></div>
+
+   </div>
+   <footer class="fixed-footer">
+         <span class="footer-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-text">Companies House</a></span>
+   </footer>  
+</body>
+</html>
