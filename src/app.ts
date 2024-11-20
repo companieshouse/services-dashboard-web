@@ -18,7 +18,7 @@ export interface TabFunction {
    fun: (req: Request, res: Response) => void;
 } 
 
-const app = express();
+export const app = express();
 app.use(express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 

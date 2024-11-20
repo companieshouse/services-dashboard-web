@@ -1,20 +1,26 @@
 {
   "name": "services-dashboard-web",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "app.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prebuild": "rm -rf ./lib",
+    "build": "tsc",
+    "test": "jest",
+    "coverage": "jest --coverage --forceExit --passWithNoTests"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "description": "Frontend for services dashboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/companieshouse/services-dashboard-web.git"
+  },
+  "author": "companieshouse",
+  "license": "MIT",
+  "homepage": "https://github.com/companieshouse/services-dashboard-web#readme",
   "dependencies": {
     "@types/mongodb": "^4.0.6",
     "@types/nunjucks": "^3.2.6",
     "cookie": "^1.0.0",
-    "dotenv": "^16.4.5",
-    "dotenv-expand": "^11.0.6",
     "express": "^4.21.0",
     "govuk-frontend": "^5.4.1",
     "mongodb": "^6.9.0",
@@ -22,5 +28,14 @@
     "nunjucks-date-filter": "^0.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.1",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5"
   }
 }
