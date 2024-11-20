@@ -22,5 +22,3 @@ export const MONGO_DB_NAME = getEnvironmentValue("MONGO_DB_NAME");
 export const MONGO_COLLECTION_PROJECTS = getEnvironmentValue("MONGO_COLLECTION_PROJECTS","projects");
 export const MONGO_COLLECTION_CONFIG = getEnvironmentValue("MONGO_COLLECTION_CONFIG","config");
 export const MONGO_COLLECTION_LINKS = getEnvironmentValue("MONGO_COLLECTION_LINKS","projects_links");
-
-
