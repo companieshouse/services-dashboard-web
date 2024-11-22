@@ -68,6 +68,10 @@ function sourceQueryParams(query: string): type.QueryParameters | undefined {
    }
 }
 
+app.get(`${config.endpointDashboard}/healthcheck`, (req, res) => {
+   res.status(200).send('OK');
+ });
+
 app.post(config.endpointDashboard!, async (req: Request, res: Response) => {
    try {
       const compressedState = req.body;
