@@ -18,6 +18,7 @@
   "license": "MIT",
   "homepage": "https://github.com/companieshouse/services-dashboard-web#readme",
   "dependencies": {
+    "@companieshouse/structured-logging-node": "^2.0.1",
     "@types/mongodb": "^4.0.6",
     "@types/nunjucks": "^3.2.6",
     "cookie": "^1.0.0",
