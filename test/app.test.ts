@@ -57,23 +57,6 @@ describe('App Tests', () => {
         expect(response.text).toBe('Tab not found');
     });
 
-    // it('should handle POST request to save state', async () => {
-    //     const compressedState = 'compressedState';
-    //     (mongo.init as jest.Mock).mockResolvedValue(undefined);
-    //     (mongo.addState as jest.Mock).mockResolvedValue('linkId');
-    //     (mongo.close as jest.Mock).mockResolvedValue(undefined);
-
-    //     const response = await request(app)
-    //         .post(config.endpointDashboard!)
-    //         .send(compressedState);
-
-    //     expect(response.status).toBe(200);
-    //     expect(response.text).toBe('linkId');
-    //     expect(mongo.init).toHaveBeenCalled();
-    //     expect(mongo.addState).toHaveBeenCalledWith(compressedState);
-    //     expect(mongo.close).toHaveBeenCalled();
-    // });
-
     it('should handle GET request for main page with linkId', async () => {
         const linkId = 'linkId';
         const compressedState = 'compressedState';
