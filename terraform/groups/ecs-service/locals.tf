@@ -1,6 +1,6 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  vault_stack_path           = "/randd/rand-stack"               # unfortunately out of standard
+  vault_stack_path           = "randd/rand-stack"                # unfortunately out of standard
   cluster_name               = "rand-randd-stack"                # unfortunately out of standard
   # name_prefix                = "${local.stack_name}-${var.environment}"
   name_prefix                = "rand-${var.environment}"
