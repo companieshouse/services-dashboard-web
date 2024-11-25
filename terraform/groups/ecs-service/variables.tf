@@ -111,7 +111,7 @@ variable "use_set_environment_files" {
   description = "Toggle default global and shared  environment files"
 }
 
-variable "services-dashboard-web_version" {
+variable "services_dashboard_web_version" {
   type        = string
   description = "The version of the services dashboard web container to run."
 }
