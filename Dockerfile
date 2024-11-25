@@ -1,24 +1,9 @@
-    # ./set-docker-vars.sh
-    # docker run --env-file ./env.list -t -i -p 8080:8080 services-dashboard-web
+FROM 416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-node-runtime-20
 
-FROM node:20
+WORKDIR /opt
+COPY dist ./package.json ./package-lock.json docker_start.sh ./
+COPY node_modules ./node_modules/
 
-EXPOSE 8080
+CMD ["./docker_start.sh"]
 
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-
-RUN npm install \
-    npm i --save-dev @types/express
-
-COPY tsconfig.json ./
-
-COPY src ./src
-COPY public ./public
-COPY views ./views
-COPY .env ./
-
-RUN npx tsc
-
-CMD ["node", "dist/app.js"]
+EXPOSE 3000
