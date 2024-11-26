@@ -7,7 +7,7 @@ export const CDN_URL = getEnvironmentValue("CDN_URL","d3miau0r8stw5u.cloudfront.
 export const DEP_TRACK_URI =  getEnvironmentValue("DEP_TRACK_SERVER","https://dependency-track.companieshouse.gov.uk");
 export const SONAR_URI     =  getEnvironmentValue("SONAR_SERVER","https://code-analysis.platform.aws.chdev.org");
 
-export const PORT = getEnvironmentValue("PORT");
+export const PORT = getEnvironmentValue("PORT","3000");
 export const endpointDashboard = getEnvironmentValue("ENDPOINT_DASHBOARD", "/dashboard" );
 export const DAYS_RETENTION_STATE_LINKS = getEnvironmentValue("DAYS_RETENTION_STATE_LINKS", "15");
 
