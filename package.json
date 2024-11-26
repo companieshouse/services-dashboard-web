@@ -4,7 +4,7 @@
   "main": "app.ts",
   "scripts": {
     "start:dev": "npm i && npm run build && nodemon",
-    "start": "node dist/bin/www.js",    
+    "start": "node dist/bin/server.js",
     "prebuild": "rm -rf ./lib",
     "build": "tsc",
     "test": "jest",

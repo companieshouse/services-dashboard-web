@@ -8,7 +8,7 @@ import * as type from '../src/common/types';
 import { logger, logErr } from '../src/utils/logger';
 import * as mongo from '../src/mongo/mongo';
 import * as filters from '../src/utils/date-filter';
-import { app } from '../src/app';
+import  app  from '../src/app';
 
 jest.mock('../src/mongo/mongo');
 jest.mock('../src/utils/logger');

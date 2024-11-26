@@ -18,7 +18,7 @@ export interface TabFunction {
    fun: (req: Request, res: Response) => void;
 } 
 
-export const app = express();
+const app = express();
 app.use(express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 
@@ -172,6 +172,4 @@ app.get(`${config.endpointDashboard}/tab/:tabName`, (req: Request, res: Response
    }
 });
 
-app.listen(config.PORT, () => {
-  logger.info(`Server is running at http://localhost:${config.PORT}/dashboard`);
-});
+export default app;
