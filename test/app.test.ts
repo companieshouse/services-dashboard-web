@@ -22,6 +22,13 @@ describe('App Tests', () => {
         jest.restoreAllMocks();
     });
 
+    it('should handle GET request for healthcheck', async () => {
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/healthcheck`);
+
+        expect(response.status).toBe(200);
+        expect(response.text).toBe('OK');
+    });
+
     it('should handle GET request for Services tab', async () => {
         (mongo.init as jest.Mock).mockResolvedValue(undefined);
         (mongo.fetchDocuments as jest.Mock).mockResolvedValue([]);
@@ -57,26 +64,25 @@ describe('App Tests', () => {
         expect(response.text).toBe('Tab not found');
     });
 
-    // it('should handle GET request for main page with linkId', async () => {
-    //     const linkId = 'linkId';
-    //     const compressedState = 'compressedState';
-    //     (mongo.init as jest.Mock).mockResolvedValue(undefined);
-    //     (mongo.getState as jest.Mock).mockResolvedValue(compressedState);
-    //     (mongo.close as jest.Mock).mockResolvedValue(undefined);
+    it('should handle GET request for main page with linkId', async () => {
+        const linkId = 'linkId';
+        const compressedState = 'compressedState';
+        (mongo.init as jest.Mock).mockResolvedValue(undefined);
+        (mongo.getState as jest.Mock).mockResolvedValue(compressedState);
+        (mongo.close as jest.Mock).mockResolvedValue(undefined);
 
-    //     const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}?linkid=${linkId}`);
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/?linkid=${linkId}`);
 
-    //     expect(response.status).toBe(200);
-    //     expect(mongo.init).toHaveBeenCalled();
-    //     expect(mongo.getState).toHaveBeenCalledWith(linkId);
-    //     expect(mongo.close).toHaveBeenCalled();
-    // });
+        expect(response.status).toBe(200);
+        expect(mongo.init).toHaveBeenCalled();
+        expect(mongo.getState).toHaveBeenCalledWith(linkId);
+        expect(mongo.close).toHaveBeenCalled();
+    });
 
-    // it('should handle GET request for main page without linkId', async () => {
-    //     const response = await request(app).get(config.ENDPOINT_DASHBOARD!);
+    it('should handle GET request for main page without linkId', async () => {
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD!}/`);
 
-    //     expect(response.status).toBe(200);
-    //     expect(response.text).toContain(config.APP_TITLE);
-    // });
-
+        expect(response.status).toBe(200);
+        expect(response.text).toContain(config.APP_TITLE);
+    });
 });
