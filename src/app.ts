@@ -19,7 +19,7 @@ export interface TabFunction {
 } 
 
 const app = express();
-app.use(express.static("public"));
+app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 
 
@@ -68,11 +68,11 @@ function sourceQueryParams(query: string): type.QueryParameters | undefined {
    }
 }
 
-app.get(`${config.endpointDashboard}/healthcheck`, (req, res) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
    res.status(200).send('OK');
  });
 
-app.post(config.endpointDashboard!, async (req: Request, res: Response) => {
+app.post(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    try {
       const compressedState = req.body;
       await mongo.init();
@@ -88,7 +88,7 @@ app.post(config.endpointDashboard!, async (req: Request, res: Response) => {
 });
 
 // handler of main page
-app.get(config.endpointDashboard!, async (req: Request, res: Response) => {
+app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    const linkId = req.query.linkid as string;
    let   compressedState = "";
    if (linkId) {
@@ -107,7 +107,9 @@ app.get(config.endpointDashboard!, async (req: Request, res: Response) => {
       return { key, title: value.title };
       });
 
-   res.render("main.njk", {title: config.APP_TITLE,
+   res.render("main.njk", {
+      title: config.APP_TITLE,
+      basePath: config.ENDPOINT_DASHBOARD,
       tabs,
       compressedState
    });
@@ -131,6 +133,7 @@ async function tabServices (req: Request, res: Response) {
       const documents = await mongo.fetchDocuments(queryParams);
       const configData = await mongo.fetchConfig();
       res.render("tabs/tab-services.njk", {
+         basePath: config.ENDPOINT_DASHBOARD,
          config: configData,
          documents: documents,
          state: compressedState,
@@ -150,7 +153,10 @@ async function tabEndol (req: Request, res: Response) {
       await mongo.init();
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
-      res.render("tabs/tab-endol.njk", {endols});
+      res.render("tabs/tab-endol.njk", {
+         basePath: config.ENDPOINT_DASHBOARD, 
+         endols
+      });
    } catch (error) {
       logErr(error);
    } finally {
@@ -163,7 +169,7 @@ async function tabProductOwner (req: Request, res: Response) {
 }
 
  // Tab Routes
-app.get(`${config.endpointDashboard}/tab/:tabName`, (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/tab/:tabName`, (req: Request, res: Response) => {
    const tabName = req.params.tabName;
    if (tabsMap[tabName]) {
        tabsMap[tabName].fun(req, res); 

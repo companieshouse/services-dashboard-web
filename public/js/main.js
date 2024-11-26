@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                // Ensure that the script from the tab content is loaded
                const scriptTag = document.createElement('script');
-               scriptTag.src = `/js/tab-${selectedTab}.js`;  // Each tab should have its own JS file
+               scriptTag.src = `/dashboard/js/tab-${selectedTab}.js`;  // Each tab should have its own JS file
                scriptTag.onload = () => initialiseTabContent();  // Call the tab-specific init function once the script is loaded
                document.body.appendChild(scriptTag);
 
