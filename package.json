@@ -6,7 +6,7 @@
     "start:dev": "npm i && npm run build && nodemon",
     "start": "node dist/bin/server.js",
     "prebuild": "rm -rf ./lib",
-    "build": "tsc",
+    "build": "tsc && cp -r views dist/",
     "test": "jest",
     "coverage": "jest --coverage --forceExit --passWithNoTests"
   },
