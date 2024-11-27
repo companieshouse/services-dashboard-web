@@ -7,7 +7,7 @@ export const CDN_URL = getEnvironmentValue("CDN_URL");
 export const DEP_TRACK_URI =  getEnvironmentValue("DEP_TRACK_SERVER");
 export const SONAR_URI     =  getEnvironmentValue("SONAR_SERVER");
 
-export const PORT = getEnvironmentValue("PORT");
+export const PORT = getEnvironmentValue("PORT","3000");
 export const ENDPOINT_DASHBOARD = getEnvironmentValue("ENDPOINT_DASHBOARD", "/dashboard" );
 export const DAYS_RETENTION_STATE_LINKS = getEnvironmentValue("DAYS_RETENTION_STATE_LINKS", "15");
 
