@@ -34,7 +34,8 @@ data "aws_ecs_cluster" "ecs_cluster" {
 
 data "aws_iam_role" "ecs_cluster_iam_role" {
   # name = "${local.name_prefix}-ecs-task-execution-role"
-  name = "cis-int-poc-cms-randd-ecs-role"     # to replace when stack is amended
+  # name = "cis-int-poc-cms-randd-ecs-role"     # to replace when stack is amended
+  name = "filing-create-cidev-ecs-task-execution-role"
 }
 
 data "aws_lb" "rand_lb" {
