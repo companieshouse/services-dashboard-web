@@ -8,7 +8,7 @@ export const DEP_TRACK_URI =  getEnvironmentValue("DEP_TRACK_SERVER","https://de
 export const SONAR_URI     =  getEnvironmentValue("SONAR_SERVER","https://code-analysis.platform.aws.chdev.org");
 
 export const PORT = getEnvironmentValue("PORT","3000");
-export const endpointDashboard = getEnvironmentValue("ENDPOINT_DASHBOARD", "/dashboard" );
+export const ENDPOINT_DASHBOARD = getEnvironmentValue("ENDPOINT_DASHBOARD", "/dashboard" );
 export const DAYS_RETENTION_STATE_LINKS = getEnvironmentValue("DAYS_RETENTION_STATE_LINKS", "15");
 
 // MongoDB configuration
