@@ -13,13 +13,8 @@ locals {
   healthcheck_path            = "/dashboard/healthcheck" #healthcheck path for overseas entities web
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
-# vpc_name                    = local.service_secrets["vpc_name"]
   application_subnet_ids      = data.aws_subnets.application.ids
   application_subnet_pattern  = local.stack_secrets["application_subnet_pattern"]
-# application_subnet_pattern  = local.stack_secrets["private_subnet_pattern"]
-# vault_stack_path            = "randd/rand-stack"                # unfortunately out of standard
-# cluster_name                = "rand-randd-stack"                # unfortunately out of standard
-# name_prefix                 = "rand-${var.environment}"
 
   # Environment Files
   use_set_environment_files   = var.use_set_environment_files

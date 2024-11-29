@@ -1,9 +1,5 @@
 terraform {
   backend "s3" {
-  #   bucket         = "companieshouse-terraform-state"
-  #   key            = "services-dashboard-web/ecs-service/terraform.tfstate"
-  #   region         = "eu-west-2"
-  #   dynamodb_table = "companieshouse-terraform-state-lock"
   }
   required_version = "~> 1.3.0"
   required_providers {
