@@ -1,23 +1,25 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  vault_stack_path            = "randd/rand-stack"                # unfortunately out of standard
-  cluster_name                = "rand-randd-stack"                # unfortunately out of standard
-# name_prefix                 = "${local.stack_name}-${var.environment}"
-  name_prefix                 = "rand-${var.environment}"
+  stack_name                  = "rand-pocs" # this must match the stack name the service deploys into
+  name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "services-dashboard-web"
   container_port              = "3000" # default node port required here until prod docker container is built allowing port change via env var
   docker_repo                 = "services-dashboard-web"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_name                     = "alb-randd-rand"
-  lb_listener_rule_priority   = 91
+  lb_listener_rule_priority   = 19
   lb_listener_paths           = ["/dashboard","/dashboard/*"]
   healthcheck_path            = "/dashboard/healthcheck" #healthcheck path for overseas entities web
   healthcheck_matcher         = "200"
-  vpc_name                    = local.stack_secrets["vpc_name"]
+  vpc_name                    = local.service_secrets["vpc_name"]
+ #vpc_name                    = local.stack_secrets["vpc_name"]
   application_subnet_ids      = data.aws_subnets.application.ids
-# application_subnet_pattern  = local.stack_secrets["application_subnet_pattern"]
-  application_subnet_pattern  = local.stack_secrets["private_subnet_pattern"]
+  application_subnet_pattern  = local.stack_secrets["application_subnet_pattern"]
+# application_subnet_pattern  = local.stack_secrets["private_subnet_pattern"]
+# vault_stack_path            = "randd/rand-stack"                # unfortunately out of standard
+# cluster_name                = "rand-randd-stack"                # unfortunately out of standard
+# name_prefix                 = "rand-${var.environment}"
 
   # Environment Files
   use_set_environment_files   = var.use_set_environment_files

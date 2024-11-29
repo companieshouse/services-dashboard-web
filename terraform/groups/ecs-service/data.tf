@@ -1,6 +1,6 @@
 data "vault_generic_secret" "stack_secrets" {
-  # path = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
-  path = "applications/${var.aws_profile}/${local.vault_stack_path}"
+  path = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
+# path = "applications/${var.aws_profile}/${local.vault_stack_path}"
 }
 
 data "aws_kms_key" "kms_key" {
@@ -8,8 +8,8 @@ data "aws_kms_key" "kms_key" {
 }
 
 data "vault_generic_secret" "service_secrets" {
-  # path = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack/${local.service_name}"
-  path = "applications/${var.aws_profile}/${local.vault_stack_path}/${local.service_name}"
+  path = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack/${local.service_name}"
+# path = "applications/${var.aws_profile}/${local.vault_stack_path}/${local.service_name}"
 }
 
 data "aws_vpc" "vpc" {
@@ -27,15 +27,15 @@ data "aws_subnets" "application" {
   }
 }
 
-data "aws_ecs_cluster" "ecs_cluster" {                       
-  # cluster_name = "${local.name_prefix}-cluster"
-  cluster_name = "${local.cluster_name}"
+data "aws_ecs_cluster" "ecs_cluster" {
+  cluster_name = "${local.name_prefix}-cluster"
+  # cluster_name = "${local.cluster_name}"
 }
 
 data "aws_iam_role" "ecs_cluster_iam_role" {
-  # name = "${local.name_prefix}-ecs-task-execution-role"
+  name = "${local.name_prefix}-ecs-task-execution-role"
   # name = "cis-int-poc-cms-randd-ecs-role"     # to replace when stack is amended
-  name = "filing-create-cidev-ecs-task-execution-role"
+  # name = "filing-create-cidev-ecs-task-execution-role"
 }
 
 data "aws_lb" "rand_lb" {
