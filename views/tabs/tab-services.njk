@@ -50,7 +50,7 @@ The select will have:
  #}
 
 {% macro dropdownFilter(collection, field, id) %}
-    <select id="{{ id }}">
+   <select class="header-select" id="{{ id }}">
         <option value="All">All</option>
         {% set uniqueValues = [] %}
 

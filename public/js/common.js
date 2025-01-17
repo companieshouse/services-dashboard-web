@@ -203,6 +203,30 @@ function initTabTable() {
      });
    });
 }
+//-------------
+// init 2 - attach header <select>s handlers
+//-------------
+function initHeaderSelects() {
+
+   document.querySelectorAll(".header-select").forEach(select => {
+      select.addEventListener("change", function() {
+            let table = document.getElementById("tab-table-id");
+            let colIndex = Array.from(select.parentElement.parentElement.children).indexOf(select.parentElement);
+            let selectedValue = this.value.toLowerCase();
+
+            table.querySelectorAll("tbody tr").forEach(row => {
+               let cell = row.children[colIndex]; // Get the correct column cell
+               let cellValue = cell ? cell.textContent.trim().toLowerCase() : "";
+
+               if (selectedValue === "all" || cellValue === selectedValue) {
+                  row.style.display = "";
+               } else {
+                  row.style.display = "none";
+               }
+            });
+      });
+   });
+}
 //-----------------------------------
 // function to sort the table by saved state's info
 //-----------------------------------
@@ -218,7 +242,7 @@ function sortTabTable() {
 //-------------
 // render the table according to the selected checkboxes
 //-------------
-function filterTabTable() {
+function filterTableByCheckboxes() {
    const tableRows = document.querySelectorAll('#tab-table-id tbody tr');
 
    tableRows.forEach(row => {
@@ -234,6 +258,7 @@ function filterTabTable() {
       }
    });
 }
+
 //==============================
 // Tab area - TABLE (end)
 //==============================
@@ -242,7 +267,7 @@ function filterTabTable() {
 // Tab area - CHECK BOXES (start)
 //==============================
 //-------------
-// init 2 - attach checkboxes handlers
+// init 3 - attach checkboxes handlers
 //-------------
 function initMenuCheckBoxes() {
 
@@ -251,7 +276,7 @@ function initMenuCheckBoxes() {
    const versionCheckboxes = document.querySelectorAll('.version-checkbox');
 
    //-------------
-   //  2.1 - attach to MASTER - checkbox
+   //  3.1 - attach to MASTER - checkbox
    //-------------
    masterCheckbox.addEventListener('change', function () {
       const isChecked = this.checked;
@@ -261,10 +286,10 @@ function initMenuCheckBoxes() {
       versionCheckboxes.forEach(checkbox => {
          checkbox.checked = isChecked;
       });
-      filterTabTable();
+      filterTableByCheckboxes();
    });
    //-------------
-   //  2.2 - attach to NAME - checkboxes
+   //  3.2 - attach to NAME - checkboxes
    //-------------
    nameCheckboxes.forEach(checkbox => {
       checkbox.addEventListener('change', function () {
@@ -275,15 +300,15 @@ function initMenuCheckBoxes() {
                vCheckbox.checked = isChecked;
          });
 
-         filterTabTable();
+         filterTableByCheckboxes();
       });
    });
 
    //-------------
-   //  2.3 - attach to VERSION - checkboxes
+   //  3.3 - attach to VERSION - checkboxes
    //-------------
    versionCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', filterTabTable);
+      checkbox.addEventListener('change', filterTableByCheckboxes);
    });
    sortTabTable();
 }
@@ -317,7 +342,7 @@ function setAllCheckboxes() {
 //==============================
 
 //-----------------------------------
-// init 3 - Add handler to (share/create link)-BUTTON
+// init 4 - Add handler to (share/create link)-BUTTON
 //-----------------------------------
 function initShareButton() {
    document.getElementById('button-share').addEventListener('click', async () => {
@@ -377,6 +402,7 @@ function showShareResponse(message, type) {
 // share BUTTON (end)
 //==============================
 
+
 //-----------------------------------
 // Main init function for tab contents
 //-----------------------------------
@@ -385,8 +411,9 @@ function mainInit(tabId, initList) {
    if ((initList  & INIT_TAB_CHECK_BOXES_AND_TABLE) === INIT_TAB_CHECK_BOXES_AND_TABLE) {
       initTabTable();
       initMenuCheckBoxes();
+      initHeaderSelects();
       loadTabFromState(tabId, window.jsonState);
-      filterTabTable();
+      filterTableByCheckboxes();
       sortTabTable();
    }
 }
