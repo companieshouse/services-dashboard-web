@@ -37,6 +37,51 @@
          </div>
 {% endmacro %}
 
+{#
+macro to create a dropdown filter for a given field in a collection:
+- collection: the array to loop over (ex. "documents")
+- field: the nested property to extract unique values from (ex "-----.gitInfo.owner")
+- the unique id to assign to the resulting <select>
+
+The select will have:
+ - an "All" option (left always at 1st position)
+ - one option for each unique value of the field in the collection
+ - sorted values
+ #}
+
+{% macro dropdownFilter(collection, field, id) %}
+    <select id="{{ id }}">
+        <option value="All">All</option>
+        {% set uniqueValues = [] %}
+
+        {% for item in collection %}
+
+            {% set keys = field.split('.') %} <!-- split the field into keys  (ex. "gitInfo.owner" ==>  ["gitInfo", "owner"]) -->
+            {% set value = item %}
+            {% for key in keys %}
+                {% if value[key] is defined %}
+                    {% set value = value[key] %}
+                {% else %}
+                    {% set value = '' %}
+                {% endif %}
+            {% endfor %}
+
+            {% if value and value not in uniqueValues %}
+                {% set _ = uniqueValues.push(value) %}
+            {% endif %}
+        {% endfor %}
+
+        <!-- Sort the unique values -->
+        {% set sortedValues = uniqueValues | sort %}
+
+        <!-- Generate options -->
+        {% for value in sortedValues %}
+            <option value="{{ value }}">{{ value }}</option>
+        {% endfor %}
+    </select>
+{% endmacro %}
+
+
 
 
 <link rel="stylesheet" href="{{basePath}}/css/tab-services.css">
@@ -77,34 +122,64 @@
                <th class="group-header group-ecs"      colspan="3">ECS</th>
                <th class="group-header group-deptrack" colspan="7">Dependency Track</th>
             </tr>
+         <!-- header row with filter dropdown -->
+            <tr>
+                  <!--  1 --><th></th>
+
+                  <!--  2 --><th>{{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}</th>
+
+                  <!--  3 --><th></th>
+                  <!--  4 --><th></th>
+                  <!--  5 --><th></th>
+
+                  <!--  5 --><th></th>
+                  <!--  7 --><th></th>
+                  <!--  8 --><th></th>
+                  <!--  9 --><th></th>
+
+                  <!-- 10 --><th></th>
+                  <!-- 11 --><th></th>
+
+                  <!-- 12 --><th></th>
+                  <!-- 13 --><th></th>
+                  <!-- 14 --><th></th>
+
+                  <!-- 15 --><th></th>
+                  <!-- 16 --><th></th>
+                  <!-- 17 --><th></th>
+                  <!-- 18 --><th></th>
+                  <!-- 19 --><th></th>
+                  <!-- 20 --><th></th>
+                  <!-- 21 --><th></th>
+            </tr>
          <!-- Col Headers -->
             <tr>
-                  <th class="col-header header-service" id="col-head-service" data-type="string"> Service</th>
+                  <!--  1 --><th class="col-header header-service" id="col-head-service" data-type="string"> Service</th>
 
-                  <th class="col-header header-git" id="col-head-git-owner"    data-type="string"> Owner</th>
-                  <th class="col-header header-git" id="col-head-git-lang"     data-type="string"> Lang</th>
-                  <th class="col-header header-git" id="col-head-git-rel-last" data-type="string"> Last Release</th>
-                  <th class="col-header header-git" id="col-head-git-rel-date" data-type="date">   Date</th>
+                  <!--  2 --><th class="col-header header-git" id="col-head-git-owner"    data-type="string"> Owner</th>
+                  <!--  3 --><th class="col-header header-git" id="col-head-git-lang"     data-type="string"> Lang</th>
+                  <!--  4 --><th class="col-header header-git" id="col-head-git-rel-last" data-type="string"> Last Release</th>
+                  <!--  5 --><th class="col-header header-git" id="col-head-git-rel-date" data-type="date">   Date</th>
 
-                  <th class="col-header header-sonar-metric" id="col-head-sonar-coverage" data-type="string"><span>Coverage</span></th>
-                  <th class="col-header header-sonar-metric" id="col-head-sonar-bugs"     data-type="number"><span>Bugs</span></th>
-                  <th class="col-header header-sonar-metric" id="col-head-sonar-csmell"   data-type="number"><span>Code smell</span></th>
-                  <th class="col-header header-sonar-metric" id="col-head-sonar-vul"      data-type="number"><span>Vulnerabilities</span></th>
+                  <!--  5 --><th class="col-header header-sonar-metric" id="col-head-sonar-coverage" data-type="string"><span>Coverage</span></th>
+                  <!--  7 --><th class="col-header header-sonar-metric" id="col-head-sonar-bugs"     data-type="number"><span>Bugs</span></th>
+                  <!--  8 --><th class="col-header header-sonar-metric" id="col-head-sonar-csmell"   data-type="number"><span>Code smell</span></th>
+                  <!--  9 --><th class="col-header header-sonar-metric" id="col-head-sonar-vul"      data-type="number"><span>Vulnerabilities</span></th>
 
-                  <th class="col-header header-version" id="col-head-deptk-version"   data-type="string"> Version</th>
-                  <th class="col-header header-version" id="col-head-deptk-runtime"   data-type="string"> Runtime</th>
+                  <!-- 10 --><th class="col-header header-version" id="col-head-deptk-version"   data-type="string"> Version</th>
+                  <!-- 11 --><th class="col-header header-version" id="col-head-deptk-runtime"   data-type="string"> Runtime</th>
 
-                  <th class="col-header header-ecs" id="col-head-ecs-cidev"   data-type="string"><span>cidev</span></th>
-                  <th class="col-header header-ecs" id="col-head-ecs-stag"    data-type="string"><span>staging</span></th>
-                  <th class="col-header header-ecs" id="col-head-ecs-live"    data-type="string"><span>live</span></th>
+                  <!-- 12 --><th class="col-header header-ecs" id="col-head-ecs-cidev"   data-type="string"><span>cidev</span></th>
+                  <!-- 13 --><th class="col-header header-ecs" id="col-head-ecs-stag"    data-type="string"><span>staging</span></th>
+                  <!-- 14 --><th class="col-header header-ecs" id="col-head-ecs-live"    data-type="string"><span>live</span></th>
 
-                  <th class="col-header header-deptrack"  id="col-head-deptk-date" data-type="date"  >Last BOM</th>
-                  <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
-                  <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
-                  <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
-                  <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mlow"  data-type="number"><span>Low</span></th>
-                  <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mvul"  data-type="number"><span>Vulner.</span></th>
-                  <th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mcomp" data-type="number"><span>Compon.</span></th>
+                  <!-- 15 --><th class="col-header header-deptrack"  id="col-head-deptk-date" data-type="date"  >Last BOM</th>
+                  <!-- 16 --><th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
+                  <!-- 17 --><th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
+                  <!-- 18 --><th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
+                  <!-- 19 --><th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mlow"  data-type="number"><span>Low</span></th>
+                  <!-- 20 --><th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mvul"  data-type="number"><span>Vulner.</span></th>
+                  <!-- 21 --><th class="col-header header-deptrack header-dt-metric" id="col-head-deptk-mcomp" data-type="number"><span>Compon.</span></th>
             </tr>
          </thead>
          <tbody>

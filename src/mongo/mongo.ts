@@ -6,7 +6,7 @@ import {logger, logErr} from "../utils/logger";
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
-logger.info(`======Reading - Mongo URL: [${config.MONGO_URI}]`);
+// logger.info(`======Reading - Mongo URL: [${config.MONGO_URI}]`);
 
 const mongoClient = new MongoClient(config.MONGO_URI, {
    minPoolSize: 1,
