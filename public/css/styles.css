@@ -156,7 +156,7 @@
    background-color: #ddd;
    border-right: 1px solid #ccc;
    overflow: auto; /* Enables both vertical and horizontal scrolling */
-   
+
    padding: 10px;
    }
 .tab-container-left-col  div {
@@ -192,10 +192,9 @@
    width: 100%;
    border-collapse: collapse;
  }
- 
+
 .tab-container-main-col th {
    padding: 0;
-   /* border: 1px solid #ccc; */
    text-align: center;
    white-space: nowrap; /* Prevents text from wrapping, enabling horizontal scrolling */
 }
@@ -210,10 +209,26 @@
 .tab-container-main-col thead th {
    position: sticky;
    top: 0;
-   border: 1px solid black;
    background-color: #f1f1f1;
    z-index: 3; /* Ensures headers stay above the table body */
    padding: 0;
+   border: none; /* Remove the border */
+   /* box-shadow: inset 0 -1px 0 black, inset 0 1px 0 black; Top and bottom black lines */
+   box-shadow:
+       inset 0 -1px 0 black;   /* Bottom border */
+       /* inset 0 1px 0 black,   /* Top border */
+       /* inset -1px 0 0 black,  /* Left border */
+       /* inset 1px 0 0 black;   /* Right border */
+}
+
+.tab-container-main-col thead tr:nth-child(2) th {
+   top: 30px; /* based on first row height */
+   z-index: 3;
+}
+
+.tab-container-main-col thead tr:nth-child(3) th {
+   top: 60px; /* based on the combined height of the first two rows */
+   z-index: 3;
 }
 
 .tab-container-main-col tbody tr:nth-child(even) {

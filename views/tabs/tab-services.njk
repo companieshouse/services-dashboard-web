@@ -124,33 +124,33 @@ The select will have:
             </tr>
          <!-- header row with filter dropdown -->
             <tr>
-                  <!--  1 --><th></th>
+                  <!--  1 --><th class="col-header"></th>
 
-                  <!--  2 --><th>{{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}</th>
+                  <!--  2 --><th class="col-header">{{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}</th>
 
-                  <!--  3 --><th></th>
-                  <!--  4 --><th></th>
-                  <!--  5 --><th></th>
+                  <!--  3 --><th class="col-header"></th>
+                  <!--  4 --><th class="col-header"></th>
+                  <!--  5 --><th class="col-header"></th>
 
-                  <!--  5 --><th></th>
-                  <!--  7 --><th></th>
-                  <!--  8 --><th></th>
-                  <!--  9 --><th></th>
+                  <!--  5 --><th class="col-header"></th>
+                  <!--  7 --><th class="col-header"></th>
+                  <!--  8 --><th class="col-header"></th>
+                  <!--  9 --><th class="col-header"></th>
 
-                  <!-- 10 --><th></th>
-                  <!-- 11 --><th></th>
+                  <!-- 10 --><th class="col-header"></th>
+                  <!-- 11 --><th class="col-header"></th>
 
-                  <!-- 12 --><th></th>
-                  <!-- 13 --><th></th>
-                  <!-- 14 --><th></th>
+                  <!-- 12 --><th class="col-header"></th>
+                  <!-- 13 --><th class="col-header"></th>
+                  <!-- 14 --><th class="col-header"></th>
 
-                  <!-- 15 --><th></th>
-                  <!-- 16 --><th></th>
-                  <!-- 17 --><th></th>
-                  <!-- 18 --><th></th>
-                  <!-- 19 --><th></th>
-                  <!-- 20 --><th></th>
-                  <!-- 21 --><th></th>
+                  <!-- 15 --><th class="col-header"></th>
+                  <!-- 16 --><th class="col-header"></th>
+                  <!-- 17 --><th class="col-header"></th>
+                  <!-- 18 --><th class="col-header"></th>
+                  <!-- 19 --><th class="col-header"></th>
+                  <!-- 20 --><th class="col-header"></th>
+                  <!-- 21 --><th class="col-header"></th>
             </tr>
          <!-- Col Headers -->
             <tr>
@@ -183,7 +183,6 @@ The select will have:
             </tr>
          </thead>
          <tbody>
-         </tr>
          {% for document in documents %}
             <!-- Iterate over each version entry in versions array -->
             {% for version in document.versions %}
