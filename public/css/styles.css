@@ -57,7 +57,7 @@
    color: white;
 }
 
-.col-header {
+.row-header-title{
    font-size: 14px;
    cursor: pointer;
 }
@@ -231,8 +231,12 @@
    z-index: 3;
 }
 
-.tab-container-main-col tbody tr:nth-child(even) {
+.even_row {
    background-color: #f9f9f9;
+}
+
+.odd_row {
+   background-color: transparent; /* default color */
 }
 
 .tab-container-main-col tbody tr td {
