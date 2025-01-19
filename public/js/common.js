@@ -171,7 +171,7 @@ function loadTabFromState(tabId, state) {
 function initTabTable() {
 
    const table = document.getElementById('tab-table-id');
-   const headers = table.querySelectorAll('.col-header');
+   const headers = table.querySelectorAll('.row-header-title');
 
    // Init Col Sort
    headers.forEach((header, index) => {
@@ -218,12 +218,9 @@ function initHeaderSelects() {
                let cell = row.children[colIndex]; // Get the correct column cell
                let cellValue = cell ? cell.textContent.trim().toLowerCase() : "";
 
-               if (selectedValue === "all" || cellValue === selectedValue) {
-                  row.style.display = "";
-               } else {
-                  row.style.display = "none";
-               }
+               toggleRow (row, (selectedValue === "all" || cellValue === selectedValue));
             });
+            updateRowStriping();
       });
    });
 }
@@ -251,14 +248,31 @@ function filterTableByCheckboxes() {
       const isNameChecked = document.getElementById(name).checked;
       const isVersionChecked = document.getElementById(`${name}-${version}`).checked;
 
-      if (isNameChecked && isVersionChecked) {
-            row.style.display = '';
-      } else {
-            row.style.display = 'none';
-      }
+      toggleRow (row, (isNameChecked && isVersionChecked));
+   });
+   updateRowStriping();
+}
+
+//-------------
+// update row striping
+//-------------
+function updateRowStriping() {
+   const tbody = document.querySelector('#tab-table-id');
+   const visibleRows = Array.from(tbody.querySelectorAll("tr:not([style*='display: none'])"));
+
+   visibleRows.forEach((row, index) => {
+       row.classList.remove("even_row", "odd_row"); // Remove existing classes
+       row.classList.add(index % 2 === 0 ? "odd_row" : "even_row"); // Apply correct class
    });
 }
 
+//-------------
+// show/hide row
+//-------------
+function toggleRow(row, display_on) {
+   row.style.display = display_on ? "" : "none";
+   updateRowStriping();
+}
 //==============================
 // Tab area - TABLE (end)
 //==============================
