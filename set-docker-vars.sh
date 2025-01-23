@@ -8,6 +8,6 @@ grep '^ *export' "${LOCAL_ENV_FILE}" | awk '{print $2}' | cut -d'=' -f1 | while 
 
   VALUE=$(printenv $VAR)  # Get the value of the var from the current env
   if [ ! -z "$VALUE" ]; then
-    echo "export $VAR=$VALUE" >> "${DOCKER_ENV_FILE}"
+    echo "$VAR=$VALUE" >> "${DOCKER_ENV_FILE}"
   fi
 done
