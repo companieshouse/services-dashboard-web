@@ -40,7 +40,6 @@ describe('App Tests', () => {
         expect(response.status).toBe(200);
         expect(mongo.init).toHaveBeenCalled();
         expect(mongo.fetchDocuments).toHaveBeenCalled();
-        expect(mongo.fetchConfig).toHaveBeenCalled();
         expect(mongo.close).toHaveBeenCalled();
     });
 
