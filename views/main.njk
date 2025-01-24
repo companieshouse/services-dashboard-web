@@ -10,7 +10,7 @@
    <script src="{{basePath}}/js/main.js"></script>
 </head>
 <body>
-   <header class="fixed-header">
+   <header class="fixed-hf fixed-header">
       <link rel="SHORTCUT ICON" href="//{{CDN_HOST}}/images/favicon.ico" />
       <div class="header-container">
          <div class="header-left-content">
@@ -20,14 +20,14 @@
          <div class="header-center-content">
                <span class="header-center-text">Services</span>
          </div>
-               <div class="header-right-content">
-                  <button id="button-share">share</button>
-                     <div id="share-status-message">
-                        <span id="share-status-icon"></span>
-                        <span id="share-status-text"></span>
-                     </div>
+         <div class="header-right-content">
+            <button id="button-share">share</button>
+               <div id="share-status-message">
+                  <span id="share-status-icon"></span>
+                  <span id="share-status-text"></span>
                </div>
-            </div>
+         </div>
+      </div>
          </div>
    </header>
 
@@ -37,14 +37,23 @@
          {% for tab in tabs %}
             <li><a href="{{basePath}}/#" class="tab-link" data-tab="{{ tab.key }}" id="tab-{{ tab.key }}-id">{{ tab.title }}</a></li>
          {% endfor %}
-         </ul>         
+         </ul>
       </nav>
 
       {# Placeholder for the various tabs #}  <div id="tab-content-id" class="tab-content" ></div>
 
    </div>
-   <footer class="fixed-footer">
-         <span class="footer-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-text">Companies House</a></span>
-   </footer>  
+   <footer class="fixed-hf  fixed-footer">
+      <div class="footer-container">
+         <div class="footer-left-content">
+         </div>
+         <div class="footer-center-content">
+            <span class="footer-center-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-center-text">Companies House</a></span>
+         </div>
+         <div class="footer-right-content">
+            <span class="footer-right-text">last scan: {{lastScan}}</span>
+         </div>
+      </div>
+   </footer>
 </body>
 </html>

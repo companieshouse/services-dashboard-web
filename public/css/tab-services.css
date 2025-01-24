@@ -23,13 +23,13 @@
     .group-deptrack {
       background-color: #f6a8a8;
     }
-   
+
    .header-service,
    .header-sonar-metric,
    .header-ecs {
       background-color: #9e9c9c;
    }
-   
+
    .header-git,
    .header-version,
    .header-deptrack {
@@ -42,7 +42,7 @@
 .header-dt-metric span {
    writing-mode: vertical-rl;
    transform: scale(1);
-}    
+}
 
 /* ------------ CSS FOR TABLE TD ------------ */
 .td-name a,

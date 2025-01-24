@@ -6,6 +6,7 @@ export const CDN_URL = getEnvironmentValue("CDN_URL");
 
 export const DEP_TRACK_URI =  getEnvironmentValue("DEP_TRACK_SERVER");
 export const SONAR_URI     =  getEnvironmentValue("SONAR_SERVER");
+export const EOL_URI       =  getEnvironmentValue("EOL_SERVER", "https://endoflife.date");
 
 export const PORT = getEnvironmentValue("PORT","3000");
 export const ENDPOINT_DASHBOARD = getEnvironmentValue("ENDPOINT_DASHBOARD", "/dashboard" );

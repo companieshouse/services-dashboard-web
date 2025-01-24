@@ -44,7 +44,7 @@
          {% for project, projArray in endols %}
             {% for cycle in projArray %}
             <tr data-name="{{ project }}" data-version="{{ cycle.cycle }}">
-               <td class="td-project">        {{ project }}</td>
+               <td class="td-project">   <a href="{{ eolUri }}/{{ project }}"> {{ project }}</a> </td>
                <td class="td-cycle">          {{ cycle.cycle }}</td>
                <td class="td-rel-date"><span> {{ cycle.releaseDate}}</span>{{addDaysAgo( cycle.releaseDate ) }}</td>
                <td class="td-lts">            {{ cycle.lts }}</td>

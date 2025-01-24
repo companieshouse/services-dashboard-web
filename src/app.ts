@@ -16,7 +16,7 @@ const unzipAsync = promisify(unzip);
 export interface TabFunction {
    title: string;
    fun: (req: Request, res: Response) => void;
-} 
+}
 
 const app = express();
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
@@ -41,17 +41,17 @@ nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
 
 // map tab-functions
 const tabsMap: Record<string, TabFunction> = {
-  endol: { 
-    title: "End of Life", 
-    fun: tabEndol 
+  endol: {
+    title: "End of Life",
+    fun: tabEndol
   },
-  services: { 
-   title: "Services", 
-   fun: tabServices 
+  services: {
+   title: "Services",
+   fun: tabServices
  },
- productowner: { 
-    title: "Product Owner", 
-    fun: tabProductOwner 
+ productowner: {
+    title: "Product Owner",
+    fun: tabProductOwner
   }
 };
 
@@ -89,30 +89,32 @@ app.post(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
 
 // handler of main page
 app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
-   const linkId = req.query.linkid as string;
-   let   compressedState = "";
-   if (linkId) {
-      try {
-         await mongo.init();
-         logger.info(`reading state from: ${linkId}`);
-         compressedState = await mongo.getState(linkId);
-      } catch (error) {
-         logErr(error);
-      } finally {
-         mongo.close();
+   try {
+      await mongo.init();
+      const linkId = req.query.linkid as string;
+      let   compressedState = "";
+      if (linkId) {
+            logger.info(`reading state from: ${linkId}`);
+            compressedState = await mongo.getState(linkId);
       }
-   }
 
-   const tabs = Object.entries(tabsMap).map(([key, value]) => {
-      return { key, title: value.title };
+      const tabs = Object.entries(tabsMap).map(([key, value]) => {
+         return { key, title: value.title };
+         });
+
+      const configData = await mongo.fetchConfig();
+         res.render("main.njk", {
+         title: config.APP_TITLE,
+         basePath: config.ENDPOINT_DASHBOARD,
+         lastScan: configData?.lastScan ?? "",
+         tabs,
+         compressedState
       });
-
-   res.render("main.njk", {
-      title: config.APP_TITLE,
-      basePath: config.ENDPOINT_DASHBOARD,
-      tabs,
-      compressedState
-   });
+   } catch (error) {
+      logErr(error);
+   } finally {
+      mongo.close();
+   }
 });
 
 // handler of "Services"-tab
@@ -131,10 +133,8 @@ async function tabServices (req: Request, res: Response) {
       }
 
       const documents = await mongo.fetchDocuments(queryParams);
-      const configData = await mongo.fetchConfig();
       res.render("tabs/tab-services.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
-         config: configData,
          documents: documents,
          state: compressedState,
          depTrackUri: config.DEP_TRACK_URI,
@@ -154,7 +154,8 @@ async function tabEndol (req: Request, res: Response) {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
       res.render("tabs/tab-endol.njk", {
-         basePath: config.ENDPOINT_DASHBOARD, 
+         basePath: config.ENDPOINT_DASHBOARD,
+         eolUri: config.EOL_URI,
          endols
       });
    } catch (error) {
@@ -172,7 +173,7 @@ async function tabProductOwner (req: Request, res: Response) {
 app.get(`${config.ENDPOINT_DASHBOARD}/tab/:tabName`, (req: Request, res: Response) => {
    const tabName = req.params.tabName;
    if (tabsMap[tabName]) {
-       tabsMap[tabName].fun(req, res); 
+       tabsMap[tabName].fun(req, res);
    } else {
       res.status(404).send('Tab not found');
    }
