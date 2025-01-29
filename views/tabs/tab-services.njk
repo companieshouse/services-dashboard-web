@@ -193,8 +193,8 @@ The select will have:
                      <!-- 4 Columns (Git info)-->
                      <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
                      <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
-                     <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.version }}</a></td>
-                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.lastRelease.date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.lastRelease.date ) }}</td>
+                     <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %}   <li>{{ release.version }}</li> {% endfor %} </a></td>
+                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
 
                      <!-- 4 Columns (sonar Metrics) -->
                      <td class="td-met-coverage">       {{ sonarLink(document.sonarKey, document.sonarMetrics.coverage) }}</td>
