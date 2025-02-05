@@ -33,11 +33,14 @@ const nunjucksEnv = nunjucks.configure([
    express: app,
  });
 
- nunjucksEnv.addGlobal("CDN_HOST", config.CDN_URL);
+nunjucksEnv.addGlobal("CDN_HOST", config.CDN_URL);
 
- // Add the date filter
+ // Add custom filters
 nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
+nunjucksEnv.addFilter("setGlobal", filters.setGlobal);
+
+nunjucksEnv.addGlobal("getGlobal", filters.getGlobal);
 
 // map tab-functions
 const tabsMap: Record<string, TabFunction> = {

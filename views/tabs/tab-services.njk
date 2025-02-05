@@ -1,7 +1,10 @@
-{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics%}
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, getListUniqueValues %}
 
 {#
-macro to create a dropdown filter for a given field in a collection:
+macro to create a dropdown filter for a given field in a collection.
+It uses the common macro 'getListUniqueValues' which sets the global var:
+'global.uniqueSortedValues', so that this function can loop it over to create the options.
+
 - collection: the array to loop over (ex. "documents")
 - field: the nested property to extract unique values from (ex "-----.gitInfo.owner")
 - the unique id to assign to the resulting <select>
@@ -13,35 +16,15 @@ The select will have:
  #}
 
 {% macro dropdownFilter(collection, field, id) %}
+   {% call getListUniqueValues(collection, field) %}{% endcall %}
+
+   <!-- Generate options -->
    <select class="header-select" id="{{ id }}">
         <option value="All">All</option>
-        {% set uniqueValues = [] %}
-
-        {% for item in collection %}
-
-            {% set keys = field.split('.') %} <!-- split the field into keys  (ex. "gitInfo.owner" ==>  ["gitInfo", "owner"]) -->
-            {% set value = item %}
-            {% for key in keys %}
-                {% if value[key] is defined %}
-                    {% set value = value[key] %}
-                {% else %}
-                    {% set value = '' %}
-                {% endif %}
-            {% endfor %}
-
-            {% if value and value not in uniqueValues %}
-                {% set _ = uniqueValues.push(value) %}
-            {% endif %}
-        {% endfor %}
-
-        <!-- Sort the unique values -->
-        {% set sortedValues = uniqueValues | sort %}
-
-        <!-- Generate options -->
-        {% for value in sortedValues %}
+        {% for value in getGlobal('uniqueSortedValues') %}
             <option value="{{ value }}">{{ value }}</option>
         {% endfor %}
-    </select>
+   </select>
 {% endmacro %}
 
 

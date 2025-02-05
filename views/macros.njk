@@ -41,3 +41,36 @@
             </span>
          </div>
 {% endmacro %}
+
+{#
+macro to create a unique sorted list of values for a given field in a collection:
+- collection: the array to loop over (ex. "documents")
+- field: the nested property to extract unique values from (ex "-----.gitInfo.owner")
+
+The sorted list is saved into a global variable "uniqueSortedValues"
+which allows this macro to be reused to create dropdown or radiobutton filters
+ #}
+
+{% macro getListUniqueValues(collection, field) %}
+   {% set uniqueValues = [] %}
+
+   {% for item in collection %}
+     {# split the field into keys  (ex. "gitInfo.owner" ==>  ["gitInfo", "owner"]) #}
+      {% set keys = field.split('.') %}
+      {% set value = item %}
+      {% for key in keys %}
+            {% if value[key] is defined %}
+               {% set value = value[key] %}
+            {% else %}
+               {% set value = '' %}
+            {% endif %}
+      {% endfor %}
+
+      {% if value and value not in uniqueValues %}
+            {% set _ = uniqueValues.push(value) %}
+      {% endif %}
+   {% endfor %}
+
+   {# Sort the unique values #}
+   {{ uniqueValues | sort | setGlobal('uniqueSortedValues') }}
+{% endmacro %}
