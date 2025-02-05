@@ -4,3 +4,40 @@
          <br><span class="days-ago">({{ value }})</span>
       {% endif %}
 {% endmacro %}
+
+{% macro setLanguage (depTrackLang, gitLang, repo) %}
+  {% if (depTrackLang | lower) === (gitLang | lower) %}
+    <a href="{{ repo }}">{{ gitLang }}</a>
+  {% else %}
+    <li><a href="{{ repo }}">{{ gitLang }}</a></li>
+    <li>{{ depTrackLang }}</li>
+  {% endif %}
+{% endmacro %}
+
+{% macro sonarLink(sonarKey, val) %}
+    {% if sonarKey %}
+        <a class="sonar-link" href="{{ sonarUri }}/dashboard?id={{ sonarKey | urlencode }}">{{val}}</a>
+    {% else %}
+        {{ val }}
+    {% endif %}
+{% endmacro %}
+
+{% macro depTrackLink(metricVal, uuid, arg) %}
+    {% if uuid %}
+        <a class="deptrack-link" href="{{ depTrackUri }}/projects/{{ uuid }}/{{ arg }}">{{metricVal}}</a>
+    {% else %}
+        {{ metricVal }}
+    {% endif %}
+{% endmacro %}
+
+{% macro DepTrackMetrics(metricVal, metricClass, uuid, arg) %}
+    {% if metricVal != 0 %}
+         <div class="rounded-number metric-{{ metricClass }}-back">
+    {% else %}
+         <div class="front-number metric-{{ metricClass }}-front">
+    {% endif %}
+            <span title={{ metricClass }}>
+            {{depTrackLink(metricVal, uuid, arg)}}
+            </span>
+         </div>
+{% endmacro %}
