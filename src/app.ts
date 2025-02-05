@@ -7,7 +7,7 @@ import * as config from "./config";
 import * as type from './common/types';
 import {logger, logErr} from "./utils/logger";
 import * as mongo from "./mongo/mongo";
-import * as filters from "./utils/nunjuck-custom-filters";
+import * as filters from "./utils/nunjucks-custom-filters";
 
 
 // Convert the zlib.unzip function to return a promise using promisify
