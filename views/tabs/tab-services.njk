@@ -1,4 +1,4 @@
-{% from "macros.njk" import addDaysAgo %}
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics%}
 
 {#
 macro to create a dropdown filter for a given field in a collection:
@@ -160,10 +160,10 @@ The select will have:
                      <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
 
                      <!-- 4 Columns (sonar Metrics) -->
-                     <td class="td-met-coverage">       {{ sonarLink(document.sonarKey, document.sonarMetrics.coverage) }}</td>
-                     <td class="td-met-bugs">           {{ sonarLink(document.sonarKey, document.sonarMetrics.bugs) }}</td>
-                     <td class="td-met-smells">         {{ sonarLink(document.sonarKey, document.sonarMetrics.code_smells) }}</td>
-                     <td class="td-met-vulnerabilities">{{ sonarLink(document.sonarKey, document.sonarMetrics.vulnerabilities) }}</td>
+                     <td class="td-met-coverage">       {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage) }}</td>
+                     <td class="td-met-bugs">           {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs) }}</td>
+                     <td class="td-met-smells">         {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells) }}</td>
+                     <td class="td-met-vulnerabilities">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities) }}</td>
 
                      <!-- 2 Columns Version & Runtime-->
                      <td class="td-version">{{ version.version }}</td>
@@ -181,24 +181,24 @@ The select will have:
                      <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version }}</li> {% endfor %} </td>
 
                      <!-- 7 Columns Dep Track (Version specific) -->
-                     <td class="td-bom-import"><span>{{ depTrackLink(version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span>{{addDaysAgo( version.lastBomImport ) }}</td>
+                     <td class="td-bom-import"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span>{{addDaysAgo( version.lastBomImport ) }}</td>
                      <td class="td-critical">
-                        {{DepTrackMetrics(version.metrics.critical, "critical", version.uuid)}}
+                        {{DepTrackMetrics(depTrackUri, version.metrics.critical, "critical", version.uuid)}}
                      </td>
                      <td class="td-deptrack-high">
-                        {{DepTrackMetrics(version.metrics.high, "high", version.uuid)}}
+                        {{DepTrackMetrics(depTrackUri, version.metrics.high, "high", version.uuid)}}
                      </td>
                      <td class="td-deptrack-medium">
-                        {{DepTrackMetrics(version.metrics.medium, "medium", version.uuid)}}
+                        {{DepTrackMetrics(depTrackUri, version.metrics.medium, "medium", version.uuid)}}
                      </td>
                      <td class="td-deptrack-low">
-                        {{DepTrackMetrics(version.metrics.low, "low", version.uuid)}}
+                        {{DepTrackMetrics(depTrackUri, version.metrics.low, "low", version.uuid)}}
                      </td>
                      <td class="td-deptrack-vulnerabilities">
-                        {{DepTrackMetrics(version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
+                        {{DepTrackMetrics(depTrackUri, version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
                      </td>
                      <td class="td-deptrack-components">
-                        {{DepTrackMetrics(version.metrics.components, "components", version.uuid, "components")}}
+                        {{DepTrackMetrics(depTrackUri, version.metrics.components, "components", version.uuid, "components")}}
                      </td>
             </tr>
             {% endfor %}
