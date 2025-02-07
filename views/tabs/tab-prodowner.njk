@@ -1,0 +1,144 @@
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, dropdownFilter %}
+
+<link rel="stylesheet" href="{{basePath}}/css/tab-prodowner.css">
+{# no need to include the tab's js: "{{basePath}}/js/tab-xxxxx.js" as this is added in main.js #}
+
+
+<div class="tab-container">
+  <div class="tab-container-left-col">
+      <!-- Master checkbox to control all .name-checkbox -->
+      <h1 class="scrumHeader">Scrum </h1>
+         <th class="row-header-select">{{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}</th>
+  </div>
+
+  <div class="tab-container-main-col">
+    <table id="tab-table-id">
+         <thead>
+         <!-- Col Headers -->
+            <tr>
+                  <!--  1 --><th class="row-header-title header-service" id="col-head-service" data-type="string"> Service</th>
+
+                  <!--  2 --><th class="row-header-title header-git" id="col-head-git-owner"    data-type="string"> Owner</th>
+                  <!--  3 --><th class="row-header-title header-git" id="col-head-git-lang"     data-type="string"> Lang</th>
+                  <!--  4 --><th class="row-header-title header-git" id="col-head-git-rel-last" data-type="string"> GitHub Release</th>
+                  <!-- 12 --><th class="row-header-title header-ecs" id="col-head-ecs-cidev"   data-type="string"><span>cidev</span></th>
+                  <!-- 13 --><th class="row-header-title header-ecs" id="col-head-ecs-stag"    data-type="string"><span>staging</span></th>
+                  <!-- 14 --><th class="row-header-title header-ecs" id="col-head-ecs-live"    data-type="string"><span>live</span></th>
+
+                  <!--  5 --><th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage" data-type="string"><span>Sonar</span></th>
+                  <!-- 15 --><th class="row-header-title header-deptrack"  id="col-head-deptk-date" data-type="date"  >Dep Track</th>
+            </tr>
+         </thead>
+         <tbody>
+
+            {# <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+                     <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
+
+            <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %}   <li>{{ release.version }}</li> {% endfor %} </a></td>
+            <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
+
+            <td class="td-ecs"> {% for version in document.ecs.cidev %}   <li>{{ version }}</li> {% endfor %} </td>
+            <td class="td-ecs"> {% for version in document.ecs.staging %} <li>{{ version }}</li> {% endfor %} </td>
+            <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version }}</li> {% endfor %} </td>
+
+            <td class="td-runtime">
+               {% if version.runtime.length > 1 %}
+                  <ul class="td-runtime-info"> {% for info in version.runtime %} <li>{{ info }}</li> {% endfor %} </ul>
+               {% else %}
+                  {{ version.runtime[0] }}
+               {% endif %}
+            </td>
+
+                     <!-- 4 Columns (sonar Metrics) -->
+                     <td class="td-met-coverage">       {{ sonarLink(document.sonarKey, document.sonarMetrics.coverage) }}</td>
+                     <td class="td-met-bugs">           {{ sonarLink(document.sonarKey, document.sonarMetrics.bugs) }}</td>
+                     <td class="td-met-smells">         {{ sonarLink(document.sonarKey, document.sonarMetrics.code_smells) }}</td>
+                     <td class="td-met-vulnerabilities">{{ sonarLink(document.sonarKey, document.sonarMetrics.vulnerabilities) }}</td>
+
+                     <td class="td-critical">
+                        {{DepTrackMetrics(version.metrics.critical, "critical", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-high">
+                        {{DepTrackMetrics(version.metrics.high, "high", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-medium">
+                        {{DepTrackMetrics(version.metrics.medium, "medium", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-low">
+                        {{DepTrackMetrics(version.metrics.low, "low", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-vulnerabilities">
+                        {{DepTrackMetrics(version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-components">
+                        {{DepTrackMetrics(version.metrics.components, "components", version.uuid, "components")}}
+                     </td>
+
+
+
+
+
+
+
+
+
+         {% for document in documents %}
+            <!-- Iterate over each version entry in versions array -->
+            {% for version in document.versions %}
+               <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}">
+                     <!-- 1st Column (link) -->
+                     <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+
+                     <!-- 4 Columns (Git info)-->
+                     <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
+                     <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
+                     <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %}   <li>{{ release.version }}</li> {% endfor %} </a></td>
+                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
+
+                     <!-- 4 Columns (sonar Metrics) -->
+                     <td class="td-met-coverage">       {{ sonarLink(document.sonarKey, document.sonarMetrics.coverage) }}</td>
+                     <td class="td-met-bugs">           {{ sonarLink(document.sonarKey, document.sonarMetrics.bugs) }}</td>
+                     <td class="td-met-smells">         {{ sonarLink(document.sonarKey, document.sonarMetrics.code_smells) }}</td>
+                     <td class="td-met-vulnerabilities">{{ sonarLink(document.sonarKey, document.sonarMetrics.vulnerabilities) }}</td>
+
+                     <!-- 2 Columns Version & Runtime-->
+                     <td class="td-version">{{ version.version }}</td>
+                     <td class="td-runtime">
+                        {% if version.runtime.length > 1 %}
+                           <ul class="td-runtime-info"> {% for info in version.runtime %} <li>{{ info }}</li> {% endfor %} </ul>
+                        {% else %}
+                           {{ version.runtime[0] }}
+                        {% endif %}
+
+                     <!-- 3 Columns ECS -->
+                     <td class="td-ecs"> {% for version in document.ecs.cidev %}   <li>{{ version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.staging %} <li>{{ version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version }}</li> {% endfor %} </td>
+
+                     <!-- 7 Columns Dep Track (Version specific) -->
+                     <td class="td-bom-import"><span>{{ depTrackLink(version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span>{{addDaysAgo( version.lastBomImport ) }}</td>
+                     <td class="td-critical">
+                        {{DepTrackMetrics(version.metrics.critical, "critical", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-high">
+                        {{DepTrackMetrics(version.metrics.high, "high", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-medium">
+                        {{DepTrackMetrics(version.metrics.medium, "medium", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-low">
+                        {{DepTrackMetrics(version.metrics.low, "low", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-vulnerabilities">
+                        {{DepTrackMetrics(version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
+                     </td>
+                     <td class="td-deptrack-components">
+                        {{DepTrackMetrics(version.metrics.components, "components", version.uuid, "components")}}
+                     </td>
+            </tr>
+            {% endfor %}
+         {% endfor %} #}
+         </tbody>
+    </table>
+  </div>
+</div>

@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
          tab.click();
       }
       else  {
-         const tabId = (tabLinks.length > 1) ? 1   // services
+         const tabId = (tabLinks.length > 1) ? 1   // (default) services
                                              : 0;  // endol
          tabLinks[tabId].click();
       }

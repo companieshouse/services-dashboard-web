@@ -1,40 +1,12 @@
-{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, getListUniqueValues %}
-
-{#
-macro to create a dropdown filter for a given field in a collection.
-It uses the common macro 'getListUniqueValues' which sets the global var:
-'global.uniqueSortedValues', so that this function can loop it over to create the options.
-
-- collection: the array to loop over (ex. "documents")
-- field: the nested property to extract unique values from (ex "-----.gitInfo.owner")
-- the unique id to assign to the resulting <select>
-
-The select will have:
- - an "All" option (left always at 1st position)
- - one option for each unique value of the field in the collection
- - sorted values
- #}
-
-{% macro dropdownFilter(collection, field, id) %}
-   {% call getListUniqueValues(collection, field) %}{% endcall %}
-
-   <!-- Generate options -->
-   <select class="header-select" id="{{ id }}">
-        <option value="All">All</option>
-        {% for value in getGlobal('uniqueSortedValues') %}
-            <option value="{{ value }}">{{ value }}</option>
-        {% endfor %}
-   </select>
-{% endmacro %}
-
-
-
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, dropdownFilter %}
 
 <link rel="stylesheet" href="{{basePath}}/css/tab-services.css">
+{# no need to include the tab's js: "{{basePath}}/js/tab-xxxxx.js" as this is added in main.js #}
+
 
 <div class="tab-container">
   <div class="tab-container-left-col">
-      <!-- Master checkbox to control all .name-checkbox -->
+      <!-- Master checkbox to control all .level1-checkbox -->
       <div class="masterCheckbox">
             <input type="checkbox" id="masterCheckbox-id">
             <label for="masterCheckbox-id"><strong>Select All</strong></label>
@@ -43,12 +15,12 @@ The select will have:
       <form id="filterForm">
          {% for document in documents %}
             <div>
-               <input type="checkbox" id="{{ document.name }}" class="name-checkbox" checked>
-               <label for="{{ document.name }}" class="label-name-checkbox">{{ document.name }}</label>
+               <input type="checkbox" id="{{ document.name }}" class="level1-checkbox" checked>
+               <label for="{{ document.name }}" class="label-level1-checkbox">{{ document.name }}</label>
                <div>
                   {% for version in document.versions %}
-                     <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="version-checkbox" data-name="{{ document.name }}" checked>
-                     <label for="{{ document.name }}-{{ version.version }}" class="label-version-checkbox">{{ version.version }}</label><br>
+                     <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="level2-checkbox" data-level1="{{ document.name }}" checked>
+                     <label for="{{ document.name }}-{{ version.version }}" class="label-level2-checkbox">{{ version.version }}</label><br>
                   {% endfor %}
                </div>
             </div>
@@ -132,7 +104,7 @@ The select will have:
          {% for document in documents %}
             <!-- Iterate over each version entry in versions array -->
             {% for version in document.versions %}
-               <tr data-name="{{ document.name }}" data-version="{{ version.version }}">
+               <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}">
                      <!-- 1st Column (link) -->
                      <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
