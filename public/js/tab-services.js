@@ -1,13 +1,19 @@
 
 const tabTableId = 'tab-table-id';
-const classMasterCheckbox = 'masterCheckbox-id';
+const MasterCheckboxId = 'masterCheckbox-id';
 const classLevel1Checkbox = 'level1-checkbox';
 const classLevel2Checkbox = 'level2-checkbox';
 
 
 function initialiseTabContent() {
-   mainInit('tab-services-id',INIT_TAB_CHECK_BOXES_AND_TABLE);
+   initTabTable();
+   initMenuCheckBoxes(MasterCheckboxId,classLevel1Checkbox, classLevel2Checkbox);
+   initHeaderSelects();
+   loadTabFromState('tab-services-id', window.jsonState);
+   filterTableByCheckboxes();
+   sortTabTable();
 }
+
 function generateTabState() {
    console.log("generateTabState for tab-services");
    const allCheckboxes = getAllCheckboxes(classLevel1Checkbox, classLevel2Checkbox);

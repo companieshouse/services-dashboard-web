@@ -206,12 +206,12 @@ function filterTableByCheckboxes() {
    const tableRows = document.querySelectorAll('#tab-table-id tbody tr');
 
    tableRows.forEach(row => {
-      const name = row.getAttribute('data-name');
-      const version = row.getAttribute('data-version');
-      const isNameChecked = document.getElementById(name).checked;
-      const isVersionChecked = document.getElementById(`${name}-${version}`).checked;
+      const level1 = row.getAttribute('data-level1');
+      const level2 = row.getAttribute('data-level2');
+      const isLevel1Checked = document.getElementById(level1).checked;
+      const isLevel2Checked = document.getElementById(`${level1}-${level2}`).checked;
 
-      toggleRow (row, (isNameChecked && isVersionChecked));
+      toggleRow (row, (isLevel1Checked && isLevel2Checked));
    });
    updateRowStriping();
 }
@@ -246,21 +246,21 @@ function toggleRow(row, display_on) {
 //-------------
 // init 3 - attach checkboxes handlers
 //-------------
-function initMenuCheckBoxes() {
+function initMenuCheckBoxes(masterCheckboxId, level1Class, level2Class) {
 
-   const masterCheckbox = document.getElementById('masterCheckbox-id');
-   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
-   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+   const masterCheckbox = document.getElementById(masterCheckboxId);
+   const level1CheckBoxes = document.querySelectorAll(`.${level1Class}`);
+   const level2CheckBoxes = document.querySelectorAll(`.${level2Class}`);
 
    //-------------
    //  3.1 - attach to MASTER - checkbox
    //-------------
    masterCheckbox.addEventListener('change', function () {
       const isChecked = this.checked;
-      nameCheckboxes.forEach(checkbox => {
+      level1CheckBoxes.forEach(checkbox => {
          checkbox.checked = isChecked;
       });
-      versionCheckboxes.forEach(checkbox => {
+      level2CheckBoxes.forEach(checkbox => {
          checkbox.checked = isChecked;
       });
       filterTableByCheckboxes();
@@ -268,12 +268,12 @@ function initMenuCheckBoxes() {
    //-------------
    //  3.2 - attach to NAME - checkboxes
    //-------------
-   nameCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', function () {
-         const name = this.id;
+   level1CheckBoxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+         const level1 = this.id;
          const isChecked = this.checked;
 
-         document.querySelectorAll(`.version-checkbox[data-name="${name}"]`).forEach(vCheckbox => {
+         document.querySelectorAll(`.${level2Class}[data-level1="${level1}"]`).forEach(vCheckbox => {
                vCheckbox.checked = isChecked;
          });
 
@@ -284,8 +284,8 @@ function initMenuCheckBoxes() {
    //-------------
    //  3.3 - attach to VERSION - checkboxes
    //-------------
-   versionCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', filterTableByCheckboxes);
+   level2CheckBoxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => filterTableByCheckboxes());
    });
    sortTabTable();
 }
@@ -293,19 +293,19 @@ function initMenuCheckBoxes() {
 //-----------------------------------
 // function to get all the name & version checkboxes
 //-----------------------------------
-function getAllCheckboxes() {
+function getAllCheckboxes(level1Class, level2Class) {
    // Select only the checkboxes with the specified classes
-   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
-   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+   const level1Checkboxes = document.querySelectorAll(`.${level1Class}`);
+   const level2Checkboxes = document.querySelectorAll(`.${level2Class}`);
 
    // Combine into 1 array
-   return [...nameCheckboxes, ...versionCheckboxes];
+   return [...level1Checkboxes, ...level2Checkboxes];
 }
 //-----------------------------------
 // function to set 'checked' all name & version checkboxes
 //-----------------------------------
-function setAllCheckboxes() {
-   const masterCheckbox = document.getElementById('masterCheckbox-id');
+function setAllCheckboxes(classMasterCheckbox) {
+   const masterCheckbox = document.getElementById(classMasterCheckbox);
    masterCheckbox.checked = true;
    const event = new Event('change');
    masterCheckbox.dispatchEvent(event);
@@ -380,19 +380,3 @@ function showShareResponse(message, type) {
 //==============================
 // share BUTTON (end)
 //==============================
-
-
-//-----------------------------------
-// Main init function for tab contents
-//-----------------------------------
-function mainInit(tabId, initList) {
-
-   if ((initList  & INIT_TAB_CHECK_BOXES_AND_TABLE) === INIT_TAB_CHECK_BOXES_AND_TABLE) {
-      initTabTable();
-      initMenuCheckBoxes();
-      initHeaderSelects();
-      loadTabFromState(tabId, window.jsonState);
-      filterTableByCheckboxes();
-      sortTabTable();
-   }
-}
