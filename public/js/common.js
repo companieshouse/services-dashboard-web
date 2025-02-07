@@ -6,12 +6,14 @@
 var lastSortedColumnId = "";
 var colSortDirection = 1; // 1 for ascending, -1 for descending
 
+
 const INIT_TAB_CHECK_BOXES = 1 << 0
 const INIT_TAB_TABLE       = 1 << 1
 const INIT_TAB_CHECK_BOXES_AND_TABLE = INIT_TAB_CHECK_BOXES | INIT_TAB_TABLE
 
+
 //======================================
-//       STANDALONE/ GENERALE UTILITIES:
+//       STANDALONE/ GENERAL UTILITIES:
 //======================================
 //-----------------------------------
 // function to generate a compressed base64 string from a plain text input
@@ -80,29 +82,23 @@ function getActiveTabId() {
 //-----------------------------------
 // function to generate a snapshot/state of all NAME & VERSION checkboxes
 //-----------------------------------
-function generateState() {
-
-   const allCheckboxes = getAllCheckboxes();
-   let checkedIds = ["+"];
-   let uncheckedIds = ["-"];
-
-   allCheckboxes.forEach((checkbox) => {
-         if (checkbox.checked) {
-            checkedIds.push(checkbox.id);
-         } else {
-            uncheckedIds.push(checkbox.id);
-         }
-   });
-
-   const state = {
-      queryArg: getQueryArg(),
-      tabId: getActiveTabId(),
-      sort: `${lastSortedColumnId},${colSortDirection}`,
-      checkboxes:  (checkedIds.length > uncheckedIds.length) ?
-                        uncheckedIds.join(',') :
-                        checkedIds.join(',')
+function generateState(tabState) {
+   compressedState = "";
+   if (tabState && typeof tabState === 'object') {
+      const state = {
+         queryArg: getQueryArg(),
+         tabId: getActiveTabId(),
+         tabState: tabState
+      }
+      compressedState = compressToBase64(JSON.stringify(state));
    }
-   return compressToBase64(JSON.stringify(state));
+   return compressedState;
+}
+function generateTabState() {
+   console.log("generateTabState does nothing. Each tab's.js file should implement its own version");
+}
+function loadTabFromState(tabId, state) {
+   console.log("loadTabFromState does nothing. Each tab's.js file should implement its own version");
 }
 
 //-----------------------------------
@@ -124,39 +120,6 @@ function sourceState(compressedState) {
       }
    }
    return jsonState;
-}
-
-function loadTabFromState(tabId, state) {
-   if (state !== undefined && state.tabId === tabId) {
-         // get csv values
-         const csvValues = state.checkboxes.split(',');
-         console.log(`loading checkboxes state as:${csvValues[0]}`);
-
-         // Get the first value which is either "+" or "-"
-         const operation = csvValues[0];
-
-         const checkboxIds = csvValues.slice(1);
-
-         const allCheckboxes = getAllCheckboxes();
-         // Determine the initial state we want to operate on
-         const checkedValue = (operation === "+") ? false : true;
-
-         // Init with that state
-         allCheckboxes.forEach(checkbox => checkbox.checked = checkedValue);
-
-         // Toggle the state for the checkboxes whose IDs are in the list
-         checkboxIds.forEach(id => {
-            const checkbox = document.getElementById(id);
-            if (checkbox) checkbox.checked = !checkedValue;
-         });
-         // source sort info
-         [lastSortedColumnId, colSortDirection] = state.sort.split(',');
-
-         // source query info
-         // stateQuery = state.queryArg;
-   } else {
-      setAllCheckboxes();
-   }
 }
 
 //======================================
@@ -361,26 +324,28 @@ function setAllCheckboxes() {
 function initShareButton() {
    document.getElementById('button-share').addEventListener('click', async () => {
       try {
-         const base64State = generateState();
-         const response = await fetch('/dashboard', {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'text/plain'
-            },
-            body: base64State
-         });
+         const base64State = generateTabState();    // this is implemented in each tab's .js
+         if (base64State) {
+            const response = await fetch('/dashboard', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'text/plain'
+               },
+               body: base64State
+            });
 
-         if (response.ok) {
-            const linkId = await response.text();
-            const currentUrl = window.location.href;
-            // Get the base URL without query parameters
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
-            console.log(shareUrl);
-            navigator.clipboard.writeText(shareUrl);
-            showShareResponse('link copied to clipboard', 'ok');
-         } else {
-            showShareResponse('Error creating link', 'error');
+            if (response.ok) {
+               const linkId = await response.text();
+               const currentUrl = window.location.href;
+               // Get the base URL without query parameters
+               const baseUrl = window.location.origin + window.location.pathname;
+               const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
+               console.log(shareUrl);
+               navigator.clipboard.writeText(shareUrl);
+               showShareResponse('link copied to clipboard', 'ok');
+            } else {
+               showShareResponse('Error creating link', 'error');
+            }
          }
       } catch (error) {
          showShareResponse('Error creating link', 'error');
