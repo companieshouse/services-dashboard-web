@@ -74,3 +74,31 @@ which allows this macro to be reused to create dropdown or radiobutton filters
    {# Sort the unique values #}
    {{ uniqueValues | sort | setGlobal('uniqueSortedValues') }}
 {% endmacro %}
+
+
+{#
+macro to create a dropdown filter for a given field in a collection.
+It uses the common macro 'getListUniqueValues' which sets the global var:
+'global.uniqueSortedValues', so that this function can loop it over to create the options.
+
+- collection: to forward to 'getListUniqueValues'
+- field: to forward to 'getListUniqueValues'
+- the unique id to assign to the resulting <select>
+
+The select will have:
+ - an "All" option (left always at 1st position)
+ - one option for each unique value of the field in the collection
+ - sorted values
+ #}
+
+{% macro dropdownFilter(collection, field, id) %}
+   {% call getListUniqueValues(collection, field) %}{% endcall %}
+
+   <!-- Generate options -->
+   <select class="header-select" id="{{ id }}">
+        <option value="All">All</option>
+        {% for value in getGlobal('uniqueSortedValues') %}
+            <option value="{{ value }}">{{ value }}</option>
+        {% endfor %}
+   </select>
+{% endmacro %}

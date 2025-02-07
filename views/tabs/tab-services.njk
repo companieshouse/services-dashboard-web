@@ -1,34 +1,4 @@
-{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, getListUniqueValues %}
-
-{#
-macro to create a dropdown filter for a given field in a collection.
-It uses the common macro 'getListUniqueValues' which sets the global var:
-'global.uniqueSortedValues', so that this function can loop it over to create the options.
-
-- collection: the array to loop over (ex. "documents")
-- field: the nested property to extract unique values from (ex "-----.gitInfo.owner")
-- the unique id to assign to the resulting <select>
-
-The select will have:
- - an "All" option (left always at 1st position)
- - one option for each unique value of the field in the collection
- - sorted values
- #}
-
-{% macro dropdownFilter(collection, field, id) %}
-   {% call getListUniqueValues(collection, field) %}{% endcall %}
-
-   <!-- Generate options -->
-   <select class="header-select" id="{{ id }}">
-        <option value="All">All</option>
-        {% for value in getGlobal('uniqueSortedValues') %}
-            <option value="{{ value }}">{{ value }}</option>
-        {% endfor %}
-   </select>
-{% endmacro %}
-
-
-
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, dropdownFilter %}
 
 <link rel="stylesheet" href="{{basePath}}/css/tab-services.css">
 
