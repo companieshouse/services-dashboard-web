@@ -1,13 +1,13 @@
 
 const tabTableId = 'tab-table-id';
-const MasterCheckboxId = 'masterCheckbox-id';
+const masterCheckboxId = 'masterCheckbox-id';
 const classLevel1Checkbox = 'level1-checkbox';
 const classLevel2Checkbox = 'level2-checkbox';
 
 
 function initialiseTabContent() {
    initTabTable();
-   initMenuCheckBoxes(MasterCheckboxId,classLevel1Checkbox, classLevel2Checkbox);
+   initMenuCheckBoxes(masterCheckboxId, classLevel1Checkbox, classLevel2Checkbox);
    initHeaderSelects();
    loadTabFromState('tab-services-id', window.jsonState);
    filterTableByCheckboxes();
@@ -69,6 +69,6 @@ function loadTabFromState(tabId, state) {
       // source query info
       // stateQuery = state.queryArg;
    } else {
-      setAllCheckboxes(classMasterCheckbox);
+      setAllCheckboxes(masterCheckboxId);
    }
 }

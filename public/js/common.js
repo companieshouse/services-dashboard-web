@@ -304,8 +304,8 @@ function getAllCheckboxes(level1Class, level2Class) {
 //-----------------------------------
 // function to set 'checked' all name & version checkboxes
 //-----------------------------------
-function setAllCheckboxes(classMasterCheckbox) {
-   const masterCheckbox = document.getElementById(classMasterCheckbox);
+function setAllCheckboxes(masterCheckboxId) {
+   const masterCheckbox = document.getElementById(masterCheckboxId);
    masterCheckbox.checked = true;
    const event = new Event('change');
    masterCheckbox.dispatchEvent(event);
