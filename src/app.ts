@@ -52,9 +52,9 @@ const tabsMap: Record<string, TabFunction> = {
    title: "Services",
    fun: tabServices
  },
- productowner: {
+ prodowner: {
     title: "Product Owner",
-    fun: tabProductOwner
+    fun: tabProdOwner
   }
 };
 
@@ -169,7 +169,24 @@ async function tabEndol (req: Request, res: Response) {
 }
 
 // handler of "Product Owner"-tab
-async function tabProductOwner (req: Request, res: Response) {
+async function tabProdOwner (req: Request, res: Response) {
+   try {
+      await mongo.init();
+      const configData = await mongo.fetchConfig();
+      const documents = await mongo.fetchDocuments();
+      const endols = configData?.endol ?? {};
+      res.render("tabs/tab-prodowner.njk", {
+         basePath: config.ENDPOINT_DASHBOARD,
+         documents,
+         endols,
+         depTrackUri: config.DEP_TRACK_URI,
+         sonarUri: config.SONAR_URI
+      });
+   } catch (error) {
+      logErr(error);
+   } finally {
+      mongo.close();
+   }
 }
 
  // Tab Routes
