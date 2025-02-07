@@ -6,11 +6,11 @@ const classLevel2Checkbox = 'level2-checkbox';
 
 
 function initialiseTabContent() {
-   initTabTable();
-   initMenuCheckBoxes(masterCheckboxId, classLevel1Checkbox, classLevel2Checkbox);
-   initHeaderSelects();
+   initTabTable(tabTableId);
+   initMenuCheckBoxes(tabTableId, masterCheckboxId, classLevel1Checkbox, classLevel2Checkbox);
+   initHeaderSelects(tabTableId);
    loadTabFromState('tab-services-id', window.jsonState);
-   filterTableByCheckboxes();
+   filterTableByCheckboxes(tabTableId);
    sortTabTable();
 }
 
