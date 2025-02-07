@@ -1,10 +1,11 @@
 {% from "macros.njk" import addDaysAgo %}
 
 <link rel="stylesheet" href="{{basePath}}/css/tab-endol.css">
+{# no need to include the tab's js: "{{basePath}}/js/tab-xxxxx.js" as this is added in main.js #}
 
 <div class="tab-container">
   <div class="tab-container-left-col">
-      <!-- Master checkbox to control all .name-checkbox -->
+      <!-- Master checkbox to control all .level1-checkbox -->
       <div class="masterCheckbox">
             <input type="checkbox" id="masterCheckbox-id">
             <label for="masterCheckbox-id"><strong>Select All</strong></label>
@@ -13,12 +14,12 @@
       <form id="filterForm">
          {% for project, projArray in endols %}
             <div>
-               <input type="checkbox" id="{{ project }}" class="name-checkbox" checked>
-               <label for="{{ project }}" class="label-name-checkbox">{{ project }}</label>
+               <input type="checkbox" id="{{ project }}" class="level1-checkbox" checked>
+               <label for="{{ project }}" class="label-level1-checkbox">{{ project }}</label>
                <div>
                {% for cycle in projArray %}
-                     <input type="checkbox" id="{{ project }}-{{ cycle.cycle }}" class="version-checkbox" data-name="{{ project }}" checked>
-                     <label for="{{ project }}-{{ cycle.cycle }}" class="label-version-checkbox">{{ cycle.cycle }}</label><br>
+                     <input type="checkbox" id="{{ project }}-{{ cycle.cycle }}" class="level2-checkbox" data-level1="{{ project }}" checked>
+                     <label for="{{ project }}-{{ cycle.cycle }}" class="label-level2-checkbox">{{ cycle.cycle }}</label><br>
                   {% endfor %}
                </div>
             </div>
@@ -43,7 +44,7 @@
       <tbody>
          {% for project, projArray in endols %}
             {% for cycle in projArray %}
-            <tr data-name="{{ project }}" data-version="{{ cycle.cycle }}">
+            <tr data-level1="{{ project }}" data-level2="{{ cycle.cycle }}">
                <td class="td-project">   <a href="{{ eolUri }}/{{ project }}"> {{ project }}</a> </td>
                <td class="td-cycle">          {{ cycle.cycle }}</td>
                <td class="td-rel-date"><span> {{ cycle.releaseDate}}</span>{{addDaysAgo( cycle.releaseDate ) }}</td>

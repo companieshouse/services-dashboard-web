@@ -6,12 +6,6 @@
 var lastSortedColumnId = "";
 var colSortDirection = 1; // 1 for ascending, -1 for descending
 
-
-const INIT_TAB_CHECK_BOXES = 1 << 0
-const INIT_TAB_TABLE       = 1 << 1
-const INIT_TAB_CHECK_BOXES_AND_TABLE = INIT_TAB_CHECK_BOXES | INIT_TAB_TABLE
-
-
 //======================================
 //       STANDALONE/ GENERAL UTILITIES:
 //======================================
