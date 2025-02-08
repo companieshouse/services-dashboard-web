@@ -6,8 +6,6 @@ import {logger, logErr} from "../utils/logger";
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
-// logger.info(`======Reading - Mongo URL: [${config.MONGO_URI}]`);
-
 const mongoClient = new MongoClient(config.MONGO_URI, {
    minPoolSize: 1,
    waitQueueTimeoutMS: 5000
@@ -18,13 +16,13 @@ const mongoClient = new MongoClient(config.MONGO_URI, {
 
 async function init() {
    try {
-      console.log(`connecting to Mongo: ${config.MONGO_URI}`)
+      logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`)
 
       await mongoClient.connect();
       database = mongoClient.db(config.MONGO_DB_NAME);
    }
    catch(error) {
-      console.error("Error connecting to Mongo:", error);
+      logger.error(`Error connecting to Mongo:${(error as Error).message}`);
    }
 }
 
@@ -32,7 +30,12 @@ function close() {
    mongoClient.close();
 }
 
- async function fetchDocuments(queryParams?: type.QueryParameters) {
+// ex.
+// https://......./dashboard/?query={"overs":["last"],"api":["last"]}
+//                           ?query={"api":"*"}
+//                           ?query={"*":"*"}
+//                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
+async function fetchDocuments(queryParams?: type.QueryParameters) {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
 
@@ -94,7 +97,55 @@ function close() {
    }
  }
 
- async function fetchConfig() {
+// Aggregate the documents by gitinfo.owner & keep the latest version only
+async function fetchDocumentsGoupedByScrum() {
+   try {
+      const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
+
+      const documents = await collection.aggregate([
+         {
+            $unwind: "$versions"
+         },
+         {
+            $sort: { "versions.lastBomImport": -1 }
+         },
+         {
+            $group: {
+               _id: "$_id",
+               name: { $first: "$name" },
+               latestVersion: { $first: "$versions" },
+               sonarKey: { $first: "$sonarKey" },
+               sonarMetrics: { $first: "$sonarMetrics" },
+               gitInfo: { $first: "$gitInfo" },
+               ecs: { $first: "$ecs" }
+            }
+         },
+         {
+            $group: {
+               _id: { $ifNull: ["$gitInfo.owner", "unassigned"] },
+               services: {
+                  $push: {
+                  _id: "$_id",
+                  name: "$name",
+                  latestVersion: "$latestVersion",
+                  sonarKey: "$sonarKey",
+                  sonarMetrics: "$sonarMetrics",
+                  gitInfo: "$gitInfo",
+                  ecs: "$ecs"
+                  }
+               }
+            }
+         }
+      ]).toArray(); // cursor --> array
+
+      // console.log(JSON.stringify(documents, null, 2));
+   } catch (error) {
+      logErr(error, "Error fetching documents:");
+      return [];
+   }
+}
+
+async function fetchConfig() {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_CONFIG!);
       const configData = await collection.findOne({});
@@ -105,7 +156,7 @@ function close() {
    }
  }
 
- async function getState(linkId: string|undefined): Promise<string> {
+async function getState(linkId: string|undefined): Promise<string> {
    let state = '';
    if (linkId !== undefined ) {
       try {
@@ -159,4 +210,4 @@ async function addState(state: string): Promise<string | undefined> {
    return linkId;
 }
 
-export { init, close, fetchDocuments, fetchConfig, getState, addState };
+export { init, close, fetchDocuments, fetchDocumentsGoupedByScrum, fetchConfig, getState, addState };

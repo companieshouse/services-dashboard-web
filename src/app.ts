@@ -58,6 +58,11 @@ const tabsMap: Record<string, TabFunction> = {
   }
 };
 
+// ex.
+// https://......./dashboard/?query={"overs":["last"],"api":["last"]}
+//                           ?query={"api":"*"}
+//                           ?query={"*":"*"}
+//                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
 function sourceQueryParams(query: string): type.QueryParameters | undefined {
    let   queryParams: type.QueryParameters | undefined;
    if (query) {
@@ -173,7 +178,7 @@ async function tabProdOwner (req: Request, res: Response) {
    try {
       await mongo.init();
       const configData = await mongo.fetchConfig();
-      const documents = await mongo.fetchDocuments();
+      const documents = await mongo.fetchDocumentsGoupedByScrum();
       const endols = configData?.endol ?? {};
       res.render("tabs/tab-prodowner.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
