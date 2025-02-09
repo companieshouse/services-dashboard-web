@@ -34,11 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
                const html = await response.text();
                tabContent.innerHTML = html;
 
-               // Ensure that the script from the tab content is loaded
-               const scriptTag = document.createElement('script');
-               scriptTag.src = `/dashboard/js/tab-${selectedTab}.js`;  // Each tab should have its own JS file
-               scriptTag.onload = () => initialiseTabContent();  // Call the tab-specific init function once the script is loaded
-               document.body.appendChild(scriptTag);
+               // attach both the JS and CSS files associated to each tab
+               // JS:
+               const tabJS = `/dashboard/js/tab-${selectedTab}.js`;
+               if (!document.querySelector(`script[src="${tabJS}"]`)) {
+                   const scriptTag = document.createElement('script');
+                   scriptTag.src = tabJS;
+                   scriptTag.onload = () => initialiseTabContent();  // Call the tab-specific init function once the script is loaded
+                   document.body.appendChild(scriptTag);
+               }
+               // CSS:
+               const tabCSS = `/dashboard/css/tab-${selectedTab}.css`;
+               if (!document.querySelector(`link[href="${tabCSS}"]`)) {
+                   const linkTag = document.createElement('link');
+                   linkTag.rel = 'stylesheet';
+                   linkTag.href = tabCSS;
+                   document.head.appendChild(linkTag);
+               }
 
                // update active tab styling
                tabLinks.forEach(l => l.classList.remove('active'));
