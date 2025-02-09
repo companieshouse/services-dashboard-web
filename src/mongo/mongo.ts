@@ -137,8 +137,8 @@ async function fetchDocumentsGoupedByScrum() {
             }
          }
       ]).toArray(); // cursor --> array
-
       // console.log(JSON.stringify(documents, null, 2));
+      return documents;
    } catch (error) {
       logErr(error, "Error fetching documents:");
       return [];
