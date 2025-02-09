@@ -135,7 +135,21 @@ async function fetchDocumentsGoupedByScrum() {
                   }
                }
             }
-         }
+         },
+         {
+            $project: {
+              _id: 1,
+              services: {
+                $sortArray: {
+                  input: "$services",
+                  sortBy: { name: 1 } // Sort by name in ascending order
+                }
+              }
+            }
+          },
+          {
+            $sort: { "_id": 1 } // Sort groups alphabetically
+          }
       ]).toArray(); // cursor --> array
       // console.log(JSON.stringify(documents, null, 2));
       return documents;
