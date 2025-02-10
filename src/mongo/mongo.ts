@@ -163,6 +163,15 @@ async function fetchConfig() {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_CONFIG!);
       const configData = await collection.findOne({});
+      // return "endol" sorted by key (ex. "amazon-corretto" before "go")
+      if (configData && configData.endol) {
+         configData.endol = Object.keys(configData.endol)
+            .sort()
+            .reduce((sortedObj, key) => {
+               sortedObj[key] = configData.endol[key];
+               return sortedObj;
+            }, {} as Record<string, any>);
+     }
       return configData;
    } catch (error) {
       logErr(error, "Error fetching Config:");
