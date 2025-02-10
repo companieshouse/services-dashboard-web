@@ -1,3 +1,4 @@
+import { Tab } from './main.js';
 
 const tabTableId = 'tab-table-id';
 const masterCheckboxId = 'masterCheckbox-id';
@@ -37,8 +38,6 @@ function generateTabState() {
    return generateState(tabState);
 }
 
-
-
 function loadTabFromState(tabId, state) {
    console.log("loadTabFromState for tab-services");
    if (state !== undefined && state.tabId === tabId) {
@@ -72,3 +71,8 @@ function loadTabFromState(tabId, state) {
       setAllCheckboxes(masterCheckboxId);
    }
 }
+
+
+const tabServices = new Tab(initialiseTabContent, generateTabState, loadTabFromState);
+
+export default tabServices;

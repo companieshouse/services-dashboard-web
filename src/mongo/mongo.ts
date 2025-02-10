@@ -51,7 +51,6 @@ async function fetchDocuments(queryParams?: type.QueryParameters) {
 
          // Find the documents by names using regex
          documents = await collection.find({ name: { $in: namePatterns }}, { session: mongoSession }).toArray();
-
          // Filter the versions for each document
          documents = documents.map(doc => {
             const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
@@ -120,6 +119,13 @@ async function fetchDocumentsGoupedByScrum() {
                sonarMetrics: { $first: "$sonarMetrics" },
                gitInfo: { $first: "$gitInfo" },
                ecs: { $first: "$ecs" }
+            }
+         },
+         {
+            $addFields: {
+               "latestVersion.runtime": {
+                  $split: ["$latestVersion.runtime", " "]
+               }
             }
          },
          {

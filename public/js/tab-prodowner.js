@@ -1,9 +1,9 @@
+import { Tab } from './main.js';
 
 const tabTableId = 'tab-table-id';
 const masterCheckboxId = 'masterCheckbox-id';
 const classLevel1Checkbox = 'level1-checkbox';
 const classLevel2Checkbox = 'level2-checkbox';
-
 
 function initialiseTabContent() {
    initTabTable(tabTableId);
@@ -12,10 +12,6 @@ function initialiseTabContent() {
    loadTabFromState('tab-services-id', window.jsonState);
    filterTableByCheckboxes(tabTableId);
    sortTabTable();
-}
-
-function initialiseTabContent() {
-   const tableId = 'tab-table-id';
 }
 
 function generateTabState() {
@@ -27,3 +23,7 @@ function generateTabState() {
 function loadTabFromState(tabId, state) {
    console.log("loadTabFromState for tab-prodowner");
 }
+
+const tabProdowner = new Tab(initialiseTabContent, generateTabState, loadTabFromState);
+
+export default tabProdowner;

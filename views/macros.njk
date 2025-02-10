@@ -1,3 +1,11 @@
+{# set a standard id (e.g. remove unallowed chars (currently spaces)
+   Note the {%- ... -%} syntax, which removes unnecessary whitespace added by nunjucks
+#}
+{% macro setStandardId(id) -%}
+    {%- set validId = id | replace(' ', '-') | lower | trim -%}
+    {{- validId -}}
+{%- endmacro %}
+
 {% macro addDaysAgo (date) %}
    {% set value = date | daysAgo %}
       {% if value %}
