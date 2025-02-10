@@ -83,22 +83,18 @@ app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
 app.post(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    try {
       const compressedState = req.body;
-      await mongo.init();
       const linkId = await mongo.addState( compressedState);
       (linkId !== undefined) ?
          res.send(linkId) :
          res.status(400).send('Error saving link');
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 });
 
 // handler of main page
 app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    try {
-      await mongo.init();
       const linkId = req.query.linkid as string;
       let   compressedState = "";
       if (linkId) {
@@ -120,15 +116,12 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 });
 
 // handler of "Services"-tab
 async function tabServices (req: Request, res: Response) {
    try {
-      await mongo.init();
       const linkId = req.query.linkid as string;
       let   query  = req.query.query  as string;
       let   compressedState = "";
@@ -150,15 +143,12 @@ async function tabServices (req: Request, res: Response) {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
  }
 
  // handler of "End of Life"-tab
 async function tabEndol (req: Request, res: Response) {
    try {
-      await mongo.init();
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
       res.render("tabs/tab-endol.njk", {
@@ -168,15 +158,12 @@ async function tabEndol (req: Request, res: Response) {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 }
 
 // handler of "Product Owner"-tab
 async function tabProdOwner (req: Request, res: Response) {
    try {
-      await mongo.init();
       const configData = await mongo.fetchConfig();
       const documents = await mongo.fetchDocumentsGoupedByScrum();
       const endols = configData?.endol ?? {};
@@ -189,8 +176,6 @@ async function tabProdOwner (req: Request, res: Response) {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 }
 

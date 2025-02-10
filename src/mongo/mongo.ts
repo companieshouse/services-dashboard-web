@@ -1,4 +1,4 @@
-import { Db, MongoClient, ObjectId } from "mongodb";
+import { Db, MongoClient, ObjectId, ClientSession } from "mongodb";
 
 import * as config from "../config";
 import * as type from '../common/types';
@@ -6,28 +6,30 @@ import {logger, logErr} from "../utils/logger";
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
-const mongoClient = new MongoClient(config.MONGO_URI, {
-   minPoolSize: 1,
-   waitQueueTimeoutMS: 5000
- });
-
- let database: Db;
-
+let mongoClient: MongoClient;
+let database: Db;
+let mongoSession: ClientSession;
 
 async function init() {
    try {
-      logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`)
-
+      logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`);
+      mongoClient = new MongoClient(config.MONGO_URI);
       await mongoClient.connect();
       database = mongoClient.db(config.MONGO_DB_NAME);
-   }
-   catch(error) {
-      logger.error(`Error connecting to Mongo:${(error as Error).message}`);
+      mongoSession = mongoClient.startSession();
+   } catch (error) {
+      logger.error(`Error connecting to Mongo: ${(error as Error).message}`);
    }
 }
 
-function close() {
-   mongoClient.close();
+async function close() {
+   try {
+      await mongoSession.endSession();
+      await mongoClient.close();
+      logger.info("Mongo connection closed.");
+   } catch (error) {
+      logger.error(`Error closing Mongo connection: ${(error as Error).message}`);
+   }
 }
 
 // ex.
@@ -42,13 +44,13 @@ async function fetchDocuments(queryParams?: type.QueryParameters) {
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
       if (!queryParams || queryParams.hasOwnProperty("*")) {
-         documents = await collection.find({}).sort({ name: 1 }).toArray();
+         documents = await collection.find({}, { session: mongoSession }).sort({ name: 1 }).toArray();
       } else {
          // Build the regex queries for each name
          const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, "i"));
 
          // Find the documents by names using regex
-         documents = await collection.find({ name: { $in: namePatterns } }).toArray();
+         documents = await collection.find({ name: { $in: namePatterns }}, { session: mongoSession }).toArray();
 
          // Filter the versions for each document
          documents = documents.map(doc => {
@@ -150,7 +152,7 @@ async function fetchDocumentsGoupedByScrum() {
           {
             $sort: { "_id": 1 } // Sort groups alphabetically
           }
-      ]).toArray(); // cursor --> array
+      ], { session: mongoSession }).toArray(); // cursor --> array
       // console.log(JSON.stringify(documents, null, 2));
       return documents;
    } catch (error) {
@@ -162,7 +164,7 @@ async function fetchDocumentsGoupedByScrum() {
 async function fetchConfig() {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_CONFIG!);
-      const configData = await collection.findOne({});
+      const configData = await collection.findOne({}, { session: mongoSession });
       // return "endol" sorted by key (ex. "amazon-corretto" before "go")
       if (configData && configData.endol) {
          configData.endol = Object.keys(configData.endol)
@@ -191,7 +193,7 @@ async function getState(linkId: string|undefined): Promise<string> {
          const document = await collection.findOneAndUpdate(
             { _id: objectId },
             { $set: { lastUsed: now } },
-            { returnDocument: 'after' }
+            { returnDocument: 'after', session: mongoSession }
          );
 
          // 2.3 get ready to return its state
@@ -201,8 +203,10 @@ async function getState(linkId: string|undefined): Promise<string> {
          }
          // 3.3 tidy up the collection (removing old entries)
          const cutoffDate = new Date(now.getTime() - MilliSecRetentionStateLinks);
-         await collection.deleteMany({ lastUsed: { $lt: cutoffDate } });
-
+         await collection.deleteMany(
+            { lastUsed: { $lt: cutoffDate } },
+            { session: mongoSession }
+          );
       } catch (error) {
          logger.info(`Error getting link state: ${error}`);
       }
@@ -220,7 +224,10 @@ async function addState(state: string): Promise<string | undefined> {
          const document = await collection.findOneAndUpdate(
             { state: state },
             { $set: { lastUsed: new Date() } },
-            { returnDocument: 'after', upsert: true } // upsert creates a new document if none exists
+            {  returnDocument: 'after',
+               upsert: true,  // upsert creates a new document if none exists
+               session: mongoSession
+            }
          );
          if (document) {
                linkId = document._id.toString();
