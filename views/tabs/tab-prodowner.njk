@@ -57,7 +57,10 @@
                   <tr data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
                         <td class="td-name">          <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
                         {# <td class="td-git-owner">     <a href="{{ service.gitInfo.repo }}/custom-properties">{{ service.gitInfo.owner }}</a></td> #}
-                        <td class="td-git-version">   {% for release in service.gitInfo.releases %} <li><a href="{{ service.gitInfo.repo }}/releases">{{ release.version }}</a></li> {% endfor %}</td>
+                        <td class="td-git-version">
+                           <div><u><a href="{{ service.gitInfo.repo }}/releases">{{ service.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></u></div>
+                           {% for release in service.gitInfo.releases %} <li><a href="{{ service.gitInfo.repo }}/releases">{{ release.version }}</a></li> {% endfor %}
+                        </td>
                         <td class="td-ecs"> {% for version in service.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
                         <td class="td-ecs"> {{ service.ecs.staging }} </td>
                         <td class="td-ecs"> {{ service.ecs.live }} </td>
