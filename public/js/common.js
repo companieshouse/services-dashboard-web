@@ -218,8 +218,10 @@ function updateRowStriping(tableId) {
    const visibleRows = Array.from(tbody.querySelectorAll("tr:not([style*='display: none'])"));
 
    visibleRows.forEach((row, index) => {
-       row.classList.remove("even_row", "odd_row"); // Remove existing classes
-       row.classList.add(index % 2 === 0 ? "odd_row" : "even_row"); // Apply correct class
+      if (!row.classList.contains("transparent_row")) {
+         row.classList.remove("even_row", "odd_row"); // Remove existing classes
+         row.classList.add(index % 2 === 0 ? "odd_row" : "even_row"); // Apply correct class
+      }
    });
 }
 
@@ -318,7 +320,7 @@ function setAllCheckboxes(masterCheckboxId) {
 function initShareButton() {
    document.getElementById('button-share').addEventListener('click', async () => {
       try {
-         const base64State = generateTabState();    // this is implemented in each tab's .js
+         const base64State = window.currentTab.generateTabState();    // this is implemented in each tab's .js
          if (base64State) {
             const response = await fetch('/dashboard', {
                method: 'POST',

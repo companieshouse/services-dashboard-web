@@ -231,9 +231,21 @@
    background-color: #f9f9f9;
 }
 
+.transparent_row,
 .odd_row {
    background-color: transparent; /* default color */
 }
+
+.runtime_red_row {
+   background-color: #ff8f73; /* default color */
+}
+.runtime_yellow_row {
+   background-color: #ffc400
+}
+.runtime_green_row {
+   background-color: #57d9a3;
+}
+
 
 .tab-container-main-col tbody tr td {
    z-index: 1; /* Ensure table body rows stay behind headers */
