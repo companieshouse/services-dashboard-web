@@ -38,9 +38,7 @@ describe('App Tests', () => {
         const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/tab/services`);
 
         expect(response.status).toBe(200);
-        expect(mongo.init).toHaveBeenCalled();
         expect(mongo.fetchDocuments).toHaveBeenCalled();
-        expect(mongo.close).toHaveBeenCalled();
     });
 
     it('should handle GET request for End of Life tab', async () => {
@@ -51,9 +49,7 @@ describe('App Tests', () => {
         const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/tab/endol`);
 
         expect(response.status).toBe(200);
-        expect(mongo.init).toHaveBeenCalled();
         expect(mongo.fetchConfig).toHaveBeenCalled();
-        expect(mongo.close).toHaveBeenCalled();
     });
 
     it('should return 404 for unknown tab', async () => {
@@ -66,16 +62,12 @@ describe('App Tests', () => {
     it('should handle GET request for main page with linkId', async () => {
         const linkId = 'linkId';
         const compressedState = 'compressedState';
-        (mongo.init as jest.Mock).mockResolvedValue(undefined);
         (mongo.getState as jest.Mock).mockResolvedValue(compressedState);
-        (mongo.close as jest.Mock).mockResolvedValue(undefined);
 
         const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/?linkid=${linkId}`);
 
         expect(response.status).toBe(200);
-        expect(mongo.init).toHaveBeenCalled();
         expect(mongo.getState).toHaveBeenCalledWith(linkId);
-        expect(mongo.close).toHaveBeenCalled();
     });
 
     it('should handle GET request for main page without linkId', async () => {

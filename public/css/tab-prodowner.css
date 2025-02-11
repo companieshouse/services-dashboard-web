@@ -71,8 +71,13 @@
 /* ------------ CSS FOR NUMBERS/ METRICS ------------ */
 
 .front-number {
+  display: inline-block;
   font-size: 10px;
   font-weight: bold;
+  padding: 5px 10px; /* Padding around the text */
+  border-radius: 10px; /* Rounded corners */
+  margin: 2px; /* Space around each element */
+  text-align: center; /* Aligns text horizontally */
 }
 
 .rounded-number {
