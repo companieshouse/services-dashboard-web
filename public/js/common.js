@@ -6,12 +6,8 @@
 var lastSortedColumnId = "";
 var colSortDirection = 1; // 1 for ascending, -1 for descending
 
-const INIT_TAB_CHECK_BOXES = 1 << 0
-const INIT_TAB_TABLE       = 1 << 1
-const INIT_TAB_CHECK_BOXES_AND_TABLE = INIT_TAB_CHECK_BOXES | INIT_TAB_TABLE
-
 //======================================
-//       STANDALONE/ GENERALE UTILITIES:
+//       STANDALONE/ GENERAL UTILITIES:
 //======================================
 //-----------------------------------
 // function to generate a compressed base64 string from a plain text input
@@ -80,29 +76,23 @@ function getActiveTabId() {
 //-----------------------------------
 // function to generate a snapshot/state of all NAME & VERSION checkboxes
 //-----------------------------------
-function generateState() {
-
-   const allCheckboxes = getAllCheckboxes();
-   let checkedIds = ["+"];
-   let uncheckedIds = ["-"];
-
-   allCheckboxes.forEach((checkbox) => {
-         if (checkbox.checked) {
-            checkedIds.push(checkbox.id);
-         } else {
-            uncheckedIds.push(checkbox.id);
-         }
-   });
-
-   const state = {
-      queryArg: getQueryArg(),
-      tabId: getActiveTabId(),
-      sort: `${lastSortedColumnId},${colSortDirection}`,
-      checkboxes:  (checkedIds.length > uncheckedIds.length) ?
-                        uncheckedIds.join(',') :
-                        checkedIds.join(',')
+function generateState(tabState) {
+   compressedState = "";
+   if (tabState && typeof tabState === 'object') {
+      const state = {
+         queryArg: getQueryArg(),
+         tabId: getActiveTabId(),
+         tabState: tabState
+      }
+      compressedState = compressToBase64(JSON.stringify(state));
    }
-   return compressToBase64(JSON.stringify(state));
+   return compressedState;
+}
+function generateTabState() {
+   console.log("generateTabState does nothing. Each tab's.js file should implement its own version");
+}
+function loadTabFromState(tabId, state) {
+   console.log("loadTabFromState does nothing. Each tab's.js file should implement its own version");
 }
 
 //-----------------------------------
@@ -126,39 +116,6 @@ function sourceState(compressedState) {
    return jsonState;
 }
 
-function loadTabFromState(tabId, state) {
-   if (state !== undefined && state.tabId === tabId) {
-         // get csv values
-         const csvValues = state.checkboxes.split(',');
-         console.log(`loading checkboxes state as:${csvValues[0]}`);
-
-         // Get the first value which is either "+" or "-"
-         const operation = csvValues[0];
-
-         const checkboxIds = csvValues.slice(1);
-
-         const allCheckboxes = getAllCheckboxes();
-         // Determine the initial state we want to operate on
-         const checkedValue = (operation === "+") ? false : true;
-
-         // Init with that state
-         allCheckboxes.forEach(checkbox => checkbox.checked = checkedValue);
-
-         // Toggle the state for the checkboxes whose IDs are in the list
-         checkboxIds.forEach(id => {
-            const checkbox = document.getElementById(id);
-            if (checkbox) checkbox.checked = !checkedValue;
-         });
-         // source sort info
-         [lastSortedColumnId, colSortDirection] = state.sort.split(',');
-
-         // source query info
-         // stateQuery = state.queryArg;
-   } else {
-      setAllCheckboxes();
-   }
-}
-
 //======================================
 //       ONLOAD / INIT  CODE:
 //======================================
@@ -168,9 +125,9 @@ function loadTabFromState(tabId, state) {
 //-------------
 // init 1 - attach sort handlers to table headers
 //-------------
-function initTabTable() {
+function initTabTable(tableId) {
 
-   const table = document.getElementById('tab-table-id');
+   const table = document.getElementById(tableId);
    const headers = table.querySelectorAll('.row-header-title');
 
    // Init Col Sort
@@ -206,21 +163,21 @@ function initTabTable() {
 //-------------
 // init 2 - attach header <select>s handlers
 //-------------
-function initHeaderSelects() {
+function initHeaderSelects(tableId) {
 
    document.querySelectorAll(".header-select").forEach(select => {
-      select.addEventListener("change", function() {
-            let table = document.getElementById("tab-table-id");
+      select.addEventListener("change", (event) => {
+            let table = document.getElementById(tableId);
             let colIndex = Array.from(select.parentElement.parentElement.children).indexOf(select.parentElement);
-            let selectedValue = this.value.toLowerCase();
+            let selectedValue = event.target.value.toLowerCase();
 
             table.querySelectorAll("tbody tr").forEach(row => {
                let cell = row.children[colIndex]; // Get the correct column cell
                let cellValue = cell ? cell.textContent.trim().toLowerCase() : "";
 
-               toggleRow (row, (selectedValue === "all" || cellValue === selectedValue));
+               toggleRow (tableId, row, (selectedValue === "all" || cellValue === selectedValue));
             });
-            updateRowStriping();
+            updateRowStriping(tableId);
       });
    });
 }
@@ -239,25 +196,25 @@ function sortTabTable() {
 //-------------
 // render the table according to the selected checkboxes
 //-------------
-function filterTableByCheckboxes() {
-   const tableRows = document.querySelectorAll('#tab-table-id tbody tr');
+function filterTableByCheckboxes(tableId) {
+   const tableRows = document.querySelectorAll(`#${tableId} tbody tr`);
 
    tableRows.forEach(row => {
-      const name = row.getAttribute('data-name');
-      const version = row.getAttribute('data-version');
-      const isNameChecked = document.getElementById(name).checked;
-      const isVersionChecked = document.getElementById(`${name}-${version}`).checked;
+      const level1 = row.getAttribute('data-level1');
+      const level2 = row.getAttribute('data-level2');
+      const isLevel1Checked = document.getElementById(level1).checked;
+      const isLevel2Checked = document.getElementById(`${level1}-${level2}`).checked;
 
-      toggleRow (row, (isNameChecked && isVersionChecked));
+      toggleRow (tableId, row, (isLevel1Checked && isLevel2Checked));
    });
-   updateRowStriping();
+   updateRowStriping(tableId);
 }
 
 //-------------
 // update row striping
 //-------------
-function updateRowStriping() {
-   const tbody = document.querySelector('#tab-table-id');
+function updateRowStriping(tableId) {
+   const tbody = document.querySelector(`#${tableId}`);
    const visibleRows = Array.from(tbody.querySelectorAll("tr:not([style*='display: none'])"));
 
    visibleRows.forEach((row, index) => {
@@ -269,9 +226,9 @@ function updateRowStriping() {
 //-------------
 // show/hide row
 //-------------
-function toggleRow(row, display_on) {
+function toggleRow(tableId, row, display_on) {
    row.style.display = display_on ? "" : "none";
-   updateRowStriping();
+   updateRowStriping(tableId);
 }
 //==============================
 // Tab area - TABLE (end)
@@ -283,66 +240,66 @@ function toggleRow(row, display_on) {
 //-------------
 // init 3 - attach checkboxes handlers
 //-------------
-function initMenuCheckBoxes() {
+function initMenuCheckBoxes(tableId, masterCheckboxId, level1Class, level2Class) {
 
-   const masterCheckbox = document.getElementById('masterCheckbox-id');
-   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
-   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+   const masterCheckbox = document.getElementById(masterCheckboxId);
+   const level1CheckBoxes = document.querySelectorAll(`.${level1Class}`);
+   const level2CheckBoxes = document.querySelectorAll(`.${level2Class}`);
 
    //-------------
    //  3.1 - attach to MASTER - checkbox
    //-------------
-   masterCheckbox.addEventListener('change', function () {
-      const isChecked = this.checked;
-      nameCheckboxes.forEach(checkbox => {
+   masterCheckbox.addEventListener('change', (event) => {
+      const isChecked = event.target.checked;
+      level1CheckBoxes.forEach(checkbox => {
          checkbox.checked = isChecked;
       });
-      versionCheckboxes.forEach(checkbox => {
+      level2CheckBoxes.forEach(checkbox => {
          checkbox.checked = isChecked;
       });
-      filterTableByCheckboxes();
+      filterTableByCheckboxes(tableId);
    });
    //-------------
-   //  3.2 - attach to NAME - checkboxes
+   //  3.2 - attach to Level1 - checkboxes
    //-------------
-   nameCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', function () {
-         const name = this.id;
-         const isChecked = this.checked;
+   level1CheckBoxes.forEach(checkbox => {
+      checkbox.addEventListener('change', (event) => {
+         const level1 = event.target.id;
+         const isChecked = event.target.checked;
 
-         document.querySelectorAll(`.version-checkbox[data-name="${name}"]`).forEach(vCheckbox => {
+         document.querySelectorAll(`.${level2Class}[data-level1="${level1}"]`).forEach(vCheckbox => {
                vCheckbox.checked = isChecked;
          });
 
-         filterTableByCheckboxes();
+         filterTableByCheckboxes(tableId);
       });
    });
 
    //-------------
    //  3.3 - attach to VERSION - checkboxes
    //-------------
-   versionCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', filterTableByCheckboxes);
+   level2CheckBoxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => filterTableByCheckboxes(tableId));
    });
    sortTabTable();
 }
 
 //-----------------------------------
-// function to get all the name & version checkboxes
+// function to get all the level1 & level2 checkboxes
 //-----------------------------------
-function getAllCheckboxes() {
+function getAllCheckboxes(level1Class, level2Class) {
    // Select only the checkboxes with the specified classes
-   const nameCheckboxes = document.querySelectorAll('.name-checkbox');
-   const versionCheckboxes = document.querySelectorAll('.version-checkbox');
+   const level1Checkboxes = document.querySelectorAll(`.${level1Class}`);
+   const level2Checkboxes = document.querySelectorAll(`.${level2Class}`);
 
    // Combine into 1 array
-   return [...nameCheckboxes, ...versionCheckboxes];
+   return [...level1Checkboxes, ...level2Checkboxes];
 }
 //-----------------------------------
-// function to set 'checked' all name & version checkboxes
+// function to set 'checked' all level1 & level2 checkboxes
 //-----------------------------------
-function setAllCheckboxes() {
-   const masterCheckbox = document.getElementById('masterCheckbox-id');
+function setAllCheckboxes(masterCheckboxId) {
+   const masterCheckbox = document.getElementById(masterCheckboxId);
    masterCheckbox.checked = true;
    const event = new Event('change');
    masterCheckbox.dispatchEvent(event);
@@ -361,26 +318,28 @@ function setAllCheckboxes() {
 function initShareButton() {
    document.getElementById('button-share').addEventListener('click', async () => {
       try {
-         const base64State = generateState();
-         const response = await fetch('/dashboard', {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'text/plain'
-            },
-            body: base64State
-         });
+         const base64State = generateTabState();    // this is implemented in each tab's .js
+         if (base64State) {
+            const response = await fetch('/dashboard', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'text/plain'
+               },
+               body: base64State
+            });
 
-         if (response.ok) {
-            const linkId = await response.text();
-            const currentUrl = window.location.href;
-            // Get the base URL without query parameters
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
-            console.log(shareUrl);
-            navigator.clipboard.writeText(shareUrl);
-            showShareResponse('link copied to clipboard', 'ok');
-         } else {
-            showShareResponse('Error creating link', 'error');
+            if (response.ok) {
+               const linkId = await response.text();
+               const currentUrl = window.location.href;
+               // Get the base URL without query parameters
+               const baseUrl = window.location.origin + window.location.pathname;
+               const shareUrl = `${baseUrl}?linkid=${encodeURIComponent(linkId)}`;
+               console.log(shareUrl);
+               navigator.clipboard.writeText(shareUrl);
+               showShareResponse('link copied to clipboard', 'ok');
+            } else {
+               showShareResponse('Error creating link', 'error');
+            }
          }
       } catch (error) {
          showShareResponse('Error creating link', 'error');
@@ -416,18 +375,3 @@ function showShareResponse(message, type) {
 // share BUTTON (end)
 //==============================
 
-
-//-----------------------------------
-// Main init function for tab contents
-//-----------------------------------
-function mainInit(tabId, initList) {
-
-   if ((initList  & INIT_TAB_CHECK_BOXES_AND_TABLE) === INIT_TAB_CHECK_BOXES_AND_TABLE) {
-      initTabTable();
-      initMenuCheckBoxes();
-      initHeaderSelects();
-      loadTabFromState(tabId, window.jsonState);
-      filterTableByCheckboxes();
-      sortTabTable();
-   }
-}

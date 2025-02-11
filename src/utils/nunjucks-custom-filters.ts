@@ -33,5 +33,10 @@ export const daysAgo = (date: string | Date): string => {
 };
 
 export const urlEncode = (arg: string): string => {
-   return encodeURIComponent(arg);
+  return encodeURIComponent(arg);
 };
+
+// to store/set/get global variable(s) in nunjucks
+const globalVars: { [key: string]: any } = {};
+export const setGlobal = (value: any, name: string): void => {globalVars[name] = value;};
+export const getGlobal = (name: string): any => {return globalVars[name];};

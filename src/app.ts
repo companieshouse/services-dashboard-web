@@ -7,7 +7,7 @@ import * as config from "./config";
 import * as type from './common/types';
 import {logger, logErr} from "./utils/logger";
 import * as mongo from "./mongo/mongo";
-import * as filters from "./utils/date-filter";
+import * as filters from "./utils/nunjucks-custom-filters";
 
 
 // Convert the zlib.unzip function to return a promise using promisify
@@ -33,11 +33,14 @@ const nunjucksEnv = nunjucks.configure([
    express: app,
  });
 
- nunjucksEnv.addGlobal("CDN_HOST", config.CDN_URL);
+nunjucksEnv.addGlobal("CDN_HOST", config.CDN_URL);
 
- // Add the date filter
+ // Add custom filters
 nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
+nunjucksEnv.addFilter("setGlobal", filters.setGlobal);
+
+nunjucksEnv.addGlobal("getGlobal", filters.getGlobal);
 
 // map tab-functions
 const tabsMap: Record<string, TabFunction> = {
@@ -49,12 +52,17 @@ const tabsMap: Record<string, TabFunction> = {
    title: "Services",
    fun: tabServices
  },
- productowner: {
+ prodowner: {
     title: "Product Owner",
-    fun: tabProductOwner
+    fun: tabProdOwner
   }
 };
 
+// ex.
+// https://......./dashboard/?query={"overs":["last"],"api":["last"]}
+//                           ?query={"api":"*"}
+//                           ?query={"*":"*"}
+//                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
 function sourceQueryParams(query: string): type.QueryParameters | undefined {
    let   queryParams: type.QueryParameters | undefined;
    if (query) {
@@ -75,22 +83,18 @@ app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
 app.post(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    try {
       const compressedState = req.body;
-      await mongo.init();
       const linkId = await mongo.addState( compressedState);
       (linkId !== undefined) ?
          res.send(linkId) :
          res.status(400).send('Error saving link');
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 });
 
 // handler of main page
 app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    try {
-      await mongo.init();
       const linkId = req.query.linkid as string;
       let   compressedState = "";
       if (linkId) {
@@ -112,15 +116,12 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 });
 
 // handler of "Services"-tab
 async function tabServices (req: Request, res: Response) {
    try {
-      await mongo.init();
       const linkId = req.query.linkid as string;
       let   query  = req.query.query  as string;
       let   compressedState = "";
@@ -142,15 +143,12 @@ async function tabServices (req: Request, res: Response) {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
  }
 
  // handler of "End of Life"-tab
 async function tabEndol (req: Request, res: Response) {
    try {
-      await mongo.init();
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
       res.render("tabs/tab-endol.njk", {
@@ -160,13 +158,25 @@ async function tabEndol (req: Request, res: Response) {
       });
    } catch (error) {
       logErr(error);
-   } finally {
-      mongo.close();
    }
 }
 
 // handler of "Product Owner"-tab
-async function tabProductOwner (req: Request, res: Response) {
+async function tabProdOwner (req: Request, res: Response) {
+   try {
+      const configData = await mongo.fetchConfig();
+      const endols = configData?.endol ?? {};
+      const documents = await mongo.fetchDocumentsGoupedByScrum(endols);
+      res.render("tabs/tab-prodowner.njk", {
+         basePath: config.ENDPOINT_DASHBOARD,
+         documents,
+         endols,
+         depTrackUri: config.DEP_TRACK_URI,
+         sonarUri: config.SONAR_URI
+      });
+   } catch (error) {
+      logErr(error);
+   }
 }
 
  // Tab Routes

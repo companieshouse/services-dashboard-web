@@ -1,15 +1,59 @@
 //======================================
 //       ONLOAD / INIT  CODE:
 //======================================
+class Tab {
+   constructor(initialiseTabContent, generateTabState, loadTabFromState) {
+       this.initialiseTabContent = initialiseTabContent;
+       this.generateTabState = generateTabState;
+       this.loadTabFromState = loadTabFromState;
+   }
+}
+export { Tab };
+
+// Function to remove existing all tabs-specific .css
+function removeExistingTabAssets() {
+   const existingStyles = document.querySelectorAll('link[href*="tab-"]');
+   existingStyles.forEach(style => style.remove());
+}
+
+// Function to load the script and initialize tab content
+async function loadScriptAndInitialise(selectedTab) {
+   removeExistingTabAssets();
+
+   const tabJS = `/dashboard/js/tab-${selectedTab}.js`;
+   const tabCSS = `/dashboard/css/tab-${selectedTab}.css`;
+
+   // Load CSS
+   const linkTag = document.createElement('link');
+   linkTag.rel = 'stylesheet';
+   linkTag.href = tabCSS;
+   document.head.appendChild(linkTag);
+
+   // Dynamically import the tab module
+   try {
+       const tabModule = await import(tabJS);
+       const tabInstance = tabModule.default;
+
+       // Set the current tab instance and initialize it
+       window.currentTab = tabInstance;
+       window.currentTab.initialiseTabContent();
+   } catch (error) {
+       console.error('Failed to load tab module:', error);
+   }
+}
+
+function onTabLoad(selectedTab) {
+   loadScriptAndInitialise(selectedTab);
+}
+export { onTabLoad };
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
    initShareButton();
    sourceState(); // init state when passed in
 
-   //-----------------------------------
-   // 1 - Add handler to tabs
-   //-----------------------------------
+   // Add handler to tabs
 
    const tabLinks   = document.querySelectorAll('.tab-link');
    const tabContent = document.getElementById('tab-content-id');
@@ -34,11 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
                const html = await response.text();
                tabContent.innerHTML = html;
 
-               // Ensure that the script from the tab content is loaded
-               const scriptTag = document.createElement('script');
-               scriptTag.src = `/dashboard/js/tab-${selectedTab}.js`;  // Each tab should have its own JS file
-               scriptTag.onload = () => initialiseTabContent();  // Call the tab-specific init function once the script is loaded
-               document.body.appendChild(scriptTag);
+               // Load the tab-specific JS and CSS files
+               onTabLoad(selectedTab);
 
                // update active tab styling
                tabLinks.forEach(l => l.classList.remove('active'));
@@ -57,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
          tab.click();
       }
       else  {
-         const tabId = (tabLinks.length > 1) ? 1   // services
+         const tabId = (tabLinks.length > 1) ? 1   // (default) services
                                              : 0;  // endol
          tabLinks[tabId].click();
       }

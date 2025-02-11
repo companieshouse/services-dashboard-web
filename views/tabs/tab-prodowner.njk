@@ -1,0 +1,86 @@
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
+
+{% macro colorRuntimeItem(item, color) %}
+  {% set colorClass = "td-runtime-info-" + color %}
+  <li class="{{ colorClass }}">{{ item }}</li>
+{% endmacro %}
+
+ <div class="tab-container">
+  <div class="tab-container-left-col">
+      <!-- Master checkbox to control all .level1-checkbox -->
+      <div class="masterCheckbox">
+            <input type="checkbox" id="masterCheckbox-id">
+            <label for="masterCheckbox-id"><strong>Select All</strong></label>
+            <hr>
+      </div>
+      <form id="filterForm">
+         {% for document in documents %}
+            <div>
+               {# document._id is the scrum name and can contain invalid chars (at least spaces)
+               so those ids should be standardised before using them #}
+               {% set standardId = setStandardId(document._id) %}
+
+               <input type="checkbox" id="{{ standardId }}" class="level1-checkbox" checked>
+               <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }}</label>
+               <div>
+               {% for service in document.services %}
+                  <input type="checkbox" id="{{ standardId }}-{{ service.name }}" class="level2-checkbox" data-level1="{{ standardId }}" checked>
+                  <label for="{{ standardId }}-{{ service.name }}" class="label-level2-checkbox">{{ service.name }}</label><br>
+               {% endfor %}
+               </div>
+            </div>
+         {% endfor %}
+      </form>
+  </div>
+
+
+  <div class="tab-container-main-col">
+    <table id="tab-table-id">
+         <thead>
+         <!-- Col Headers -->
+            <tr>
+                  <!--  1 --><th class="row-header-title header-service" id="col-head-service" data-type="string"> Service</th>
+
+                  {# <!--  2 --><th class="row-header-title header-git" id="col-head-git-owner"    data-type="string"> Owner</th> #}
+                  <!--  3 --><th class="row-header-title header-git" id="col-head-git-rel-last" data-type="string"> GitHub Release</th>
+                  <!--  4 --><th class="row-header-title header-ecs" id="col-head-ecs-cidev"    data-type="string"><span>cidev</span></th>
+                  <!--  5 --><th class="row-header-title header-ecs" id="col-head-ecs-stag"     data-type="string"><span>staging</span></th>
+                  <!--  6 --><th class="row-header-title header-ecs" id="col-head-ecs-live"     data-type="string"><span>live</span></th>
+                  <!--  7 --><th class="row-header-title header-git" id="col-head-git-lang"     data-type="string">Runtime</th>
+                  <!--  8 --><th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage" data-type="string"><span>Sonar</span></th>
+                  <!--  9 --><th class="row-header-title header-deptrack"     id="col-head-deptk-date"     data-type="number">Dep Track</th>
+            </tr>
+         </thead>
+         <tbody>
+            {% for document in documents %}
+               {% for service in document.services %}
+                  <tr data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
+                        <td class="td-name">          <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
+                        {# <td class="td-git-owner">     <a href="{{ service.gitInfo.repo }}/custom-properties">{{ service.gitInfo.owner }}</a></td> #}
+                        <td class="td-git-version">   {% for release in service.gitInfo.releases %} <li><a href="{{ service.gitInfo.repo }}/releases">{{ release.version }}</a></li> {% endfor %}</td>
+                        <td class="td-ecs"> {% for version in service.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
+                        <td class="td-ecs"> {{ service.ecs.staging }} </td>
+                        <td class="td-ecs"> {{ service.ecs.live }} </td>
+                        {# <td class="td-git-lang">      {{setLanguage(service.latestVersion.lang, service.gitInfo.lang, service.gitInfo.repo) }}</td> #}
+                        <td class="td-runtime">
+                           <ul class="td-runtime-info"> {% for info in service.latestVersion.runtime.runtime %}  {{ colorRuntimeItem(info.value, info.color) }} {% endfor %} </ul>
+                        </td>
+                        <td class="td-sonar-metrics">
+                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.bugs) }}
+                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.code_smells) }}
+                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities) }}
+                        </td>
+                        <td class="td-deptrack-metrics">
+                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.critical, "critical", service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.high, "high", service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.medium, "medium", service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.low, "low", service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.vulnerabilities, "vulnerabilities", service.latestVersion.uuid)}}
+                        </td>
+                  </tr>
+               {% endfor %}
+            {% endfor %}
+         </tbody>
+    </table>
+  </div>
+</div>

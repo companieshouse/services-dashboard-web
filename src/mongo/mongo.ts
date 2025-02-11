@@ -1,52 +1,58 @@
-import { Db, MongoClient, ObjectId } from "mongodb";
+import { Db, MongoClient, ObjectId, ClientSession } from "mongodb";
 
 import * as config from "../config";
 import * as type from '../common/types';
 import {logger, logErr} from "../utils/logger";
+import {checkRuntimesVsEol, EndOfLifeData} from "../utils/check-eol";
+
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
-// logger.info(`======Reading - Mongo URL: [${config.MONGO_URI}]`);
-
-const mongoClient = new MongoClient(config.MONGO_URI, {
-   minPoolSize: 1,
-   waitQueueTimeoutMS: 5000
- });
-
- let database: Db;
-
+let mongoClient: MongoClient;
+let database: Db;
+let mongoSession: ClientSession;
 
 async function init() {
    try {
-      console.log(`connecting to Mongo: ${config.MONGO_URI}`)
-
+      logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`);
+      mongoClient = new MongoClient(config.MONGO_URI);
       await mongoClient.connect();
       database = mongoClient.db(config.MONGO_DB_NAME);
-   }
-   catch(error) {
-      console.error("Error connecting to Mongo:", error);
+      mongoSession = mongoClient.startSession();
+   } catch (error) {
+      logger.error(`Error connecting to Mongo: ${(error as Error).message}`);
    }
 }
 
-function close() {
-   mongoClient.close();
+async function close() {
+   try {
+      await mongoSession.endSession();
+      await mongoClient.close();
+      logger.info("Mongo connection closed.");
+   } catch (error) {
+      logger.error(`Error closing Mongo connection: ${(error as Error).message}`);
+   }
 }
 
- async function fetchDocuments(queryParams?: type.QueryParameters) {
+// ex.
+// https://......./dashboard/?query={"overs":["last"],"api":["last"]}
+//                           ?query={"api":"*"}
+//                           ?query={"*":"*"}
+//                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
+async function fetchDocuments(queryParams?: type.QueryParameters) {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
 
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
       if (!queryParams || queryParams.hasOwnProperty("*")) {
-         documents = await collection.find({}).sort({ name: 1 }).toArray();
+         documents = await collection.find({}, { session: mongoSession }).sort({ name: 1 }).toArray();
       } else {
          // Build the regex queries for each name
          const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, "i"));
 
          // Find the documents by names using regex
-         documents = await collection.find({ name: { $in: namePatterns } }).toArray();
-
+         documents = await collection.find({ name: { $in: namePatterns }}, { session: mongoSession }).toArray();
          // Filter the versions for each document
          documents = documents.map(doc => {
             const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
@@ -94,10 +100,104 @@ function close() {
    }
  }
 
- async function fetchConfig() {
+// Aggregate the documents by gitinfo.owner & keep the latest version only
+async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData) {
+   try {
+      const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
+
+      const documents = await collection.aggregate([
+         {
+            $unwind: "$versions"
+         },
+         {
+            $sort: { "versions.lastBomImport": -1 }
+         },
+         {
+            $group: {
+               _id: "$_id",
+               name: { $first: "$name" },
+               latestVersion: { $first: "$versions" },
+               sonarKey: { $first: "$sonarKey" },
+               sonarMetrics: { $first: "$sonarMetrics" },
+               gitInfo: { $first: "$gitInfo" },
+               ecs: { $first: "$ecs" }
+            }
+         },
+         {
+            $group: {
+               _id: { $ifNull: ["$gitInfo.owner", "unassigned"] },
+               services: {
+                  $push: {
+                  _id: "$_id",
+                  name: "$name",
+                  latestVersion: "$latestVersion",
+                  sonarKey: "$sonarKey",
+                  sonarMetrics: "$sonarMetrics",
+                  gitInfo: "$gitInfo",
+                  ecs: "$ecs"
+                  }
+               }
+            }
+         },
+         {
+            $project: {
+              _id: 1,
+              services: {
+                $sortArray: {
+                  input: "$services",
+                  sortBy: { name: 1 } // Sort by name in ascending order
+                }
+              }
+            }
+          },
+          {
+            $sort: { "_id": 1 } // Sort groups alphabetically
+          }
+      ], { session: mongoSession }).toArray(); // cursor --> array
+      // console.log(JSON.stringify(documents, null, 2));
+
+      const transformedDocuments = documents.map((team) => ({
+         ...team,
+         services: team.services.map((service: any) => {
+             if (service.latestVersion?.runtime) {
+                 const runtimeStr = service.latestVersion.runtime;
+                 const langArray = [service.latestVersion.lang, service.gitInfo.lang];
+               //   console.log(`-------------- runtimeStr: ${runtimeStr}`);
+
+                 const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, [90, 180]);
+
+                 return {
+                     ...service,
+                     latestVersion: {
+                         ...service.latestVersion,
+                         runtime: runtimeColorResult,
+                     },
+                 };
+             }
+             return service;
+         }),
+      }));
+
+      return transformedDocuments;
+   } catch (error) {
+      logErr(error, "Error fetching documents:");
+      return [];
+   }
+}
+
+async function fetchConfig() {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_CONFIG!);
-      const configData = await collection.findOne({});
+      const configData = await collection.findOne({}, { session: mongoSession });
+      // return "endol" sorted by key (ex. "amazon-corretto" before "go")
+      if (configData && configData.endol) {
+         configData.endol = Object.keys(configData.endol)
+            .sort()
+            .reduce((sortedObj, key) => {
+               sortedObj[key] = configData.endol[key];
+               return sortedObj;
+            }, {} as Record<string, any>);
+     }
       return configData;
    } catch (error) {
       logErr(error, "Error fetching Config:");
@@ -105,7 +205,7 @@ function close() {
    }
  }
 
- async function getState(linkId: string|undefined): Promise<string> {
+async function getState(linkId: string|undefined): Promise<string> {
    let state = '';
    if (linkId !== undefined ) {
       try {
@@ -117,7 +217,7 @@ function close() {
          const document = await collection.findOneAndUpdate(
             { _id: objectId },
             { $set: { lastUsed: now } },
-            { returnDocument: 'after' }
+            { returnDocument: 'after', session: mongoSession }
          );
 
          // 2.3 get ready to return its state
@@ -127,8 +227,10 @@ function close() {
          }
          // 3.3 tidy up the collection (removing old entries)
          const cutoffDate = new Date(now.getTime() - MilliSecRetentionStateLinks);
-         await collection.deleteMany({ lastUsed: { $lt: cutoffDate } });
-
+         await collection.deleteMany(
+            { lastUsed: { $lt: cutoffDate } },
+            { session: mongoSession }
+          );
       } catch (error) {
          logger.info(`Error getting link state: ${error}`);
       }
@@ -146,7 +248,10 @@ async function addState(state: string): Promise<string | undefined> {
          const document = await collection.findOneAndUpdate(
             { state: state },
             { $set: { lastUsed: new Date() } },
-            { returnDocument: 'after', upsert: true } // upsert creates a new document if none exists
+            {  returnDocument: 'after',
+               upsert: true,  // upsert creates a new document if none exists
+               session: mongoSession
+            }
          );
          if (document) {
                linkId = document._id.toString();
@@ -159,4 +264,4 @@ async function addState(state: string): Promise<string | undefined> {
    return linkId;
 }
 
-export { init, close, fetchDocuments, fetchConfig, getState, addState };
+export { init, close, fetchDocuments, fetchDocumentsGoupedByScrum, fetchConfig, getState, addState };

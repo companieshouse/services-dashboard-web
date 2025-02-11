@@ -7,7 +7,7 @@
    <script> window.compressedState = "{{ compressedState | default('') }}"; </script>
    <script src="{{basePath}}/js/libs/pako/2.0.4/pako.min.js"></script>
    <script src="{{basePath}}/js/common.js"></script>
-   <script src="{{basePath}}/js/main.js"></script>
+   <script type="module" src="{{basePath}}/js/main.js"></script>
 </head>
 <body>
    <header class="fixed-hf fixed-header">
@@ -28,7 +28,6 @@
                </div>
          </div>
       </div>
-         </div>
    </header>
 
    <div class="main-content">

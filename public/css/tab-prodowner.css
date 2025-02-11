@@ -68,6 +68,68 @@
    color: inherit; /* Inherit color from parent */
 }
 
+/* ------------ CSS FOR NUMBERS/ METRICS ------------ */
+
+.front-number {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 5px 10px; /* Padding around the text */
+  border-radius: 10px; /* Rounded corners */
+  margin: 2px; /* Space around each element */
+  text-align: center; /* Aligns text horizontally */
+}
+
+.rounded-number {
+  display: inline-block;
+  color: #ffffff; /* Font color */
+  font-size: 10px;
+  font-weight: bold;
+  padding: 5px 10px; /* Padding around the text */
+  border-radius: 10px; /* Rounded corners */
+  margin: 2px; /* Space around each element */
+  text-align: center; /* Aligns text horizontally */
+}
+
+.metric-critical-back {
+  background-color: #ef3017;
+}
+.metric-high-back {
+  background-color: #dd6119;
+}
+.metric-medium-back {
+  background-color: #494e49;
+}
+.metric-low-back {
+  background-color: #9e9595;
+}
+.metric-vulnerabilities-back {
+  background-color: #dc32ef;
+}
+.metric-components-back {
+  background-color: #444aef;
+}
+
+
+.metric-critical-front {
+  color: #ef3017;
+}
+.metric-high-front {
+  color: #dd6119;
+}
+.metric-medium-front {
+  color: #494e49;
+}
+.metric-low-front {
+  color: #9e9595;
+}
+.metric-vulnerabilities-front {
+  color: #dc32ef;
+}
+.metric-components-front {
+  color: #444aef;
+}
+
 /* ------------ CSS FOR RUNTIME LIST ------------ */
 
 .td-runtime-info {
@@ -76,3 +138,12 @@
   list-style-position: inside; /* Ensure bullet points align with the text */
  }
 
+.td-runtime-info-red {
+  color: red;
+}
+.td-runtime-info-yellow {
+  color: orange;
+}
+.td-runtime-info-green {
+  color: green;
+}
