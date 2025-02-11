@@ -3,7 +3,7 @@ import { Db, MongoClient, ObjectId, ClientSession } from "mongodb";
 import * as config from "../config";
 import * as type from '../common/types';
 import {logger, logErr} from "../utils/logger";
-import {checkRuntimesVsEol, EndOfLifeData} from "../utils/check-eol";
+import {checkRuntimesVsEol, EndOfLifeData, Thresholds} from "../utils/check-eol";
 
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
@@ -101,7 +101,7 @@ async function fetchDocuments(queryParams?: type.QueryParameters) {
  }
 
 // Aggregate the documents by gitinfo.owner & keep the latest version only
-async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData) {
+async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds) {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
 
@@ -164,7 +164,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData) {
                  const langArray = [service.latestVersion.lang, service.gitInfo.lang];
                //   console.log(`-------------- runtimeStr: ${runtimeStr}`);
 
-                 const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, [90, 180]);
+                 const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
 
                  return {
                      ...service,

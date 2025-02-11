@@ -1,20 +1,44 @@
 {% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
 
-{% macro colorRuntimeItem(item, color) %}
-  {% set colorClass = "td-runtime-info-" + color %}
-  <li class="{{ colorClass }}">{{ item }}</li>
+{% macro addReleaseColorClass(date) %}
+   {% set daysago = date | daysPassed %}
+   {% if daysago >= 180 %}
+      td_red
+   {% elseif daysago >= 90 %}
+      td_yellow
+   {% else %}
+      td_green
+   {% endif %}
 {% endmacro %}
 
-{% macro addColorClass(color) %}
-    {% if color == 'green' %}
-        runtime_green_row
-    {% elif color == 'yellow' %}
-        runtime_yellow_row
-    {% elif color == 'red' %}
-        runtime_red_row
-    {% else %}
-        ''
-    {% endif %}
+{% macro colorRuntimeItem(item, color) %}
+   {% set colorClass = "td-runtime-info-" + color %}
+   <li class="{{ colorClass }}">{{ item }}</li>
+{% endmacro %}
+
+{% macro addRuntimeColorClass(color) %}
+   {% set validColors = ['green', 'yellow', 'red'] %}
+   {{ 'td_' + color if color in validColors else '' }}
+{% endmacro %}
+
+{% macro addSonarColorClass(bugs) %}
+   {% if bugs == 0 %}
+      td_green
+   {% elseif bugs < 10 %}
+      td_yellow
+   {% else %}
+      td_red
+   {% endif %}
+{% endmacro %}
+
+{% macro addDepTrackColorClass(critical, high, medium) %}
+   {% if critical == 0 %}
+      td_red
+   {% elseif high != 0 or medium != 0 %}
+      td_yellow
+   {% else %}
+      td_green
+   {% endif %}
 {% endmacro %}
 
 
@@ -68,31 +92,39 @@
             {% for document in documents %}
                {% for service in document.services %}
                   {% set totalRuntimeColor = service.latestVersion.runtime.total %}
+                  {% set githubReleaseColorClass = addReleaseColorClass(service.gitInfo.releases[0].date) %}
 
                   <tr class="transparent_row" data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
                         <td class="td-name">          <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
                         {# <td class="td-git-owner">     <a href="{{ service.gitInfo.repo }}/custom-properties">{{ service.gitInfo.owner }}</a></td> #}
-                        <td class="td-git-version {{ addColorClass(totalRuntimeColor) }}">
+                        <td class="td-git-version {{githubReleaseColorClass }}">
                            <div><u><a href="{{ service.gitInfo.repo }}/releases">{{ service.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></u></div>
                            {% for release in service.gitInfo.releases %} <li><a href="{{ service.gitInfo.repo }}/releases">{{ release.version }}</a></li> {% endfor %}
                         </td>
-                        <td class="td-ecs {{ addColorClass(totalRuntimeColor) }}"> {% for version in service.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
-                        <td class="td-ecs {{ addColorClass(totalRuntimeColor) }}"> {{ service.ecs.staging }} </td>
-                        <td class="td-ecs {{ addColorClass(totalRuntimeColor) }}"> {{ service.ecs.live }} </td>
+                        <td class="td-ecs {{ githubReleaseColorClass }}"> {% for version in service.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
+                        <td class="td-ecs {{ githubReleaseColorClass }}"> {{ service.ecs.staging }} </td>
+                        <td class="td-ecs {{ githubReleaseColorClass }}"> {{ service.ecs.live }} </td>
                         {# <td class="td-git-lang">      {{setLanguage(service.latestVersion.lang, service.gitInfo.lang, service.gitInfo.repo) }}</td> #}
                         <td class="td-runtime">
                            <ul class="td-runtime-info"> {% for info in service.latestVersion.runtime.runtime %}  {{ colorRuntimeItem(info.value, info.color) }} {% endfor %} </ul>
                         </td>
-                        <td class="td-sonar-metrics">
-                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.bugs) }}
+
+                        {% set sonarBugs = service.sonarMetrics.bugs %}
+                        <td class="td-sonar-metrics {{addSonarColorClass(sonarBugs)}}">
+                           {{ sonarLink(sonarUri, service.sonarKey, sonarBugs) }}
                            {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.code_smells) }}
                            {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities) }}
                         </td>
-                        <td class="td-deptrack-metrics">
-                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.critical, "critical", service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.high, "high", service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.medium, "medium", service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.low, "low", service.latestVersion.uuid)}}
+
+                        {% set depTrackCritical = service.latestVersion.metrics.critical %}
+                        {% set depTrackHigh     = service.latestVersion.metrics.high %}
+                        {% set depTrackMedium   = service.latestVersion.metrics.medium %}
+                        {% set depTrackLow      = service.latestVersion.metrics.low %}
+                        <td class="td-deptrack-metrics {{addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium)}}">
+                           {{DepTrackMetrics(depTrackUri, depTrackCritical, "critical", service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, depTrackHigh,     "high",     service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, depTrackMedium,   "medium",   service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, depTrackLow,       "low",     service.latestVersion.uuid)}}
                            {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.vulnerabilities, "vulnerabilities", service.latestVersion.uuid)}}
                         </td>
                   </tr>

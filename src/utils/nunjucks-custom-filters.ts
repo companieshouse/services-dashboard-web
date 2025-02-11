@@ -32,6 +32,22 @@ export const daysAgo = (date: string | Date): string => {
     }
 };
 
+export const daysPassed = (date: string | Date): number => {
+  const currentDate = new Date();
+  const targetDate = new Date(date);
+
+  // Check if targetDate is valid.
+  if (isNaN(targetDate.getTime())) {
+    return NaN;   // return NaN for any unhandled strings
+  }
+  // Calculate time diff (milliseconds)
+  const diffInTime = currentDate.getTime() - targetDate.getTime();
+
+  // Convert to days
+  return Math.floor(diffInTime / (1000 * 60 * 60 * 24));
+};
+
+
 export const urlEncode = (arg: string): string => {
   return encodeURIComponent(arg);
 };

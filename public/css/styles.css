@@ -236,13 +236,13 @@
    background-color: transparent; /* default color */
 }
 
-.runtime_red_row {
+.td_red {
    background-color: #ff8f73; /* default color */
 }
-.runtime_yellow_row {
+.td_yellow {
    background-color: #ffc400
 }
-.runtime_green_row {
+.td_green {
    background-color: #57d9a3;
 }
 

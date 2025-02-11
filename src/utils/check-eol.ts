@@ -14,16 +14,21 @@ export interface RuntimeColorResult {
     runtime: { value: string; color: string }[];
 }
 
+export interface Thresholds {
+  [key: string]: [number, number];
+}
+
 export function checkRuntimesVsEol (
     languageArray: string[],
     runtimeArray: string[],
     endol: EndOfLifeData,
-    thresholds: [number, number]
+    thresholds: Thresholds
 ): RuntimeColorResult {
     const today = new Date();
     const runtimeColors: { value: string; color: string }[] = [];
     let hasRed = false;
     let hasYellow = false;
+    let threshold : string = "default";
 
     // get the language
     const language = languageArray.map(l => l.toLowerCase());
@@ -36,18 +41,21 @@ export function checkRuntimesVsEol (
       //------------ JAVA
       if (language.includes("java")) {
         if (runtime.match(/corretto/i)) {
+          threshold = "amazon-corretto";
           const versionMatch = runtime.match(/\-(\d+)/);
           if (versionMatch) {
               matchedRuntime = endol["amazon-corretto"]?.find(r => r.cycle === versionMatch[1]);
           }
           matchedRuntime = matchedRuntime || redRuntime;
         } else if (runtime.match(/spring-core/i)) {
+          threshold = "spring-framework";
           const versionMatch = runtime.match(/:(\d+\.\d+)/);
           if (versionMatch) {
             matchedRuntime = endol["spring-framework"]?.find(r => r.cycle === versionMatch[1]);
           }
           matchedRuntime = matchedRuntime || redRuntime;
         } else if (runtime.match(/spring-boot/i)) {
+          threshold = "spring-boot";
           const versionMatch = runtime.match(/:(\d+\.\d+)/);
           if (versionMatch) {
             matchedRuntime = endol["spring-boot"]?.find(r => r.cycle === versionMatch[1]);
@@ -56,6 +64,7 @@ export function checkRuntimesVsEol (
         }
       //------------ NODE
       } else if (language.includes("node")) {
+        threshold = "nodejs";
         const versionMatch = runtime.match(/(\d+)/);
         if (versionMatch) {
           matchedRuntime = endol["nodejs"]?.find(r => r.cycle === versionMatch[1]);
@@ -63,6 +72,7 @@ export function checkRuntimesVsEol (
         matchedRuntime = matchedRuntime || redRuntime;
         //------------ GO
       } else if (language.includes("go")) {
+        threshold = "go";
         const versionMatch = runtime.match(/(\d+\.\d+)/);
         if (versionMatch) {
           matchedRuntime = endol["go"]?.find(r => r.cycle === versionMatch[1]);
@@ -75,11 +85,12 @@ export function checkRuntimesVsEol (
 
               const eolDate = parseISO(matchedRuntime.eol);
               const daysUntilEOL = differenceInDays(eolDate, today);
+              const runtimeThreshold: [number, number] = thresholds[threshold] || [90, 180];
 
-              if (daysUntilEOL <= thresholds[0]) {
+              if (daysUntilEOL <= runtimeThreshold[0]) {
                   color = "red";
                   hasRed = true;
-              } else if (daysUntilEOL <= thresholds[1]) {
+              } else if (daysUntilEOL <= runtimeThreshold[1]) {
                   color = "yellow";
                   hasYellow = true;
               }
