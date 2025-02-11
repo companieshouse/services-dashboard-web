@@ -165,8 +165,8 @@ async function tabEndol (req: Request, res: Response) {
 async function tabProdOwner (req: Request, res: Response) {
    try {
       const configData = await mongo.fetchConfig();
-      const documents = await mongo.fetchDocumentsGoupedByScrum();
       const endols = configData?.endol ?? {};
+      const documents = await mongo.fetchDocumentsGoupedByScrum(endols);
       res.render("tabs/tab-prodowner.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
          documents,

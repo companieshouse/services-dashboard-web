@@ -133,3 +133,12 @@
   list-style-position: inside; /* Ensure bullet points align with the text */
  }
 
+.td-runtime-info-red {
+  color: red;
+}
+.td-runtime-info-orange {
+  color: orange;
+}
+.td-runtime-info-green {
+  color: green;
+}

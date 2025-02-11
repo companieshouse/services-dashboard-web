@@ -1,5 +1,10 @@
 {% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
 
+{% macro colorRuntimeItem(item, color) %}
+  {% set colorClass = "td-runtime-info-" + color %}
+  <li class="{{ colorClass }}">{{ item }}</li>
+{% endmacro %}
+
  <div class="tab-container">
   <div class="tab-container-left-col">
       <!-- Master checkbox to control all .level1-checkbox -->
@@ -58,11 +63,7 @@
                         <td class="td-ecs"> {{ service.ecs.live }} </td>
                         {# <td class="td-git-lang">      {{setLanguage(service.latestVersion.lang, service.gitInfo.lang, service.gitInfo.repo) }}</td> #}
                         <td class="td-runtime">
-                           {% if service.latestVersion.runtime.length > 1 %}
-                              <ul class="td-runtime-info"> {% for info in service.latestVersion.runtime %} <li>{{ info }}</li> {% endfor %} </ul>
-                           {% else %}
-                              {{ service.latestVersion.runtime[0] }}
-                           {% endif %}
+                           <ul class="td-runtime-info"> {% for info in service.latestVersion.runtime.runtime %}  {{ colorRuntimeItem(info.value, info.color) }} {% endfor %} </ul>
                         </td>
                         <td class="td-sonar-metrics">
                            {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.bugs) }}

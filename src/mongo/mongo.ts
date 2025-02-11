@@ -3,6 +3,8 @@ import { Db, MongoClient, ObjectId, ClientSession } from "mongodb";
 import * as config from "../config";
 import * as type from '../common/types';
 import {logger, logErr} from "../utils/logger";
+import {checkRuntimesVsEol, EndOfLifeData} from "../utils/check-eol";
+
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
@@ -99,7 +101,7 @@ async function fetchDocuments(queryParams?: type.QueryParameters) {
  }
 
 // Aggregate the documents by gitinfo.owner & keep the latest version only
-async function fetchDocumentsGoupedByScrum() {
+async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData) {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
 
@@ -119,13 +121,6 @@ async function fetchDocumentsGoupedByScrum() {
                sonarMetrics: { $first: "$sonarMetrics" },
                gitInfo: { $first: "$gitInfo" },
                ecs: { $first: "$ecs" }
-            }
-         },
-         {
-            $addFields: {
-               "latestVersion.runtime": {
-                  $split: ["$latestVersion.runtime", " "]
-               }
             }
          },
          {
@@ -160,7 +155,30 @@ async function fetchDocumentsGoupedByScrum() {
           }
       ], { session: mongoSession }).toArray(); // cursor --> array
       // console.log(JSON.stringify(documents, null, 2));
-      return documents;
+
+      const transformedDocuments = documents.map((team) => ({
+         ...team,
+         services: team.services.map((service: any) => {
+             if (service.latestVersion?.runtime) {
+                 const runtimeStr = service.latestVersion.runtime;
+                 const langArray = [service.latestVersion.lang, service.gitInfo.lang];
+               //   console.log(`-------------- runtimeStr: ${runtimeStr}`);
+
+                 const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, [90, 180]);
+
+                 return {
+                     ...service,
+                     latestVersion: {
+                         ...service.latestVersion,
+                         runtime: runtimeColorResult,
+                     },
+                 };
+             }
+             return service;
+         }),
+      }));
+
+      return transformedDocuments;
    } catch (error) {
       logErr(error, "Error fetching documents:");
       return [];
