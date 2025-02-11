@@ -1,0 +1,125 @@
+import { differenceInDays, parseISO } from "date-fns";
+
+export interface RuntimeInfo {
+    cycle: string;
+    eol: string | boolean;
+}
+
+export interface EndOfLifeData {
+    [key: string]: RuntimeInfo[];
+}
+
+export interface RuntimeColorResult {
+    total: string;
+    runtime: { value: string; color: string }[];
+}
+
+export function checkRuntimesVsEol (
+    languageArray: string[],
+    runtimeArray: string[],
+    endol: EndOfLifeData,
+    thresholds: [number, number]
+): RuntimeColorResult {
+    const today = new Date();
+    const runtimeColors: { value: string; color: string }[] = [];
+    let hasRed = false;
+    let hasYellow = false;
+
+    // get the language
+    const language = languageArray.map(l => l.toLowerCase());
+
+    runtimeArray.forEach(runtime => {
+      let matchedRuntime: RuntimeInfo | undefined;
+      const redRuntime: RuntimeInfo = { cycle: "", eol: true };
+      let color = "green"; // default
+
+      //------------ JAVA
+      if (language.includes("java")) {
+        if (runtime.match(/corretto/i)) {
+          const versionMatch = runtime.match(/\-(\d+)/);
+          if (versionMatch) {
+              matchedRuntime = endol["amazon-corretto"]?.find(r => r.cycle === versionMatch[1]);
+          }
+          matchedRuntime = matchedRuntime || redRuntime;
+        } else if (runtime.match(/spring-core/i)) {
+          const versionMatch = runtime.match(/:(\d+\.\d+)/);
+          if (versionMatch) {
+            matchedRuntime = endol["spring-framework"]?.find(r => r.cycle === versionMatch[1]);
+          }
+          matchedRuntime = matchedRuntime || redRuntime;
+        } else if (runtime.match(/spring-boot/i)) {
+          const versionMatch = runtime.match(/:(\d+\.\d+)/);
+          if (versionMatch) {
+            matchedRuntime = endol["spring-boot"]?.find(r => r.cycle === versionMatch[1]);
+          }
+          matchedRuntime = matchedRuntime || redRuntime;
+        }
+      //------------ NODE
+      } else if (language.includes("node")) {
+        const versionMatch = runtime.match(/(\d+)/);
+        if (versionMatch) {
+          matchedRuntime = endol["nodejs"]?.find(r => r.cycle === versionMatch[1]);
+        }
+        matchedRuntime = matchedRuntime || redRuntime;
+        //------------ GO
+      } else if (language.includes("go")) {
+        const versionMatch = runtime.match(/(\d+\.\d+)/);
+        if (versionMatch) {
+          matchedRuntime = endol["go"]?.find(r => r.cycle === versionMatch[1]);
+        }
+        matchedRuntime = matchedRuntime || redRuntime;
+      }
+
+      if (matchedRuntime) {
+          if (typeof matchedRuntime.eol === "string") {
+
+              const eolDate = parseISO(matchedRuntime.eol);
+              const daysUntilEOL = differenceInDays(eolDate, today);
+
+              if (daysUntilEOL <= thresholds[0]) {
+                  color = "red";
+                  hasRed = true;
+              } else if (daysUntilEOL <= thresholds[1]) {
+                  color = "yellow";
+                  hasYellow = true;
+              }
+          } else if (matchedRuntime.eol === false) {
+              color = "green";
+          } else if (matchedRuntime.eol === true) {
+              color = "red";
+              hasRed = true;
+          }
+      } else { color = "none"; }
+
+      runtimeColors.push({ value: runtime, color });
+    });
+
+    let totalColor = "green";
+    if (hasRed) {
+        totalColor = "red";
+    } else if (hasYellow) {
+        totalColor = "yellow";
+    }
+    // console.log(`------------------- matchedRuntime: ${JSON.stringify({total: totalColor, runtime: runtimeColors}, null, 2)}`);
+
+    return {
+        total: totalColor,
+        runtime: runtimeColors
+    };
+}
+// // Example usage
+// const projectRuntime = [
+//     "21.0.1",
+//     "java-21-amazon-corretto.x86_64",
+//     "spring-core:5.2.12.release",
+//     "spring-boot-starter:2.3.7.release"
+// ];
+
+// const languageList = ["Java"]; // Determines that it's Java
+// const eolThresholds: [number, number] = [90, 180]; // Custom thresholds (90 days for red, 180 for yellow)
+
+// const eolData: EndOfLifeData = {
+//     // Mock data structure similar to your MongoDB document
+// };
+
+// console.log(getRuntimeColor(projectRuntime, eolData, languageList, eolThresholds));
