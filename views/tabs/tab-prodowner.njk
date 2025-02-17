@@ -32,7 +32,7 @@
 {% endmacro %}
 
 {% macro addDepTrackColorClass(critical, high, medium) %}
-   {% if critical == 0 %}
+   {% if critical != 0 %}
       td_red
    {% elseif high != 0 or medium != 0 %}
       td_yellow
