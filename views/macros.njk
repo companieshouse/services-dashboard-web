@@ -22,7 +22,8 @@
   {% endif %}
 {% endmacro %}
 
-{% macro sonarLink(sonarUri, sonarKey, val, tooltip, class) %}
+
+{% macro sonarLink(sonarUri, sonarKey, val, tooltip) %}
    <span title="{{ tooltip }}">
       {% if sonarKey %}
          <a class="sonar-link" href="{{ sonarUri }}/dashboard?id={{ sonarKey | urlencode }}">{{val}}</a>

@@ -31,6 +31,17 @@
    {% endif %}
 {% endmacro %}
 
+
+{% macro sonarTD(sonarUri, sonarKey, val, tooltip, class) %}
+   {% if val and val != 0 %}
+      <div class="rounded-number sr-metric-{{ class }}-back">
+   {% else %}
+      <div class="front-number sr-metric-{{ class }}-front">
+   {% endif %}
+      {{ sonarLink(sonarUri, sonarKey, val, tooltip) }}
+      </div>
+{% endmacro %}
+
 {% macro addDepTrackColorClass(critical, high, medium) %}
    {% if critical != 0 %}
       td_red
@@ -111,9 +122,9 @@
 
                         {% set sonarBugs = service.sonarMetrics.bugs %}
                         <td class="td-sonar-metrics {{addSonarColorClass(sonarBugs)}}">
-                           {{ sonarLink(sonarUri, service.sonarKey, sonarBugs, "bugs", "bugs") }}
-                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.code_smells, "code smells", "codesmell") }}
-                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities, "vulnerabilities", "vulnerabilities") }}
+                           {{ sonarTD(sonarUri, service.sonarKey, sonarBugs, "bugs", "bugs") }}
+                           {{ sonarTD(sonarUri, service.sonarKey, service.sonarMetrics.code_smells, "code smells", "codesmell") }}
+                           {{ sonarTD(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities, "vulnerabilities", "vulnerabilities") }}
                         </td>
 
                         {% set depTrackCritical = service.latestVersion.metrics.critical %}
