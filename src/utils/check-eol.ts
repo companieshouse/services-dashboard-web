@@ -1,4 +1,5 @@
 import { differenceInDays, parseISO } from "date-fns";
+import { logger } from "./logger";
 
 export interface RuntimeInfo {
     cycle: string;
@@ -118,19 +119,3 @@ export function checkRuntimesVsEol (
         runtime: runtimeColors
     };
 }
-// // Example usage
-// const projectRuntime = [
-//     "21.0.1",
-//     "java-21-amazon-corretto.x86_64",
-//     "spring-core:5.2.12.release",
-//     "spring-boot-starter:2.3.7.release"
-// ];
-
-// const languageList = ["Java"]; // Determines that it's Java
-// const eolThresholds: [number, number] = [90, 180]; // Custom thresholds (90 days for red, 180 for yellow)
-
-// const eolData: EndOfLifeData = {
-//     // Mock data structure similar to your MongoDB document
-// };
-
-// console.log(getRuntimeColor(projectRuntime, eolData, languageList, eolThresholds));

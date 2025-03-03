@@ -111,9 +111,9 @@
 
                         {% set sonarBugs = service.sonarMetrics.bugs %}
                         <td class="td-sonar-metrics {{addSonarColorClass(sonarBugs)}}">
-                           {{ sonarLink(sonarUri, service.sonarKey, sonarBugs) }}
-                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.code_smells) }}
-                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities) }}
+                           {{ sonarLink(sonarUri, service.sonarKey, sonarBugs, "bugs", "bugs") }}
+                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.code_smells, "code smells", "codesmell") }}
+                           {{ sonarLink(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities, "vulnerabilities", "vulnerabilities") }}
                         </td>
 
                         {% set depTrackCritical = service.latestVersion.metrics.critical %}
@@ -124,7 +124,7 @@
                            {{DepTrackMetrics(depTrackUri, depTrackCritical, "critical", service.latestVersion.uuid)}}
                            {{DepTrackMetrics(depTrackUri, depTrackHigh,     "high",     service.latestVersion.uuid)}}
                            {{DepTrackMetrics(depTrackUri, depTrackMedium,   "medium",   service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, depTrackLow,       "low",     service.latestVersion.uuid)}}
+                           {{DepTrackMetrics(depTrackUri, depTrackLow,      "low",      service.latestVersion.uuid)}}
                            {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.vulnerabilities, "vulnerabilities", service.latestVersion.uuid)}}
                         </td>
                   </tr>

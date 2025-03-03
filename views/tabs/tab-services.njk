@@ -111,10 +111,10 @@
                      <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
 
                      <!-- 4 Columns (sonar Metrics) -->
-                     <td class="td-met-coverage">       {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage) }}</td>
-                     <td class="td-met-bugs">           {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs) }}</td>
-                     <td class="td-met-smells">         {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells) }}</td>
-                     <td class="td-met-vulnerabilities">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities) }}</td>
+                     <td class="td-met-coverage">       {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage, "coverage") }}</td>
+                     <td class="td-met-bugs">           {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs, "bugs") }}</td>
+                     <td class="td-met-smells">         {{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells, "code smells") }}</td>
+                     <td class="td-met-vulnerabilities">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
 
                      <!-- 2 Columns Version & Runtime-->
                      <td class="td-version">{{ version.version }}</td>

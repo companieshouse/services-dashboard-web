@@ -67,7 +67,9 @@
    text-decoration: none;
    color: inherit; /* Inherit color from parent */
 }
-
+.tab-container-main-col td {
+   border: 1px solid #353030;
+}
 /* ------------ CSS FOR RUNTIME LIST ------------ */
 
 .td-runtime-info {
