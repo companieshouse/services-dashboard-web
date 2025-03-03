@@ -23,19 +23,13 @@
 {% endmacro %}
 
 {% macro sonarLink(sonarUri, sonarKey, val, tooltip, class) %}
-    {% if val and val != 0 %}
-      <div class="rounded-number sr-metric-{{ class }}-back">
-    {% else %}
-      <div class="front-number sr-metric-{{ class }}-front">
-    {% endif %}
-         <span title="{{ tooltip }}">
-            {% if sonarKey %}
-               <a class="sonar-link" href="{{ sonarUri }}/dashboard?id={{ sonarKey | urlencode }}">{{val}}</a>
-            {% else %}
-               {{ val }}
-            {% endif %}
-         </span>
-      </div>
+   <span title="{{ tooltip }}">
+      {% if sonarKey %}
+         <a class="sonar-link" href="{{ sonarUri }}/dashboard?id={{ sonarKey | urlencode }}">{{val}}</a>
+      {% else %}
+         {{ val }}
+      {% endif %}
+   </span>
 {% endmacro %}
 
 {% macro depTrackLink(depTrackUri, metricVal, uuid, arg) %}
