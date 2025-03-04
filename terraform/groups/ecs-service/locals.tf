@@ -4,6 +4,10 @@ locals {
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "services-dashboard-web"
+
+  stack_secrets_path          = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
+  service_secrets_path        = "${local.stack_secrets_path}/services-dashboard"
+
   container_port              = "3000" # default node port required here until prod docker container is built allowing port change via env var
   docker_repo                 = "services-dashboard-web"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"

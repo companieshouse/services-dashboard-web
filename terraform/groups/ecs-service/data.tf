@@ -1,5 +1,5 @@
 data "vault_generic_secret" "stack_secrets" {
-  path = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
+  path = local.stack_secrets_path
 }
 
 data "aws_kms_key" "kms_key" {
@@ -7,7 +7,7 @@ data "aws_kms_key" "kms_key" {
 }
 
 data "vault_generic_secret" "service_secrets" {
-  path = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack/${local.service_name}"
+  path = local.service_secrets_path
 }
 
 data "aws_vpc" "vpc" {
