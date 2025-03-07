@@ -1,10 +1,10 @@
 {% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
 
-{% macro addReleaseColorClass(date) %}
+{% macro addColorClass(date, min, max) %}
    {% set daysago = date | daysPassed %}
-   {% if daysago >= 180 %}
+   {% if daysago >= max %}
       td_red
-   {% elseif daysago >= 90 %}
+   {% elseif daysago >= min %}
       td_yellow
    {% else %}
       td_green
@@ -103,7 +103,7 @@
             {% for document in documents %}
                {% for service in document.services %}
                   {% set totalRuntimeColor = service.latestVersion.runtime.total %}
-                  {% set githubReleaseColorClass = addReleaseColorClass(service.gitInfo.releases[0].date) %}
+                  {% set githubReleaseColorClass = addColorClass(service.gitInfo.releases[0].date, thresholdsGitRelease[0], thresholdsGitRelease[1]) %}
 
                   <tr class="transparent_row" data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
                         <td class="td-name">          <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>

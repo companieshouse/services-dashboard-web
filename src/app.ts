@@ -174,6 +174,7 @@ async function tabProdOwner (req: Request, res: Response) {
          basePath: config.ENDPOINT_DASHBOARD,
          documents,
          endols,
+         thresholdsGitRelease: thresholds.gitRelease,
          depTrackUri: config.DEP_TRACK_URI,
          sonarUri: config.SONAR_URI
       });
