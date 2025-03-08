@@ -108,7 +108,7 @@
                      <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
                      <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
                      <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %}   <li>{{ release.version }}</li> {% endfor %} </a></td>
-                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
+                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span><br>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
 
                      <!-- 4 Columns (sonar Metrics) -->
                      <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage, "coverage") }}</td>
@@ -127,12 +127,12 @@
                      </td>
 
                      <!-- 3 Columns ECS -->
-                     <td class="td-ecs"> {% for version in document.ecs.cidev %}   <li>{{ version }}</li> {% endfor %} </td>
-                     <td class="td-ecs"> {% for version in document.ecs.staging %} <li>{{ version }}</li> {% endfor %} </td>
-                     <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.cidev %}   <li>{{ version.version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.staging %} <li>{{ version.version }}</li> {% endfor %} </td>
+                     <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version.version }}</li> {% endfor %} </td>
 
                      <!-- 7 Columns Dep Track (Version specific) -->
-                     <td class="td-bom-import"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span>{{addDaysAgo( version.lastBomImport ) }}</td>
+                     <td class="td-bom-import"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br>{{addDaysAgo( version.lastBomImport ) }}</td>
                      <td class="td-critical">
                         {{DepTrackMetrics(depTrackUri, version.metrics.critical, "critical", version.uuid)}}
                      </td>

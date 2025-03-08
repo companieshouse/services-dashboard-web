@@ -1,20 +1,39 @@
 {% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
 
-{% macro addColorClass(date, min, max) %}
-   {% set daysago = date | daysPassed %}
-   {% if daysago >= max %}
-      td_red
-   {% elseif daysago >= min %}
-      td_yellow
+{% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
+   {% set color = "red" %}
+
+   {% if ReleaseDate %}
+
+      {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
+      {% set daysago = ReleaseDate | daysPassed %}
+
+      {% if daysago >= max %}
+         {% set color = "red" %}
+      {% elseif daysago >= min %}
+         {% set color = "yellow" %}
+      {% else %}
+         {% set color = "green" %}
+      {% endif %}
+
    {% else %}
-      td_green
+      {% set ReleaseDate = "no date loaded" %}
    {% endif %}
+   {% set colorClass = "td-git-version-" + color %}
+
+   <span title="{{ ReleaseDate }}">
+      <li class="{{ colorClass }}">
+         <a class="{{ colorClass }}" href="{{ repoLink }}/releases/tag/{{ version }}">{{ version }}</a>{{addDaysAgo( ReleaseDate ) }}
+      </li>
+   </span>
 {% endmacro %}
+
 
 {% macro colorRuntimeItem(item, color) %}
    {% set colorClass = "td-runtime-info-" + color %}
    <li class="{{ colorClass }}">{{ item }}</li>
 {% endmacro %}
+
 
 {% macro addRuntimeColorClass(color) %}
    {% set validColors = ['green', 'yellow', 'red'] %}
@@ -103,19 +122,37 @@
             {% for document in documents %}
                {% for service in document.services %}
                   {% set totalRuntimeColor = service.latestVersion.runtime.total %}
-                  {% set githubReleaseColorClass = addColorClass(service.gitInfo.releases[0].date, thresholdsGitRelease[0], thresholdsGitRelease[1]) %}
 
                   <tr class="transparent_row" data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
-                        <td class="td-name">          <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
-                        {# <td class="td-git-owner">     <a href="{{ service.gitInfo.repo }}/custom-properties">{{ service.gitInfo.owner }}</a></td> #}
-                        <td class="td-git-version {{githubReleaseColorClass }}">
-                           <div><u><a href="{{ service.gitInfo.repo }}/releases">{{ service.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></u></div>
-                           {% for release in service.gitInfo.releases %} <li><a href="{{ service.gitInfo.repo }}/releases">{{ release.version }}</a></li> {% endfor %}
+                        <td class="td-name"> <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
+                        <td class="td-git-version">
+                           <ul class="td-git-version-info">
+                              {% for release in service.gitInfo.releases %}
+                                 {{ gitReleaseInfo(release.version, release.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo)}}
+                              {% endfor %}
+                           </ul>
                         </td>
-                        <td class="td-ecs {{ githubReleaseColorClass }}"> {% for version in service.ecs.cidev %} <li>{{ version }}</li> {% endfor %} </td>
-                        <td class="td-ecs {{ githubReleaseColorClass }}"> {{ service.ecs.staging }} </td>
-                        <td class="td-ecs {{ githubReleaseColorClass }}"> {{ service.ecs.live }} </td>
-                        {# <td class="td-git-lang">      {{setLanguage(service.latestVersion.lang, service.gitInfo.lang, service.gitInfo.repo) }}</td> #}
+                        <td class="td-ecs">
+                           <ul class="td-git-version-info">
+                              {% for version in service.ecs.cidev %}
+                                 {{ gitReleaseInfo(version.version, version.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo)}}
+                              {% endfor %}
+                           </ul>
+                        </td>
+                        <td class="td-ecs">
+                           <ul class="td-git-version-info">
+                              {% for version in service.ecs.staging %}
+                                 {{ gitReleaseInfo(version.version, version.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo)}}
+                              {% endfor %}
+                           </ul>
+                        </td>
+                        <td class="td-ecs">
+                           <ul class="td-git-version-info">
+                              {% for version in service.ecs.live %}
+                                 {{ gitReleaseInfo(version.version, version.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo)}}
+                              {% endfor %}
+                           </ul>
+                        </td>
                         <td class="td-runtime">
                            <ul class="td-runtime-info"> {% for info in service.latestVersion.runtime.runtime %}  {{ colorRuntimeItem(info.value, info.color) }} {% endfor %} </ul>
                         </td>

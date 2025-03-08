@@ -49,8 +49,9 @@
 .td-git-owner a,
 .td-git-lang a,
 .td-git-version a,
-.td-git-date a {
-   color: rgb(0, 0, 0);
+.td-git-date a,
+.td-ecs a {
+   /* color: rgb(0, 0, 0); */
    text-decoration: none;
 }
 .td-name a {
@@ -70,20 +71,26 @@
 .tab-container-main-col td {
    border: 1px solid #353030;
 }
+
 /* ------------ CSS FOR RUNTIME LIST ------------ */
 
+.td-git-version-info,
 .td-runtime-info {
   margin-left: 0;     /* Remove left margin */
   padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
   list-style-position: inside; /* Ensure bullet points align with the text */
  }
 
+.td-git-version-red,
 .td-runtime-info-red {
   color: red;
 }
+.td-git-version-yellow,
 .td-runtime-info-yellow {
   color: orange;
 }
-.td-runtime-info-green {
+.td-git-version-green,
+.td-runtime-info-green
+ {
   color: green;
 }
