@@ -1,73 +1,29 @@
 import { Tab } from './main.js';
 
+const tabId = 'tab-prodowner-id';
 const tabTableId = 'tab-table-id';
 const masterCheckboxId = 'masterCheckbox-id';
 const classLevel1Checkbox = 'level1-checkbox';
 const classLevel2Checkbox = 'level2-checkbox';
 
 function initialiseTabContent() {
+   initSortDirection();
    initTabTable(tabTableId);
    initMenuCheckBoxes(tabTableId, masterCheckboxId, classLevel1Checkbox, classLevel2Checkbox);
-   initHeaderSelects(tabTableId);
-   loadTabFromState('tab-services-id', window.jsonState);
+   loadTabFromState(tabId, window.jsonState);
    filterTableByCheckboxes(tabTableId);
-   sortTabTable();
+   sortTabTable(lastSortedColumnId);
 }
 
 function generateTabState() {
    console.log("generateTabState for tab-prodowner");
-   const allCheckboxes = getAllCheckboxes(classLevel1Checkbox, classLevel2Checkbox);
-   let checkedIds = ["+"];
-   let uncheckedIds = ["-"];
-
-   allCheckboxes.forEach((checkbox) => {
-         if (checkbox.checked) {
-            checkedIds.push(checkbox.id);
-         } else {
-            uncheckedIds.push(checkbox.id);
-         }
-   });
-
-   const tabState = {
-      sort: `${lastSortedColumnId},${colSortDirection}`,
-      checkboxes:  (checkedIds.length > uncheckedIds.length) ?
-                        uncheckedIds.join(',') :
-                        checkedIds.join(',')
-   };
-   return generateState(tabState);
+   return generateTabCheckboxesState(classLevel1Checkbox, classLevel2Checkbox);
 }
 
 function loadTabFromState(tabId, state) {
-   if (state !== undefined && state.tabId === tabId) {
-      // get csv values
-      const csvValues = state.checkboxes.split(',');
-      console.log(`loading checkboxes state as:${csvValues[0]}`);
-
-      // Get the first value which is either "+" or "-"
-      const operation = csvValues[0];
-
-      const checkboxIds = csvValues.slice(1);
-
-      const allCheckboxes = getAllCheckboxes(classLevel1Checkbox, classLevel2Checkbox);
-      // Determine the initial state we want to operate on
-      const checkedValue = (operation === "+") ? false : true;
-
-      // Init with that state
-      allCheckboxes.forEach(checkbox => checkbox.checked = checkedValue);
-
-      // Toggle the state for the checkboxes whose IDs are in the list
-      checkboxIds.forEach(id => {
-         const checkbox = document.getElementById(id);
-         if (checkbox) checkbox.checked = !checkedValue;
-      });
-      // source sort info
-      [lastSortedColumnId, colSortDirection] = state.sort.split(',');
-
-      // source query info
-      // stateQuery = state.queryArg;
-   } else {
-      setAllCheckboxes(masterCheckboxId);
-   }}
+   console.log("loadTabFromState for tab-prodowner");
+   loadTabCheckboxesFromState(tabId, state, classLevel1Checkbox, classLevel2Checkbox, masterCheckboxId);
+}
 
 const tabProdowner = new Tab(initialiseTabContent, generateTabState, loadTabFromState);
 

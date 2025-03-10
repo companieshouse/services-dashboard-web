@@ -3,9 +3,13 @@
 //======================================
 // keep track of col sort
 // (in order to save the info in the state)
-var lastSortedColumnId = "";
-var colSortDirection = 1; // 1 for ascending, -1 for descending
+var lastSortedColumnId;
+var colSortDirection;
 
+function initSortDirection() {
+   lastSortedColumnId = "";
+   colSortDirection  = 1; // 1 for ascending, -1 for descending
+}
 //======================================
 //       STANDALONE/ GENERAL UTILITIES:
 //======================================
@@ -95,6 +99,63 @@ function loadTabFromState(tabId, state) {
    console.log("loadTabFromState does nothing. Each tab's.js file should implement its own version");
 }
 
+function generateTabCheckboxesState(classLevel1Checkbox, classLevel2Checkbox) {
+   const allCheckboxes = getAllCheckboxes(classLevel1Checkbox, classLevel2Checkbox);
+   let checkedIds = ["+"];
+   let uncheckedIds = ["-"];
+
+   allCheckboxes.forEach((checkbox) => {
+         if (checkbox.checked) {
+            checkedIds.push(checkbox.id);
+         } else {
+            uncheckedIds.push(checkbox.id);
+         }
+   });
+
+   const tabState = {
+      sort: `${lastSortedColumnId},${colSortDirection}`,
+      checkboxes:  (checkedIds.length > uncheckedIds.length) ?
+                        uncheckedIds.join(',') :
+                        checkedIds.join(',')
+   };
+   return generateState(tabState);
+}
+
+function loadTabCheckboxesFromState(tabId, state, classLevel1Checkbox, classLevel2Checkbox, masterCheckboxId) {
+   if (state !== undefined && state.tabId === tabId) {
+      // get csv values
+      const csvValues = state.checkboxes.split(',');
+      console.log(`loading checkboxes state as:${csvValues[0]}`);
+
+      // Get the first value which is either "+" or "-"
+      const operation = csvValues[0];
+
+      const checkboxIds = csvValues.slice(1);
+
+      const allCheckboxes = getAllCheckboxes(classLevel1Checkbox, classLevel2Checkbox);
+      // Determine the initial state we want to operate on
+      const checkedValue = (operation === "+") ? false : true;
+
+      // Init with that state
+      allCheckboxes.forEach(checkbox => checkbox.checked = checkedValue);
+
+      // Toggle the state for the checkboxes whose IDs are in the list
+      checkboxIds.forEach(id => {
+         const checkbox = document.getElementById(id);
+         if (checkbox) checkbox.checked = !checkedValue;
+      });
+      // source sort info
+      [lastSortedColumnId, colSortDirection] = state.sort.split(',');
+
+      // source query info
+      // stateQuery = state.queryArg;
+   } else {
+      setAllCheckboxes(masterCheckboxId);
+   }
+}
+
+
+
 //-----------------------------------
 // function to init all NAME & VERSION checkboxes from the received 'state'
 //-----------------------------------
@@ -130,35 +191,39 @@ function initTabTable(tableId) {
    const table = document.getElementById(tableId);
    const headers = table.querySelectorAll('.row-header-title');
 
-   // Init Col Sort
-   headers.forEach((header, index) => {
-     header.addEventListener('click', (event) => {
-       const type = header.getAttribute('data-type');
-       const tbody = table.querySelector('tbody');
-       const rows = Array.from(tbody.querySelectorAll('tr'));
+   if (table) {
+      // Init Col Sort
+      headers.forEach((header, index) => {
+      header.addEventListener('click', (event) => {
+         const type = header.getAttribute('data-type');
+         const tbody = table.querySelector('tbody');
+         const rows = Array.from(tbody.querySelectorAll('tr'));
 
-       rows.sort((a, b) => {
-         const cellA = a.children[index].textContent.trim();
-         const cellB = b.children[index].textContent.trim();
+         rows.sort((a, b) => {
+            const cellA = a.children[index].textContent.trim();
+            const cellB = b.children[index].textContent.trim();
 
-         if (type === 'number') {
-           return (parseFloat(cellA) - parseFloat(cellB)) * colSortDirection;
-         } else if (type === 'date') {
-           return (new Date(cellA) - new Date(cellB)) * colSortDirection;
-         } else {
-           return cellA.localeCompare(cellB) * colSortDirection;
-         }
-       });
-       // keep track of last used column-sort
-       lastSortedColumnId = event.target.id;;
+            if (type === 'number') {
+            return (parseFloat(cellA) - parseFloat(cellB)) * colSortDirection;
+            } else if (type === 'date') {
+            return (new Date(cellA) - new Date(cellB)) * colSortDirection;
+            } else {
+            return cellA.localeCompare(cellB) * colSortDirection;
+            }
+         });
+         // keep track of last used column-sort
+         // note that if there are clicked child elements (e.g. a <span>)
+         // within the <th> element, the event.target may not be the <th> element itself
+         lastSortedColumnId = event.target.closest('th').id;
 
-       // Toggle sort direction
-       colSortDirection *= -1;
+         // Toggle sort direction
+         colSortDirection *= -1;
 
-       // Re-attach sorted rows to the table
-       rows.forEach(row => tbody.appendChild(row));
-     });
-   });
+         // Re-attach sorted rows to the table
+         rows.forEach(row => tbody.appendChild(row));
+      });
+      });
+   }
 }
 //-------------
 // init 2 - attach header <select>s handlers
@@ -184,7 +249,7 @@ function initHeaderSelects(tableId) {
 //-----------------------------------
 // function to sort the table by saved state's info
 //-----------------------------------
-function sortTabTable() {
+function sortTabTable(lastSortedColumnId) {
       if (lastSortedColumnId) {
          const col = document.getElementById(lastSortedColumnId);
          if (col) {
