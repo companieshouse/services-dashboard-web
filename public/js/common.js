@@ -202,10 +202,11 @@ function filterTableByCheckboxes(tableId) {
    tableRows.forEach(row => {
       const level1 = row.getAttribute('data-level1');
       const level2 = row.getAttribute('data-level2');
-      const isLevel1Checked = document.getElementById(level1).checked;
+      // const isLevel1Checked = document.getElementById(level1).checked;
       const isLevel2Checked = document.getElementById(`${level1}-${level2}`).checked;
 
-      toggleRow (tableId, row, (isLevel1Checked && isLevel2Checked));
+      // toggleRow (tableId, row, (isLevel1Checked && isLevel2Checked));
+      toggleRow (tableId, row, isLevel2Checked);
    });
    updateRowStriping(tableId);
 }
