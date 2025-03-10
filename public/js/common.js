@@ -124,7 +124,7 @@ function generateTabCheckboxesState(classLevel1Checkbox, classLevel2Checkbox) {
 function loadTabCheckboxesFromState(tabId, state, classLevel1Checkbox, classLevel2Checkbox, masterCheckboxId) {
    if (state !== undefined && state.tabId === tabId) {
       // get csv values
-      const csvValues = state.checkboxes.split(',');
+      const csvValues = state.tabState.checkboxes.split(',');
       console.log(`loading checkboxes state as:${csvValues[0]}`);
 
       // Get the first value which is either "+" or "-"
@@ -145,7 +145,7 @@ function loadTabCheckboxesFromState(tabId, state, classLevel1Checkbox, classLeve
          if (checkbox) checkbox.checked = !checkedValue;
       });
       // source sort info
-      [lastSortedColumnId, colSortDirection] = state.sort.split(',');
+      [lastSortedColumnId, colSortDirection] = state.tabState.sort.split(',');
 
       // source query info
       // stateQuery = state.queryArg;
