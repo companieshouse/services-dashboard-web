@@ -159,22 +159,22 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
       const transformedDocuments = documents.map((team) => ({
          ...team,
          services: team.services.map((service: any) => {
-             if (service.latestVersion?.runtime) {
-                 const runtimeStr = service.latestVersion.runtime;
-                 const langArray = [service.latestVersion.lang, service.gitInfo.lang];
+            if (service.latestVersion?.runtime) {
+               const runtimeStr = service.latestVersion.runtime;
+               const langArray = [service.latestVersion.lang, service.gitInfo.lang];
                //   console.log(`-------------- runtimeStr: ${runtimeStr}`);
 
-                 const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
+               const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
 
-                 return {
+               return {
                      ...service,
                      latestVersion: {
-                         ...service.latestVersion,
-                         runtime: runtimeColorResult,
+                        ...service.latestVersion,
+                        runtime: runtimeColorResult,
                      },
-                 };
-             }
-             return service;
+               };
+            }
+            return service;
          }),
       }));
 

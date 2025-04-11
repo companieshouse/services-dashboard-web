@@ -32,7 +32,7 @@ export function checkRuntimesVsEol (
     let threshold : string = "default";
 
     // get the language
-    const language = languageArray.map(l => l.toLowerCase());
+    const language = languageArray.length > 0 ? languageArray.map(l => (l ?? "unknown").toLowerCase()) : ["unknown"];
 
     runtimeArray.forEach(runtime => {
       let matchedRuntime: RuntimeInfo | undefined;
