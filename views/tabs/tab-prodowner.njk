@@ -1,4 +1,4 @@
-{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
+{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
 
 {% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
    {% set color = "red" %}
@@ -82,20 +82,24 @@
       </div>
       <form id="filterForm">
          {% for document in documents %}
-            <div>
-               {# document._id is the scrum name and can contain invalid chars (at least spaces)
-               so those ids should be standardised before using them #}
-               {% set standardId = setStandardId(document._id) %}
-
-               <input type="checkbox" id="{{ standardId }}" class="level1-checkbox" checked>
-               <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }}</label>
+            {% if document %}
                <div>
-               {% for service in document.services %}
-                  <input type="checkbox" id="{{ standardId }}-{{ service.name }}" class="level2-checkbox" data-level1="{{ standardId }}" checked>
-                  <label for="{{ standardId }}-{{ service.name }}" class="label-level2-checkbox">{{ service.name }}</label><br>
-               {% endfor %}
+                  {# document._id is the scrum name and can contain invalid chars (at least spaces)
+                  so those ids should be standardised before using them #}
+                  {% set standardId = setStandardId(document._id) %}
+
+                  <input type="checkbox" id="{{ standardId }}" class="level1-checkbox" checked>
+                  <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }}</label>
+                  <div>
+                  {% for service in document.services %}
+                     {% if service %}
+                        <input type="checkbox" id="{{ standardId }}-{{ service.name }}" class="level2-checkbox" data-level1="{{ standardId }}" checked>
+                        <label for="{{ standardId }}-{{ service.name }}" class="label-level2-checkbox">{{ service.name }}</label><br>
+                     {% endif %}
+                  {% endfor %}
+                  </div>
                </div>
-            </div>
+            {% endif %}
          {% endfor %}
       </form>
   </div>
@@ -118,63 +122,81 @@
          </thead>
          <tbody>
             {% for document in documents %}
-               {% for service in document.services %}
-                  {% set totalRuntimeColor = service.latestVersion.runtime.total %}
+               {% if document %}
+                  {% for service in document.services %}
+                     {% if service %}
+                        {% set totalRuntimeColor = service.latestVersion.runtime.total %}
 
-                  <tr class="transparent_row" data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
-                        <td class="td-name"> <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
-                        <td class="td-git-version">
-                           <ul class="td-git-version-info">
-                              {% for release in service.gitInfo.releases %}
-                                 {{ gitReleaseInfo(release.version, release.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo)}}
-                              {% endfor %}
-                           </ul>
-                        </td>
-                        <td class="td-ecs">
-                           <ul class="td-git-version-info">
-                              {% for version in service.ecs.cidev %}
-                                 {{ gitReleaseInfo(version.version, version.date, thresholdsCidev[0], thresholdsCidev[1],  service.gitInfo.repo)}}
-                              {% endfor %}
-                           </ul>
-                        </td>
-                        <td class="td-ecs">
-                           <ul class="td-git-version-info">
-                              {% for version in service.ecs.staging %}
-                                 {{ gitReleaseInfo(version.version, version.date, thresholdsStaging[0], thresholdsStaging[1],  service.gitInfo.repo)}}
-                              {% endfor %}
-                           </ul>
-                        </td>
-                        <td class="td-ecs">
-                           <ul class="td-git-version-info">
-                              {% for version in service.ecs.live %}
-                                 {{ gitReleaseInfo(version.version, version.date, thresholdsLive[0], thresholdsLive[1],  service.gitInfo.repo)}}
-                              {% endfor %}
-                           </ul>
-                        </td>
-                        <td class="td-runtime">
-                           <ul class="td-runtime-info"> {% for info in service.latestVersion.runtime.runtime %}  {{ colorRuntimeItem(info.value, info.color) }} {% endfor %} </ul>
-                        </td>
+                        <tr class="transparent_row" data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
+                              <td class="td-name"> <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
+                              <td class="td-git-version">
+                                 <ul class="td-git-version-info">
+                                    {% for release in service.gitInfo.releases %}
+                                       {% if release %}
+                                          {{ gitReleaseInfo(release.version, release.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo) }}
+                                       {% endif %}
+                                    {% endfor %}
+                                 </ul>
+                              </td>
+                              <td class="td-ecs">
+                                 <ul class="td-git-version-info">
+                                    {% for version in service.ecs.cidev %}
+                                       {% if version %}
+                                          {{ gitReleaseInfo(version.version, version.date, thresholdsCidev[0], thresholdsCidev[1],  service.gitInfo.repo)}}
+                                       {% endif %}
+                                    {% endfor %}
+                                 </ul>
+                              </td>
+                              <td class="td-ecs">
+                                 <ul class="td-git-version-info">
+                                    {% for version in service.ecs.staging %}
+                                       {% if version %}
+                                          {{ gitReleaseInfo(version.version, version.date, thresholdsStaging[0], thresholdsStaging[1],  service.gitInfo.repo)}}
+                                       {% endif %}
+                                    {% endfor %}
+                                 </ul>
+                              </td>
+                              <td class="td-ecs">
+                                 <ul class="td-git-version-info">
+                                    {% for version in service.ecs.live %}
+                                       {% if version %}
+                                          {{ gitReleaseInfo(version.version, version.date, thresholdsLive[0], thresholdsLive[1],  service.gitInfo.repo)}}
+                                       {% endif %}
+                                    {% endfor %}
+                                 </ul>
+                              </td>
+                              <td class="td-runtime">
+                                 <ul class="td-runtime-info">
+                                 {% for info in service.latestVersion.runtime.runtime %}
+                                    {% if info %}
+                                       {{ colorRuntimeItem(info.value, info.color) }}
+                                    {% endif %}
+                                 {% endfor %}
+                                 </ul>
+                              </td>
 
-                        {% set sonarBugs = service.sonarMetrics.bugs %}
-                        <td class="td-sonar-metrics {{addSonarColorClass(sonarBugs)}}">
-                           {{ sonarTD(sonarUri, service.sonarKey, sonarBugs, "bugs", "bugs") }}
-                           {{ sonarTD(sonarUri, service.sonarKey, service.sonarMetrics.code_smells, "code smells", "codesmell") }}
-                           {{ sonarTD(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities, "vulnerabilities", "vulnerabilities") }}
-                        </td>
+                              {% set sonarBugs = service.sonarMetrics.bugs %}
+                              <td class="td-sonar-metrics {{addSonarColorClass(sonarBugs)}}">
+                                 {{ sonarTD(sonarUri, service.sonarKey, sonarBugs, "bugs", "bugs") }}
+                                 {{ sonarTD(sonarUri, service.sonarKey, service.sonarMetrics.code_smells, "code smells", "codesmell") }}
+                                 {{ sonarTD(sonarUri, service.sonarKey, service.sonarMetrics.vulnerabilities, "vulnerabilities", "vulnerabilities") }}
+                              </td>
 
-                        {% set depTrackCritical = service.latestVersion.metrics.critical %}
-                        {% set depTrackHigh     = service.latestVersion.metrics.high %}
-                        {% set depTrackMedium   = service.latestVersion.metrics.medium %}
-                        {% set depTrackLow      = service.latestVersion.metrics.low %}
-                        <td class="td-deptrack-metrics {{addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium)}}">
-                           {{DepTrackMetrics(depTrackUri, depTrackCritical, "critical", service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, depTrackHigh,     "high",     service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, depTrackMedium,   "medium",   service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, depTrackLow,      "low",      service.latestVersion.uuid)}}
-                           {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.vulnerabilities, "vulnerabilities", service.latestVersion.uuid)}}
-                        </td>
-                  </tr>
-               {% endfor %}
+                              {% set depTrackCritical = service.latestVersion.metrics.critical %}
+                              {% set depTrackHigh     = service.latestVersion.metrics.high %}
+                              {% set depTrackMedium   = service.latestVersion.metrics.medium %}
+                              {% set depTrackLow      = service.latestVersion.metrics.low %}
+                              <td class="td-deptrack-metrics {{addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium)}}">
+                                 {{DepTrackMetrics(depTrackUri, depTrackCritical, "critical", service.latestVersion.uuid)}}
+                                 {{DepTrackMetrics(depTrackUri, depTrackHigh,     "high",     service.latestVersion.uuid)}}
+                                 {{DepTrackMetrics(depTrackUri, depTrackMedium,   "medium",   service.latestVersion.uuid)}}
+                                 {{DepTrackMetrics(depTrackUri, depTrackLow,      "low",      service.latestVersion.uuid)}}
+                                 {{DepTrackMetrics(depTrackUri, service.latestVersion.metrics.vulnerabilities, "vulnerabilities", service.latestVersion.uuid)}}
+                              </td>
+                        </tr>
+                     {% endif %}
+                  {% endfor %}
+               {% endif %}
             {% endfor %}
          </tbody>
     </table>

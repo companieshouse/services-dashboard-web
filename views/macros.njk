@@ -13,13 +13,15 @@
       {% endif %}
 {% endmacro %}
 
-{% macro setLanguage (depTrackLang, gitLang, repo) %}
-  {% if (depTrackLang | lower) === (gitLang | lower) %}
-    <a href="{{ repo }}">{{ gitLang }}</a>
-  {% else %}
-    <li><a href="{{ repo }}">{{ gitLang }}</a></li>
-    <li>{{ depTrackLang }}</li>
-  {% endif %}
+{% macro setLanguage(depTrackLang, gitLang, repo) %}
+   {% if depTrackLang and gitLang and (depTrackLang | lower) == (gitLang | lower) or (depTrackLang and not gitLang) or (gitLang and not depTrackLang) %}
+      <a href="{{ repo }}">{{ depTrackLang or gitLang }}</a>
+   {% elif depTrackLang != gitLang %}
+      <ul>
+         <li><a href="{{ repo }}">{{ gitLang }}</a></li>
+         <li>{{ depTrackLang }}</li>
+      </ul>
+   {% endif %}
 {% endmacro %}
 
 

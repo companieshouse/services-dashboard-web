@@ -10,16 +10,20 @@
       </div>
       <form id="filterForm">
          {% for document in documents %}
-            <div>
-               <input type="checkbox" id="{{ document.name }}" class="level1-checkbox" checked>
-               <label for="{{ document.name }}" class="label-level1-checkbox">{{ document.name }}</label>
+            {% if document %}
                <div>
-                  {% for version in document.versions %}
-                     <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="level2-checkbox" data-level1="{{ document.name }}" checked>
-                     <label for="{{ document.name }}-{{ version.version }}" class="label-level2-checkbox">{{ version.version }}</label><br>
-                  {% endfor %}
+                  <input type="checkbox" id="{{ document.name }}" class="level1-checkbox" checked>
+                  <label for="{{ document.name }}" class="label-level1-checkbox">{{ document.name }}</label>
+                  <div>
+                     {% for version in document.versions %}
+                        {% if version %}
+                           <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="level2-checkbox" data-level1="{{ document.name }}" checked>
+                           <label for="{{ document.name }}-{{ version.version }}" class="label-level2-checkbox">{{ version.version }}</label><br>
+                        {% endif %}
+                     {% endfor %}
+                  </div>
                </div>
-            </div>
+            {% endif %}
          {% endfor %}
       </form>
   </div>
@@ -98,61 +102,65 @@
          </thead>
          <tbody>
          {% for document in documents %}
-            <!-- Iterate over each version entry in versions array -->
-            {% for version in document.versions %}
-               <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}">
-                     <!-- 1st Column (link) -->
-                     <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+            {% if document %}
+               <!-- Iterate over each version entry in versions array -->
+               {% for version in document.versions %}
+                  {% if version %}
+                     <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}">
+                           <!-- 1st Column (link) -->
+                           <td class="td-name"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
 
-                     <!-- 4 Columns (Git info)-->
-                     <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
-                     <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
-                     <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %}   <li>{{ release.version }}</li> {% endfor %} </a></td>
-                     <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span><br>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
+                           <!-- 4 Columns (Git info)-->
+                           <td class="td-git-owner">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
+                           <td class="td-git-lang">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
+                           <td class="td-git-version">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %} {% if release %}<li>{{ release.version }}</li> {% endif %}{% endfor %} </a></td>
+                           <td class="td-git-date"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span><br>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
 
-                     <!-- 4 Columns (sonar Metrics) -->
-                     <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage, "coverage") }}</td>
-                     <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs, "bugs") }}</td>
-                     <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells, "code smells") }}</td>
-                     <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
+                           <!-- 4 Columns (sonar Metrics) -->
+                           <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage, "coverage") }}</td>
+                           <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs, "bugs") }}</td>
+                           <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells, "code smells") }}</td>
+                           <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
 
-                     <!-- 2 Columns Version & Runtime-->
-                     <td class="td-version">{{ version.version }}</td>
-                     <td class="td-runtime">
-                        {% if version.runtime.length > 1 %}
-                           <ul class="td-runtime-info"> {% for info in version.runtime %} <li>{{ info }}</li> {% endfor %} </ul>
-                        {% else %}
-                           {{ version.runtime[0] }}
-                        {% endif %}
-                     </td>
+                           <!-- 2 Columns Version & Runtime-->
+                           <td class="td-version">{{ version.version }}</td>
+                           <td class="td-runtime">
+                              {% if version.runtime.length > 1 %}
+                                 <ul class="td-runtime-info"> {% for info in version.runtime %} {% if info %}<li>{{ info }}</li> {% endif %}{% endfor %} </ul>
+                              {% else %}
+                                 {{ version.runtime[0] }}
+                              {% endif %}
+                           </td>
 
-                     <!-- 3 Columns ECS -->
-                     <td class="td-ecs"> {% for version in document.ecs.cidev %}   <li>{{ version.version }}</li> {% endfor %} </td>
-                     <td class="td-ecs"> {% for version in document.ecs.staging %} <li>{{ version.version }}</li> {% endfor %} </td>
-                     <td class="td-ecs"> {% for version in document.ecs.live %}    <li>{{ version.version }}</li> {% endfor %} </td>
+                           <!-- 3 Columns ECS -->
+                           <td class="td-ecs"> {% for version in document.ecs.cidev %}   {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
+                           <td class="td-ecs"> {% for version in document.ecs.staging %} {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
+                           <td class="td-ecs"> {% for version in document.ecs.live %}    {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
 
-                     <!-- 7 Columns Dep Track (Version specific) -->
-                     <td class="td-bom-import"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br>{{addDaysAgo( version.lastBomImport ) }}</td>
-                     <td class="td-critical">
-                        {{DepTrackMetrics(depTrackUri, version.metrics.critical, "critical", version.uuid)}}
-                     </td>
-                     <td class="td-deptrack-high">
-                        {{DepTrackMetrics(depTrackUri, version.metrics.high, "high", version.uuid)}}
-                     </td>
-                     <td class="td-deptrack-medium">
-                        {{DepTrackMetrics(depTrackUri, version.metrics.medium, "medium", version.uuid)}}
-                     </td>
-                     <td class="td-deptrack-low">
-                        {{DepTrackMetrics(depTrackUri, version.metrics.low, "low", version.uuid)}}
-                     </td>
-                     <td class="td-deptrack-vulnerabilities">
-                        {{DepTrackMetrics(depTrackUri, version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
-                     </td>
-                     <td class="td-deptrack-components">
-                        {{DepTrackMetrics(depTrackUri, version.metrics.components, "components", version.uuid, "components")}}
-                     </td>
-            </tr>
-            {% endfor %}
+                           <!-- 7 Columns Dep Track (Version specific) -->
+                           <td class="td-bom-import"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br>{{addDaysAgo( version.lastBomImport ) }}</td>
+                           <td class="td-critical">
+                              {{DepTrackMetrics(depTrackUri, version.metrics.critical, "critical", version.uuid)}}
+                           </td>
+                           <td class="td-deptrack-high">
+                              {{DepTrackMetrics(depTrackUri, version.metrics.high, "high", version.uuid)}}
+                           </td>
+                           <td class="td-deptrack-medium">
+                              {{DepTrackMetrics(depTrackUri, version.metrics.medium, "medium", version.uuid)}}
+                           </td>
+                           <td class="td-deptrack-low">
+                              {{DepTrackMetrics(depTrackUri, version.metrics.low, "low", version.uuid)}}
+                           </td>
+                           <td class="td-deptrack-vulnerabilities">
+                              {{DepTrackMetrics(depTrackUri, version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
+                           </td>
+                           <td class="td-deptrack-components">
+                              {{DepTrackMetrics(depTrackUri, version.metrics.components, "components", version.uuid, "components")}}
+                           </td>
+                     </tr>
+                  {% endif %}
+               {% endfor %}
+            {% endif %}
          {% endfor %}
          </tbody>
     </table>
