@@ -1,4 +1,4 @@
-/* public/css/styles.css */
+/* public/css/common.css */
 
 /* Reset styles */
 * {
@@ -10,6 +10,7 @@
  body, html {
    height: 100%;
    font-family: Arial, sans-serif;
+   font-size: 12px;
  }
 /* ------------ HEADER  & FOOTER ------------ */
 
@@ -370,3 +371,86 @@ color: #734a77;
 .dt-metric-components-front {
 color: #898df3;
 }
+
+
+
+/* ------------ CSS common FOR services * prodowner <START> ------------ */
+/* public/css/tab/tab-services.css */
+
+.tab-container-main-col thead tr:nth-child(2) th {
+   top: 40px; /* value based on the height of the first row */
+   z-index: 4; /* This ensures the second row stays above the first */
+ }
+
+
+ .group-header {
+       font-size: 14px;
+
+       /* define height for group header row for better alignment */
+       height: 40px;
+     }
+     .group-service,
+     .group-sonar,
+     .group-ecs {
+       background-color: #e1b4b4;
+     }
+
+     .group-git,
+     .group-version,
+     .group-deptrack {
+       background-color: #f6a8a8;
+     }
+
+    .header-service,
+    .header-sonar-metric,
+    .header-ecs {
+       background-color: #9e9c9c;
+    }
+
+    .header-git,
+    .header-version,
+    .header-deptrack {
+       background-color: #c7c6c6;
+    }
+
+ /* ------------ CSS FOR TABLE HEADER ------------ */
+ .header-sonar-metric span,
+ .header-ecs span,
+ .header-dt-metric span {
+    writing-mode: vertical-rl;
+    transform: scale(1);
+ }
+
+ /* ------------ CSS FOR TABLE TD ------------ */
+ .td-name a,
+ .td-git-owner a,
+ .td-git-lang a,
+ .td-git-version a,
+ .td-git-date a,
+ .td-ecs a {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+ }
+ .td-name a {
+    color: rgb(224, 118, 52);
+ }
+ .td-version {
+    background-color: #ddd;
+    color: rgb(224, 118, 52);
+ }
+ .deptrack-link,
+ .sonar-link  {
+    text-decoration: none;
+    color: inherit; /* Inherit color from parent */
+ }
+
+ /* ------------ CSS FOR RUNTIME LIST ------------ */
+
+ .td-git-version-info,
+ .td-runtime-info {
+   margin-left: 0;     /* Remove left margin */
+   padding-left: 0px;  /* Reduce left padding (or set to 0 for no indentation) */
+   list-style-position: inside; /* Ensure bullet points align with the text */
+  }
+
+/* ------------ CSS common FOR services * prodowner <END> ------------ */
