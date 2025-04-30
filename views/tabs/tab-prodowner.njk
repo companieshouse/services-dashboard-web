@@ -21,11 +21,9 @@
    {% endif %}
    {% set colorClass = "td-git-version-" + color %}
 
-   <span title="{{ ReleaseDate }}">
-      <li class="{{ colorClass }}">
-         <a class="{{ colorClass }}" href="{{ repoLink }}/releases/tag/{{ version }}">{{ version }}</a>{{addDaysAgo( ReleaseDate ) }}
-      </li>
-   </span>
+   <li class="{{ colorClass }}" title="{{ ReleaseDate }}">
+      <a class="{{ colorClass }}" href="{{ repoLink }}/releases/tag/{{ version }}">{{ version }}</a>{{addDaysAgo( ReleaseDate ) }}
+   </li>
 {% endmacro %}
 
 
