@@ -172,10 +172,16 @@
    border-bottom: 1px solid #ccc;
    z-index: 10;
 }
+.no-wrap-inline-contents {
+   white-space: nowrap; /* Prevents line wrapping for inline child-elems (ex. checkbox and labels to go on different lines) */
+}
 
 .label-level1-checkbox {
    white-space: nowrap; /* Prevents text from wrapping (even at natural breakpoints like dashes (-)) */
    color: rgb(224, 118, 52);
+}
+.label-level2-checkbox {
+   white-space: nowrap; /* Prevents wrapping */
 }
 
 /* ------------ SINGLE TAB - MAIN COL  ------------ */

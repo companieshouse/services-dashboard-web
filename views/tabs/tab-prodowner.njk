@@ -81,14 +81,14 @@
       <form id="filterForm">
          {% for document in documents %}
             {% if document %}
-               <div>
+               <div class="no-wrap-inline-contents">
                   {# document._id is the scrum name and can contain invalid chars (at least spaces)
                   so those ids should be standardised before using them #}
                   {% set standardId = setStandardId(document._id) %}
 
                   <input type="checkbox" id="{{ standardId }}" class="level1-checkbox" checked>
                   <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }}</label>
-                  <div>
+                  <div class="no-wrap-inline-contents">
                   {% for service in document.services %}
                      {% if service %}
                         <input type="checkbox" id="{{ standardId }}-{{ service.name }}" class="level2-checkbox" data-level1="{{ standardId }}" checked>

@@ -11,10 +11,10 @@
       <form id="filterForm">
          {% for document in documents %}
             {% if document %}
-               <div>
+                  <div class="no-wrap-inline-contents">
                   <input type="checkbox" id="{{ document.name }}" class="level1-checkbox" checked>
                   <label for="{{ document.name }}" class="label-level1-checkbox">{{ document.name }}</label>
-                  <div>
+                  <div class="no-wrap-inline-contents">
                      {% for version in document.versions %}
                         {% if version %}
                            <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="level2-checkbox" data-level1="{{ document.name }}" checked>
