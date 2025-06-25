@@ -221,6 +221,7 @@ function initTabTable(tableId) {
 
          // Re-attach sorted rows to the table
          rows.forEach(row => tbody.appendChild(row));
+         updateRowStriping(tableId);
       });
       });
    }
