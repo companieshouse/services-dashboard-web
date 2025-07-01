@@ -8,5 +8,5 @@ export default () => {
   process.env.CDN_URL="d3miau0r8stw5u.cloudfront.net"
   process.env.PORT="3000"
   process.env.DEP_TRACK_SERVER="https://dependency-track.companieshouse.gov.uk"
-  process.env.SONAR_SERVER="https://code-analysis.platform.aws.chdev.org"
+  process.env.SONAR_SERVER="https://sonarqube.companieshouse.gov.uk"
 };
