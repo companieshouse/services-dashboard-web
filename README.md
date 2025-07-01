@@ -35,3 +35,4 @@ Run the following command from the terminal.
 ```sh
 docker run --env-file .env -it --rm -p 3000:3000 local-services-dashboard
 ```
+Access the service from  http://localhost:3000/dashboard in the browser.
