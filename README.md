@@ -1,6 +1,6 @@
 # services-dashboard-web
 
-This service is the web component of the service's dashboard.
+This service is the web component of the services dashboard.
 _(Please refer to the main documentation in [services-dashboard-api](https://github.com/companieshouse/services-dashboard-api/) for an overview)._
 
 It is primarily designed to display information stored in Mongo that has been collected by other components of the dashboard.
