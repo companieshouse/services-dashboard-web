@@ -110,7 +110,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
 
       const tabs = Object.entries(tabsMap).map(([key, value]) => {
          return { key, title: value.title };
-         });
+      });
 
       const configData = await mongo.fetchConfig();
          res.render("main.njk", {
