@@ -18,8 +18,14 @@ export interface TabFunction {
    fun: (req: Request, res: Response) => void;
 }
 
+const path = require('path');
+console.log('pathname:', path.join(__dirname, '../node_modules/govuk-frontend/dist/govuk'));
+
 const app = express();
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
+app.use('/assets', express.static(path.join(__dirname, '../node_modules/govuk-frontend/dist/govuk/assets')));
+app.use('/css', express.static(path.join(__dirname, '../node_modules/govuk-frontend/dist/govuk')));
+app.use('/javascript', express.static(path.join(__dirname, '../node_modules/govuk-frontend/dist/govuk')));
 app.use(express.text());   // to parse text/plain requests
 
 
