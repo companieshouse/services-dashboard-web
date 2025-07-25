@@ -26,8 +26,7 @@ app.use(express.text());   // to parse text/plain requests
 
 const nunjucksEnv = nunjucks.configure([
    "views",
-   "node_modules/govuk-frontend",
-   "node_modules/govuk-frontend/components"
+   "node_modules/govuk-frontend/dist"
  ], {
    autoescape: true,
    express: app,
