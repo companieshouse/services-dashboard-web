@@ -37,7 +37,6 @@
                <th class="group-header group-version govuk-table-header"  colspan="3">Version info</th>
                <th class="group-header group-git govuk-table-header"      colspan="4">Git info</th>
                <th class="group-header group-sonar govuk-table-header"    colspan="4">Sonar</th>
-               <th class="group-header group-ecs govuk-table-header"      colspan="3">ECS</th>
                <th class="group-header group-deptrack govuk-table-header" colspan="6">Dependency Track</th>
             </tr>
          <!-- header row with filter dropdown -->
@@ -62,13 +61,9 @@
                   <!-- 13 --><th class="row-header-select govuk-table-header"></th>
                   <!-- 14 --><th class="row-header-select govuk-table-header"></th>
                   <!-- 15 --><th class="row-header-select govuk-table-header"></th>
-
-                  <!-- 16 --><th class="row-header-select govuk-table-header"></th>
+                  <!-- 16 --><th class="row-header-selec govuk-table-header"></th>
                   <!-- 17 --><th class="row-header-select govuk-table-header"></th>
                   <!-- 18 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 19 --><th class="row-header-selec govuk-table-header"></th>
-                  <!-- 20 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 21 --><th class="row-header-select govuk-table-header"></th>
             </tr>
          <!-- Col Headers -->
             <tr class="govuk-table__row">
@@ -88,16 +83,13 @@
                   <!-- 10 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-bugs"     data-type="number"><span>Bugs</span></th>
                   <!-- 11 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-csmell"   data-type="number"><span>Code smell</span></th>
                   <!-- 12 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-vul"      data-type="number"><span>Vulner.</span></th>
-                  <!-- 13 --><th class="row-header-title header-ecs govuk-table-header" id="col-head-ecs-cidev"   data-type="string"><span>cidev</span></th>
-                  <!-- 14 --><th class="row-header-title header-ecs govuk-table-header" id="col-head-ecs-stag"    data-type="string"><span>staging</span></th>
-                  <!-- 15 --><th class="row-header-title header-ecs govuk-table-header" id="col-head-ecs-live"    data-type="string"><span>live</span></th>
-
-                  <!-- 16 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
-                  <!-- 17 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
-                  <!-- 18 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
-                  <!-- 19 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mlow"  data-type="number"><span>Low</span></th>
-                  <!-- 20 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mvul"  data-type="number"><span>Vulner.</span></th>
-                  <!-- 21 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mcomp" data-type="number"><span>Compon.</span></th>
+ 
+                  <!-- 13 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
+                  <!-- 14 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
+                  <!-- 15 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
+                  <!-- 16 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mlow"  data-type="number"><span>Low</span></th>
+                  <!-- 17 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mvul"  data-type="number"><span>Vulner.</span></th>
+                  <!-- 18 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mcomp" data-type="number"><span>Compon.</span></th>
             </tr>
          </thead>
          <tbody class="govuk-table__body">
@@ -108,7 +100,15 @@
                   {% if version %}
                      <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}" class="govuk-table__row">
                            <!-- 1st Column (link) -->
-                           <td class="td-nam govuk-table__cell"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a></td>
+                           <td class="td-nam govuk-table__cell"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a>
+                              <p>Live versions</p>
+                              <p>CI-Dev:</p> 
+                              <ul>{% for version in document.ecs.cidev %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
+                              <p>Staging:</p>
+                              <ul>{% for version in document.ecs.staging %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
+                              <p>Live:</p>
+                              <ul>{% for version in document.ecs.live %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
+                           </td>
 
                            <!-- 3 Columns Version/Date & Runtime-->
                            <td class="td-version govuk-table__cell">{{ version.version }}</td>
@@ -132,11 +132,6 @@
                            <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs, "bugs") }}</td>
                            <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells, "code smells") }}</td>
                            <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
-
-                           <!-- 3 Columns ECS -->
-                           <td class="td-ecs govuk-table__cell"> {% for version in document.ecs.cidev %}   {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
-                           <td class="td-ecs govuk-table__cell"> {% for version in document.ecs.staging %} {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
-                           <td class="td-ecs govuk-table__cell"> {% for version in document.ecs.live %}    {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
 
                            <!-- 6 Columns Dep Track (Version specific) -->
                            <td class="td-critical govuk-table__cell">
