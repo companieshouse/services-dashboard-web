@@ -117,8 +117,34 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
          title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "",
+         documents: await mongo.fetchDocuments(),
          tabs,
          compressedState
+      });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
+app.get(config.ENDPOINT_DASHBOARD! + "/query", async (req, res) => {
+   try {
+      let   serviceName  = req.query.search as string || "*";
+      let   compressedState = "";
+      const queryParams = {
+         [serviceName]: ["*"]
+      } as type.QueryParameters;
+
+      const documents = await mongo.fetchDocuments(queryParams);
+      const configData = await mongo.fetchConfig();
+
+      res.render("main.njk", {
+         title: config.APP_TITLE,
+         basePath: config.ENDPOINT_DASHBOARD,
+         lastScan: configData?.lastScan ?? "",
+         documents: documents,
+         state: compressedState,
+         depTrackUri: config.DEP_TRACK_URI,
+         sonarUri: config.SONAR_URI
       });
    } catch (error) {
       logErr(error);

@@ -1,35 +1,18 @@
 {% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, dropdownFilter %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
 
 <div class="tab-container">
-  {# <div class="tab-container-left-col">
-      <!-- Master checkbox to control all .level1-checkbox -->
-      <div class="masterCheckbox">
-            <input type="checkbox" id="masterCheckbox-id">
-            <label for="masterCheckbox-id"><strong>Select All</strong></label>
-            <hr>
-      </div>
-      <form id="filterForm">
-         {% for document in documents %}
-            {% if document %}
-                  <div class="no-wrap-inline-contents">
-                  <input type="checkbox" id="{{ document.name }}" class="level1-checkbox" checked>
-                  <label for="{{ document.name }}" class="label-level1-checkbox">{{ document.name }}</label>
-                  <div class="no-wrap-inline-contents">
-                     {% for version in document.versions %}
-                        {% if version %}
-                           <input type="checkbox" id="{{ document.name }}-{{ version.version }}" class="level2-checkbox" data-level1="{{ document.name }}" checked>
-                           <label for="{{ document.name }}-{{ version.version }}" class="label-level2-checkbox">{{ version.version }}</label><br>
-                        {% endif %}
-                     {% endfor %}
-                  </div>
-               </div>
-            {% endif %}
-         {% endfor %}
-      </form>
-  </div> #}
-
   <div class="tab-container-main-col">
-    <table id="tab-table-id" class="govuk-table govuk-table--small-text-until-tablet">
+      <div class="search-functions">
+         {{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}
+
+         <form method="GET" action="{{basePath}}/query" class="govuk-form-group">
+            <label class="govuk-label" for="search">Search Services</label>
+            <input class="govuk-input" id="search" name="search" type="text" value="{{ search or ''}}"></input>
+            <button class="govuk-button" type="submit">Search</button>
+         </form>
+      </div>
+      <table id="tab-table-id" class="govuk-table govuk-table--small-text-until-tablet">
          <thead class="govuk-table__head">
          <!-- Headers for Col groups -->
             <tr class="govuk-table__row">
@@ -39,32 +22,6 @@
                <th class="group-header group-sonar govuk-table-header"    colspan="4">Sonar</th>
                <th class="group-header group-deptrack govuk-table-header" colspan="6">Dependency Track</th>
             </tr>
-         <!-- header row with filter dropdown -->
-            <tr class="govuk-table__row">
-                  <!--  1 --><th class="row-header-select govuk-table-header"></th>
-
-                  <!--  2 --><th class="row-header-select govuk-table-header"></th>
-                  <!--  3 --><th class="row-header-select govuk-table-header"></th>
-                  <!--  4 --><th class="row-header-select govuk-table-header"></th>
-
-                  <!--  5 --><th class="row-header-select govuk-table-header">{{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}</th>
-
-                  <!--  6 --><th class="row-header-select govuk-table-header"></th>
-                  <!--  7 --><th class="row-header-select govuk-table-header"></th>
-                  <!--  8 --><th class="row-header-select govuk-table-header"></th>
-
-                  <!--  9 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 10 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 11 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 12 --><th class="row-header-select govuk-table-header"></th>
-
-                  <!-- 13 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 14 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 15 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 16 --><th class="row-header-selec govuk-table-header"></th>
-                  <!-- 17 --><th class="row-header-select govuk-table-header"></th>
-                  <!-- 18 --><th class="row-header-select govuk-table-header"></th>
-            </tr>
          <!-- Col Headers -->
             <tr class="govuk-table__row">
                   <!--  1 --><th class="row-header-title header-service govuk-table-header" id="col-head-service" data-type="string"> Service</th>
@@ -72,7 +29,6 @@
                   <!--  2 --><th class="row-header-title header-version govuk-table-header" id="col-head-deptk-version"   data-type="string">(SBOM) Version</th>
                   <!--  3 --><th class="row-header-title header-deptrack govuk-table-header"  id="col-head-deptk-date" data-type="date">(SBOM) date</th>
                   <!--  4 --><th class="row-header-title header-version govuk-table-header" id="col-head-deptk-runtime"   data-type="string">Runtime</th>
-
 
                   <!--  5 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-owner"    data-type="string"> Owner</th>
                   <!--  6 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-lang"     data-type="string"> Lang</th>

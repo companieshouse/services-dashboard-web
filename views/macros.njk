@@ -1,3 +1,5 @@
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+
 {# set a standard id (e.g. remove unallowed chars (currently spaces)
    Note the {%- ... -%} syntax, which removes unnecessary whitespace added by nunjucks
 #}
@@ -108,10 +110,16 @@ The select will have:
    {% call getListUniqueValues(collection, field) %}{% endcall %}
 
    <!-- Generate options -->
-   <select class="header-select" id="{{ id }}">
-        <option value="All">All</option>
-        {% for value in getGlobal('uniqueSortedValues') %}
-            <option value="{{ value }}">{{ value }}</option>
-        {% endfor %}
-   </select>
+   {{ govukSelect({
+      id: "team-filter",
+      name: "team-filter",
+      label: {
+         text: "Filter by team"
+      },
+      items: [
+         {value: "All", text: "All"},
+         {value: "Element", text: "Element"}
+      ]
+      }) 
+   }}
 {% endmacro %}
