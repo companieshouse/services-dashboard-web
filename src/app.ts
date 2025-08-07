@@ -113,8 +113,9 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
       });
 
       const configData = await mongo.fetchConfig();
-         res.render("main.njk", {
+         res.render("dashboard.njk", {
          title: config.APP_TITLE,
+         activePage: 'dashboard',
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "",
          documents: await mongo.fetchDocuments(),
@@ -137,14 +138,32 @@ app.get(config.ENDPOINT_DASHBOARD! + "/query", async (req, res) => {
       const documents = await mongo.fetchDocuments(queryParams);
       const configData = await mongo.fetchConfig();
 
-      res.render("main.njk", {
+      res.render("dashboard.njk", {
          title: config.APP_TITLE,
+         activePage: 'dashboard',
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "",
          documents: documents,
          state: compressedState,
          depTrackUri: config.DEP_TRACK_URI,
          sonarUri: config.SONAR_URI
+      });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
+app.get(config.ENDPOINT_DASHBOARD! + "/eol", async (req: Request, res: Response) => {
+   try {
+      const configData = await mongo.fetchConfig();
+      const endols = configData?.endol ?? {};
+      res.render("eol.njk", {
+         title: config.APP_TITLE,
+         activePage: 'eol',
+         basePath: config.ENDPOINT_DASHBOARD,
+         lastScan: configData?.lastScan ?? "",
+         documents: await mongo.fetchDocuments(),
+         endols,
       });
    } catch (error) {
       logErr(error);
