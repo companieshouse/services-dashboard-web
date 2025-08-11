@@ -12,3 +12,54 @@
   gap: 1em;
   margin-bottom: 1em;
  }
+
+.vertical {
+  writing-mode: vertical-rl;
+}
+
+.left {
+  text-align: left;
+}
+
+.center {
+  text-align: center;
+}
+
+nav, .govuk-header__container {
+  margin-left: 2em;
+}
+
+.govuk-service-navigation__container > span {
+  color: black;
+  align-self: center;
+}
+
+table, th, td {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+
+/* Scroll control */
+
+/* .scroll-container {
+  max-height: 70vh;
+  overflow-y: auto;
+} */
+
+.govuk-table__head tr {
+  position: sticky;
+  top: 0;
+  background-color: #fff; 
+  z-index: 2;
+}
+
+.govuk-table__head tr:nth-child(1) {
+  top: 0;
+  z-index: 3; 
+}
+
+.govuk-table__head tr:nth-child(2) {
+  top: 1.4em; /* bit random, but this size stops content popping appearing the header rows when scrolling */
+}

@@ -1,11 +1,11 @@
+import { ObjectId } from "mongodb";
 
-export interface QueryParameters {
-    [name: string]: string[];
+export interface GitInfo {
+   owner: string | null;
 }
 
-export interface StateData {
-    queryArg: string;
-    sort: string;
-    checkboxes: string;
+export interface Doc {
+   _id: ObjectId,
+   versions: any,
+   gitInfo: GitInfo
 }
- 

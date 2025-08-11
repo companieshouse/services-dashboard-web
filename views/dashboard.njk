@@ -1,16 +1,21 @@
-{% set body_class = "dashboard" %}
+{% set body_class = "dashboard" %} {# Helps us denote which page we're on in CSS #}
 {% extends "_layout.njk" %}
 
-{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics, dropdownFilter %}
+{% from "macros.njk" import addDaysAgo, setLanguage, sonarLink, depTrackLink, DepTrackMetrics %}
 
 {% block content %}
 <main class="govuk-main-wrapper" id="main-content">
     <h1 class="govuk-heading-xl">Services Dashboard</h1>
     <div class="main-content">
         <div class="search-functions">
-            {{ dropdownFilter(documents, "gitInfo.owner", "select-owner") }}
+            <form method="GET" action="{{basePath}}" class="govuk-form-group">
+                <label class="govuk-label" for="team">Filter by owner</label>
+                <select class="govuk-select" id="team" name="team">
+                    {% for team in allTeams %}
+                        <option value="{{team}}">{{team}}</option>
+                    {% endfor %}
+                </select>
 
-            <form method="GET" action="{{basePath}}/query" class="govuk-form-group">
                 <label class="govuk-label" for="search">Search Services</label>
                 <div class="search-input-group">
                     <input class="govuk-input" id="search" name="search" type="text" value="{{ search or ''}}"></input> 
@@ -22,109 +27,112 @@
                 </div>
             </form>
         </div>
-        <table id="tab-table-id" class="govuk-table govuk-table--small-text-until-tablet">
-            <thead class="govuk-table__head">
-            <!-- Headers for Col groups -->
-                <tr class="govuk-table__row">
-                    <th class="group-header group-service govuk-table-header"  colspan="1"></th>
-                    <th class="group-header group-version govuk-table-header"  colspan="3">Version info</th>
-                    <th class="group-header group-git govuk-table-header"      colspan="4">Git info</th>
-                    <th class="group-header group-sonar govuk-table-header"    colspan="4">Sonar</th>
-                    <th class="group-header group-deptrack govuk-table-header" colspan="6">Dependency Track</th>
-                </tr>
-            <!-- Col Headers -->
-                <tr class="govuk-table__row">
-                        <!--  1 --><th class="row-header-title header-service govuk-table-header" id="col-head-service" data-type="string"> Service</th>
+        <br />
+        <div class="scroll-container">
+            <table id="tab-table-id" class="govuk-table govuk-table--small-text-until-tablet">
+                <thead class="govuk-table__head">
+                <!-- Headers for Col groups -->
+                    <tr class="govuk-table__row">
+                        <th class="group-header group-service govuk-table-header"  colspan="1"></th>
+                        <th class="group-header group-version govuk-table-header"  colspan="3">Version info</th>
+                        <th class="group-header group-git govuk-table-header"      colspan="4">Git info</th>
+                        <th class="group-header group-sonar govuk-table-header"    colspan="4">Sonar</th>
+                        <th class="group-header group-deptrack govuk-table-header" colspan="6">Dependency Track</th>
+                    </tr>
+                <!-- Col Headers -->
+                    <tr class="govuk-table__row">
+                            <!--  1 --><th class="row-header-title header-service govuk-table-header" id="col-head-service" data-type="string"> Service</th>
 
-                        <!--  2 --><th class="row-header-title header-version govuk-table-header" id="col-head-deptk-version"   data-type="string">(SBOM) Version</th>
-                        <!--  3 --><th class="row-header-title header-deptrack govuk-table-header"  id="col-head-deptk-date" data-type="date">(SBOM) date</th>
-                        <!--  4 --><th class="row-header-title header-version govuk-table-header" id="col-head-deptk-runtime"   data-type="string">Runtime</th>
+                            <!--  2 --><th class="row-header-title header-version govuk-table-header" id="col-head-deptk-version"   data-type="string">(SBOM) Version</th>
+                            <!--  3 --><th class="row-header-title header-deptrack govuk-table-header"  id="col-head-deptk-date" data-type="date">(SBOM) date</th>
+                            <!--  4 --><th class="row-header-title header-version govuk-table-header" id="col-head-deptk-runtime"   data-type="string">Runtime</th>
 
-                        <!--  5 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-owner"    data-type="string"> Owner</th>
-                        <!--  6 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-lang"     data-type="string"> Lang</th>
-                        <!--  7 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-rel-last" data-type="string"> Last Release</th>
-                        <!--  8 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-rel-date" data-type="date">   Date</th>
+                            <!--  5 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-owner"    data-type="string"> Owner</th>
+                            <!--  6 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-lang"     data-type="string"> Lang</th>
+                            <!--  7 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-rel-last" data-type="string"> Last Release</th>
+                            <!--  8 --><th class="row-header-title header-git govuk-table-header" id="col-head-git-rel-date" data-type="date">   Date</th>
 
-                        <!--  9 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-coverage" data-type="string"><span>Coverage</span></th>
-                        <!-- 10 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-bugs"     data-type="number"><span>Bugs</span></th>
-                        <!-- 11 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-csmell"   data-type="number"><span>Code smell</span></th>
-                        <!-- 12 --><th class="row-header-title header-sonar-metric govuk-table-header" id="col-head-sonar-vul"      data-type="number"><span>Vulner.</span></th>
-    
-                        <!-- 13 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
-                        <!-- 14 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
-                        <!-- 15 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
-                        <!-- 16 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mlow"  data-type="number"><span>Low</span></th>
-                        <!-- 17 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mvul"  data-type="number"><span>Vulner.</span></th>
-                        <!-- 18 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header" id="col-head-deptk-mcomp" data-type="number"><span>Compon.</span></th>
-                </tr>
-            </thead>
-            <tbody class="govuk-table__body">
-            {% for document in documents %}
-                {% if document %}
-                    <!-- Iterate over each version entry in versions array -->
-                    {% for version in document.versions %}
-                        {% if version %}
-                        <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}" class="govuk-table__row">
-                                <!-- 1st Column (link) -->
-                                <td class="td-nam govuk-table__cell"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a>
-                                    <p>Live versions</p>
-                                    <p>CI-Dev:</p> 
-                                    <ul>{% for version in document.ecs.cidev %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
-                                    <p>Staging:</p>
-                                    <ul>{% for version in document.ecs.staging %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
-                                    <p>Live:</p>
-                                    <ul>{% for version in document.ecs.live %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
-                                </td>
+                            <!--  9 --><th class="row-header-title header-sonar-metric govuk-table-header vertical" id="col-head-sonar-coverage" data-type="string"><span>Coverage</span></th>
+                            <!-- 10 --><th class="row-header-title header-sonar-metric govuk-table-header vertical" id="col-head-sonar-bugs"     data-type="number"><span>Bugs</span></th>
+                            <!-- 11 --><th class="row-header-title header-sonar-metric govuk-table-header vertical" id="col-head-sonar-csmell"   data-type="number"><span>Code smell</span></th>
+                            <!-- 12 --><th class="row-header-title header-sonar-metric govuk-table-header vertical" id="col-head-sonar-vul"      data-type="number"><span>Vulner.</span></th>
+        
+                            <!-- 13 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header vertical" id="col-head-deptk-mcrit" data-type="number"><span>Critical</span></th>
+                            <!-- 14 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header vertical" id="col-head-deptk-mhigh" data-type="number"><span>High</span></th>
+                            <!-- 15 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header vertical" id="col-head-deptk-mmed"  data-type="number"><span>Medium</span></th>
+                            <!-- 16 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header vertical" id="col-head-deptk-mlow"  data-type="number"><span>Low</span></th>
+                            <!-- 17 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header vertical" id="col-head-deptk-mvul"  data-type="number"><span>Vulner.</span></th>
+                            <!-- 18 --><th class="row-header-title header-deptrack header-dt-metric govuk-table-header vertical" id="col-head-deptk-mcomp" data-type="number"><span>Compon.</span></th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                {% for document in documents %}
+                    {% if document %}
+                        <!-- Iterate over each version entry in versions array -->
+                        {% for version in document.versions %}
+                            {% if version %}
+                            <tr data-level1="{{ document.name }}" data-level2="{{ version.version }}" class="govuk-table__row">
+                                    <!-- 1st Column (link) -->
+                                    <td class="td-nam govuk-table__cell"><a href="{{ document.gitInfo.repo }}">{{ document.name }}</a>
+                                        <p>Live versions</p>
+                                        <p>CI-Dev:</p> 
+                                        <ul>{% for version in document.ecs.cidev %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
+                                        <p>Staging:</p>
+                                        <ul>{% for version in document.ecs.staging %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
+                                        <p>Live:</p>
+                                        <ul>{% for version in document.ecs.live %}<li>{% if version %}{{ version.version }}{% else %}N/A{% endif %}</li> {% endfor %}</ul>
+                                    </td>
 
-                                <!-- 3 Columns Version/Date & Runtime-->
-                                <td class="td-version govuk-table__cell">{{ version.version }}</td>
-                                <td class="td-bom-import govuk-table__cell"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br>{{addDaysAgo( version.lastBomImport ) }}</td>
-                                <td class="td-runtime govuk-table__cell">
-                                    {% if version.runtime.length > 1 %}
-                                    <ul class="td-runtime-info"> {% for info in version.runtime %} {% if info %}<li>{{ info }}</li> {% endif %}{% endfor %} </ul>
-                                    {% else %}
-                                    {{ version.runtime[0] }}
-                                    {% endif %}
-                                </td>
+                                    <!-- 3 Columns Version/Date & Runtime-->
+                                    <td class="td-version govuk-table__cell">{{ version.version }}</td>
+                                    <td class="td-bom-import govuk-table__cell"><span>{{ depTrackLink(depTrackUri, version.lastBomImport | date("YYYY-MM-DD"), version.uuid) }}</span><br>{{addDaysAgo( version.lastBomImport ) }}</td>
+                                    <td class="td-runtime govuk-table__cell">
+                                        {% if version.runtime.length > 1 %}
+                                        <ul class="td-runtime-info"> {% for info in version.runtime %} {% if info %}<li>{{ info }}</li> {% endif %}{% endfor %} </ul>
+                                        {% else %}
+                                        {{ version.runtime[0] }}
+                                        {% endif %}
+                                    </td>
 
-                                <!-- 4 Columns (Git info)-->
-                                <td class="td-git-owner govuk-table__cell">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
-                                <td class="td-git-lang govuk-table__cell">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
-                                <td class="td-git-version govuk-table__cell">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %} {% if release %}<li>{{ release.version }}</li> {% endif %}{% endfor %} </a></td>
-                                <td class="td-git-date govuk-table__cell"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span><br>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
+                                    <!-- 4 Columns (Git info)-->
+                                    <td class="td-git-owner govuk-table__cell">     <a href="{{ document.gitInfo.repo }}/custom-properties">{{ document.gitInfo.owner }}</a></td>
+                                    <td class="td-git-lang govuk-table__cell">      {{setLanguage(version.lang, document.gitInfo.lang, document.gitInfo.repo) }}</td>
+                                    <td class="td-git-version govuk-table__cell">   <a href="{{ document.gitInfo.repo }}/releases">         {% for release in document.gitInfo.releases %} {% if release %}<li>{{ release.version }}</li> {% endif %}{% endfor %} </a></td>
+                                    <td class="td-git-date govuk-table__cell"><span><a href="{{ document.gitInfo.repo }}/releases">         {{ document.gitInfo.releases[0].date | date("YYYY-MM-DD") }}</a></span><br>{{addDaysAgo( document.gitInfo.releases[0].date ) }}</td>
 
-                                <!-- 4 Columns (sonar Metrics) -->
-                                <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage, "coverage") }}</td>
-                                <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs, "bugs") }}</td>
-                                <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells, "code smells") }}</td>
-                                <td class="td-sonar-metrics govuk-table__cell">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
+                                    <!-- 4 Columns (sonar Metrics) -->
+                                    <td class="td-sonar-metrics govuk-table__cell center">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.coverage, "coverage") }}</td>
+                                    <td class="td-sonar-metrics govuk-table__cell center">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.bugs, "bugs") }}</td>
+                                    <td class="td-sonar-metrics govuk-table__cell center">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.code_smells, "code smells") }}</td>
+                                    <td class="td-sonar-metrics govuk-table__cell center">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
 
-                                <!-- 6 Columns Dep Track (Version specific) -->
-                                <td class="td-critical govuk-table__cell">
-                                    {{DepTrackMetrics(depTrackUri, version.metrics.critical, "critical", version.uuid)}}
-                                </td>
-                                <td class="td-deptrack-high govuk-table__cell">
-                                    {{DepTrackMetrics(depTrackUri, version.metrics.high, "high", version.uuid)}}
-                                </td>
-                                <td class="td-deptrack-medium govuk-table__cell">
-                                    {{DepTrackMetrics(depTrackUri, version.metrics.medium, "medium", version.uuid)}}
-                                </td>
-                                <td class="td-deptrack-low govuk-table__cell">
-                                    {{DepTrackMetrics(depTrackUri, version.metrics.low, "low", version.uuid)}}
-                                </td>
-                                <td class="td-deptrack-vulnerabilities govuk-table__cell">
-                                    {{DepTrackMetrics(depTrackUri, version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
-                                </td>
-                                <td class="td-deptrack-components govuk-table__cell">
-                                    {{DepTrackMetrics(depTrackUri, version.metrics.components, "components", version.uuid, "components")}}
-                                </td>
-                        </tr>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
+                                    <!-- 6 Columns Dep Track (Version specific) -->
+                                    <td class="td-critical govuk-table__cell center">
+                                        {{DepTrackMetrics(depTrackUri, version.metrics.critical, "critical", version.uuid)}}
+                                    </td>
+                                    <td class="td-deptrack-high govuk-table__cell center">
+                                        {{DepTrackMetrics(depTrackUri, version.metrics.high, "high", version.uuid)}}
+                                    </td>
+                                    <td class="td-deptrack-medium govuk-table__cell center">
+                                        {{DepTrackMetrics(depTrackUri, version.metrics.medium, "medium", version.uuid)}}
+                                    </td>
+                                    <td class="td-deptrack-low govuk-table__cell center">
+                                        {{DepTrackMetrics(depTrackUri, version.metrics.low, "low", version.uuid)}}
+                                    </td>
+                                    <td class="td-deptrack-vulnerabilities govuk-table__cell center">
+                                        {{DepTrackMetrics(depTrackUri, version.metrics.vulnerabilities, "vulnerabilities", version.uuid)}}
+                                    </td>
+                                    <td class="td-deptrack-components govuk-table__cell center">
+                                        {{DepTrackMetrics(depTrackUri, version.metrics.components, "components", version.uuid, "components")}}
+                                    </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        <div>
     </div>
 </main>
 {% endblock %}

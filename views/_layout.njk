@@ -16,7 +16,7 @@
       <script src="{{basePath}}/js/common.js"></script>
       <script type="module" src="{{basePath}}/js/main.js"></script>
     </head>
-    <body class="{{ body_class }} govuk-template__body">
+    <body class="{{ body_class }} govuk-template__body"> {# body_class is set by the pages that inherit from this layout #}
         <script>
             document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
         </script>
@@ -25,7 +25,6 @@
         {% block content %}
         {% endblock %}
             
-        {% include "./_footer.njk" %}
         <script type="module" src="/javascript/govuk-frontend.min.js"></script>
         <script type="module">
             import {
