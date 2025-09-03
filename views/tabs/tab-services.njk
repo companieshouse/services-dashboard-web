@@ -134,9 +134,9 @@
                            <td class="td-sonar-metrics">{{ sonarLink(sonarUri, document.sonarKey, document.sonarMetrics.vulnerabilities, "vulnerabilities") }}</td>
 
                            <!-- 3 Columns ECS -->
-                           <td class="td-ecs"> {% for version in document.ecs.cidev %}   {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
-                           <td class="td-ecs"> {% for version in document.ecs.staging %} {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
-                           <td class="td-ecs"> {% for version in document.ecs.live %}    {% if version %}<li>{{ version.version }}</li> {% endif %}{% endfor %} </td>
+                           <td class="td-ecs"> {{document.ecs.cidev}}</td>
+                           <td class="td-ecs"> {{document.ecs.staging}}</td>
+                           <td class="td-ecs"> {{document.ecs.live}}</td>
 
                            <!-- 6 Columns Dep Track (Version specific) -->
                            <td class="td-critical">
