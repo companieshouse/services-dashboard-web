@@ -138,29 +138,17 @@
                               </td>
                               <td class="td-ecs">
                                  <ul class="td-git-version-info">
-                                    {% for version in service.ecs.cidev %}
-                                       {% if version %}
-                                          {{ gitReleaseInfo(version.version, version.date, thresholdsCidev[0], thresholdsCidev[1],  service.gitInfo.repo)}}
-                                       {% endif %}
-                                    {% endfor %}
+                                       {{service.ecs.cidev}}
                                  </ul>
                               </td>
                               <td class="td-ecs">
                                  <ul class="td-git-version-info">
-                                    {% for version in service.ecs.staging %}
-                                       {% if version %}
-                                          {{ gitReleaseInfo(version.version, version.date, thresholdsStaging[0], thresholdsStaging[1],  service.gitInfo.repo)}}
-                                       {% endif %}
-                                    {% endfor %}
+                                       {{service.ecs.staging}}
                                  </ul>
                               </td>
                               <td class="td-ecs">
                                  <ul class="td-git-version-info">
-                                    {% for version in service.ecs.live %}
-                                       {% if version %}
-                                          {{ gitReleaseInfo(version.version, version.date, thresholdsLive[0], thresholdsLive[1],  service.gitInfo.repo)}}
-                                       {% endif %}
-                                    {% endfor %}
+                                       {{service.ecs.live}}
                                  </ul>
                               </td>
                               <td class="td-runtime">
