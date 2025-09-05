@@ -188,7 +188,10 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
 async function fetchConfig() {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_CONFIG!);
-      const configData = await collection.findOne({}, { session: mongoSession });
+      const configData = await collection.findOne(
+         { _id: config.MONGO_CONFIG_SINGLETON as any },
+         {session: mongoSession }
+      );
       // return "endol" sorted by key (ex. "amazon-corretto" before "go")
       if (configData && configData.endol) {
          configData.endol = Object.keys(configData.endol)
