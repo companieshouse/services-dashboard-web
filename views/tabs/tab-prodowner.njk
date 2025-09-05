@@ -138,17 +138,23 @@
                               </td>
                               <td class="td-ecs">
                                  <ul class="td-git-version-info">
-                                       {{service.ecs.cidev}}
+                                       {% if service.ecs.cidev.version %}
+                                          {{ gitReleaseInfo(service.ecs.cidev.version, service.ecs.cidev.gitReleaseDate, thresholdsCidev[0], thresholdsCidev[1],  service.gitInfo.repo)}}
+                                       {% endif %}
                                  </ul>
                               </td>
                               <td class="td-ecs">
                                  <ul class="td-git-version-info">
-                                       {{service.ecs.staging}}
+                                       {% if service.ecs.staging.version %}
+                                          {{ gitReleaseInfo(service.ecs.staging.version, service.ecs.staging.gitReleaseDate, thresholdsStaging[0], thresholdsStaging[1],  service.gitInfo.repo)}}
+                                       {% endif %}
                                  </ul>
                               </td>
                               <td class="td-ecs">
                                  <ul class="td-git-version-info">
-                                       {{service.ecs.live}}
+                                       {% if service.ecs.live.version %}
+                                          {{ gitReleaseInfo(service.ecs.live.version, service.ecs.live.gitReleaseDate, thresholdsLive[0], thresholdsLive[1],  service.gitInfo.repo)}}
+                                       {% endif %}
                                  </ul>
                               </td>
                               <td class="td-runtime">
