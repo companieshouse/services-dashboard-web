@@ -140,14 +140,21 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             }
          },
          {
+            // Add a count field with the length of the services array
+            $addFields: {
+               servicesCount: { $size: "$services" }
+            }
+         },
+         {
             $project: {
-              _id: 1,
-              services: {
-                $sortArray: {
-                  input: "$services",
-                  sortBy: { name: 1 } // Sort by name in ascending order
-                }
-              }
+               _id: 1,
+               servicesCount: 1,
+               services: {
+                  $sortArray: {
+                     input: "$services",
+                     sortBy: { name: 1 } // Sort by name in ascending order
+                  }
+               }
             }
           },
           {

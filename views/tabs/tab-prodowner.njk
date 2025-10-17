@@ -87,7 +87,7 @@
                   {% set standardId = setStandardId(document._id) %}
 
                   <input type="checkbox" id="{{ standardId }}" class="level1-checkbox" checked>
-                  <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }}</label>
+                  <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }} ({{ document.servicesCount }})</label>
                   <div class="no-wrap-inline-contents">
                   {% for service in document.services %}
                      {% if service %}
@@ -108,7 +108,7 @@
          <thead>
          <!-- Col Headers -->
             <tr>
-                  <!--  1 --><th class="row-header-title header-service" id="col-head-service" data-type="string"> Service</th>
+                  <!--  1 --><th class="row-header-title header-service" id="col-head-service"  data-type="string"> Service</th>
                   <!--  2 --><th class="row-header-title header-git" id="col-head-git-rel-last" data-type="string"> GitHub Release</th>
                   <!--  3 --><th class="row-header-title header-ecs" id="col-head-ecs-cidev"    data-type="string"><span>cidev</span></th>
                   <!--  4 --><th class="row-header-title header-ecs" id="col-head-ecs-stag"     data-type="string"><span>staging</span></th>
