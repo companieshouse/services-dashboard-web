@@ -25,6 +25,7 @@
     "@types/nunjucks": "^3.2.6",
     "cookie": "^1.0.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "express": "^4.21.0",
     "govuk-frontend": "^5.4.1",
     "mongodb": "^6.9.0",

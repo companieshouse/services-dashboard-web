@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip/dist/bulma-tooltip.min.css">
+  <script src="{{basePath}}/js/libs/pako/2.0.4/pako.min.js"></script>
+  <script src="{{basePath}}/js/common.js"></script>
+  <script type="module" src="{{basePath}}/js/main.js"></script>
+</head>
+<body>
+
+  <section class="hero is-primary">
+    <div class="hero-body">
+      <p class="title">Companies House Service Dashboard</p>
+      <p class="subtitle">Last scan: {{ lastScan }}</p>
+    </div>
+  </section>
+
+  {% include "partials/tabs.njk" %}
+
+  <section class="section">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </section>
+
+</body>
+</html>

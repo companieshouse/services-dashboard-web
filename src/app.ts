@@ -44,20 +44,11 @@ nunjucksEnv.addFilter("setGlobal", filters.setGlobal);
 nunjucksEnv.addGlobal("getGlobal", filters.getGlobal);
 
 // map tab-functions
-const tabsMap: Record<string, TabFunction> = {
-  endol: {
-    title: "End of Life",
-    fun: tabEndol
-  },
-  services: {
-   title: "Services",
-   fun: tabServices
- },
- prodowner: {
-    title: "Product Owner",
-    fun: tabProdOwner
-  }
-};
+const tabs = [
+   { key: "overview", name: "Overview" },
+   { key: "teams", name: "Teams" },
+   { key: "runtimes", name: "Runtimes" },
+];
 
 // ex.
 // https://......./dashboard/?query={"overs":["last"],"api":["last"]}
@@ -103,17 +94,66 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
             compressedState = await mongo.getState(linkId);
       }
 
-      const tabs = Object.entries(tabsMap).map(([key, value]) => {
-         return { key, title: value.title };
-         });
+      const configData = await mongo.fetchConfig();
+      res.render("index.njk", {
+      title: config.APP_TITLE,
+      basePath: config.ENDPOINT_DASHBOARD,
+      lastScan: configData?.lastScan ?? "N/A",
+      tabs,
+      compressedState
+   });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
+app.get(`${config.ENDPOINT_DASHBOARD!}/overview`, async (req: Request, res: Response) => {
+   try {
+      const linkId = req.query.linkid as string;
+      let   query  = req.query.query  as string;
+      let   compressedState = "";
+      let   queryParams: type.QueryParameters | undefined;
+      try {
+         queryParams = sourceQueryParams(query);
+      } catch (error) {
+         res.status(400).json({ "error": `${error}` });
+         return;
+      }
 
       const configData = await mongo.fetchConfig();
-         res.render("main.njk", {
-         title: config.APP_TITLE,
+
+      const documents = await mongo.fetchDocuments(queryParams);
+      res.render("overview.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
-         lastScan: configData?.lastScan ?? "",
-         tabs,
-         compressedState
+         lastScan: configData?.lastScan ?? "N/A",
+         documents: documents,
+         state: compressedState,
+         depTrackUri: config.DEP_TRACK_URI,
+         sonarUri: config.SONAR_URI
+      });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
+app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Response) => {
+   try {
+      const configData = await mongo.fetchConfig();
+      const endols = configData?.endol ?? {};
+      const thresholds = configData?.thresholds ?? {};
+
+      const documents = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+      res.render("teams.njk", {
+         basePath: config.ENDPOINT_DASHBOARD,
+         documents,
+         endols,
+         lastScan: configData?.lastScan ?? "N/A",
+         thresholdsGitRelease: thresholds.gitRelease || thresholds.default,
+         thresholdsCidev:     thresholds.cidev       || thresholds.default,
+         thresholdsStaging:   thresholds.staging     || thresholds.default,
+         thresholdsLive:      thresholds.live        || thresholds.default,
+         depTrackUri: config.DEP_TRACK_URI,
+         sonarUri: config.SONAR_URI
       });
    } catch (error) {
       logErr(error);
@@ -187,13 +227,14 @@ async function tabProdOwner (req: Request, res: Response) {
 }
 
  // Tab Routes
-app.get(`${config.ENDPOINT_DASHBOARD}/tab/:tabName`, (req: Request, res: Response) => {
-   const tabName = req.params.tabName;
-   if (tabsMap[tabName]) {
-       tabsMap[tabName].fun(req, res);
-   } else {
-      res.status(404).send('Tab not found');
-   }
-});
+// app.get(`${config.ENDPOINT_DASHBOARD}/tab/:tabName`, (req: Request, res: Response) => {
+//    const tabName = req.params.tabName;
+
+//    if (tabsMap[tabName]) {
+//        tabsMap[tabName].fun(req, res);
+//    } else {
+//       res.status(404).send('Tab not found');
+//    }
+// });
 
 export default app;

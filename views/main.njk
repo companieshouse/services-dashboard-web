@@ -3,7 +3,8 @@
 <head>
    <meta charset="UTF-8">
    <title>{{ title }}</title>
-   <link rel="stylesheet" href="{{basePath}}/css/common.css">
+   {# <link rel="stylesheet" href="{{basePath}}/css/common.css"> #}
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
    <script> window.compressedState = "{{ compressedState | default('') }}"; </script>
    <script src="{{basePath}}/js/libs/pako/2.0.4/pako.min.js"></script>
    <script src="{{basePath}}/js/common.js"></script>
@@ -15,26 +16,16 @@
       <div class="header-container">
          <div class="header-left-content">
                <img src="//{{CDN_HOST}}/images/royal-coat-of-arms-white.svg" alt="Logo" class="header-logo">
-               <a href="https://www.gov.uk/government/organisations/companies-house" class="header-logo-text">Companies House</a>
-         </div>
-         <div class="header-center-content">
-               <span class="header-center-text">Services</span>
-         </div>
-         <div class="header-right-content">
-            <button id="button-share">share</button>
-               <div id="share-status-message">
-                  <span id="share-status-icon"></span>
-                  <span id="share-status-text"></span>
-               </div>
+               <a href="https://www.gov.uk/government/organisations/companies-house" class="header-logo-text">Companies House Service Dashboard</a>
          </div>
       </div>
    </header>
 
    <div class="main-content">
-      <nav class="tab-nav">
+      <div class="tabs is-medium is-boxed">
          <ul>
          {% for tab in tabs %}
-            <li><a href="{{basePath}}/#" class="tab-link" data-tab="{{ tab.key }}" id="tab-{{ tab.key }}-id">{{ tab.title }}</a></li>
+            <li><a href="{{basePath}}/tabs/{{ tab.key }}" class="tab-link" data-tab="{{ tab.key }}" id="tab-{{ tab.key }}-id">{{ tab.name }}</a></li>
          {% endfor %}
          </ul>
       </nav>
@@ -50,7 +41,7 @@
             <span class="footer-center-text">Built by <a href="https://github.com/companieshouse/services-dashboard-web" class="footer-center-text">Companies House</a></span>
          </div>
          <div class="footer-right-content">
-            <span class="footer-right-text">last scan: {{lastScan}}</span>
+            <span class="footer-right-text">Last scan: {{lastScan}}</span>
          </div>
       </div>
    </footer>

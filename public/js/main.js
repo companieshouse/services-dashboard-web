@@ -82,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
                onTabLoad(selectedTab);
 
                // update active tab styling
-               tabLinks.forEach(l => l.classList.remove('active'));
-               e.target.classList.add('active');
+               tabLinks.forEach(l => l.classList.remove('is-active'));
+               e.target.classList.add('is-active');
             } catch (error) {
                console.error('Failed to load tab content:', error);
                tabContent.innerHTML = '<p>Error loading content.</p>';
@@ -98,8 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
          tab.click();
       }
       else  {
-         const tabId = (tabLinks.length > 1) ? 1   // (default) services
-                                             : 0;  // endol
+         const tabId = tabLinks.length > 2 ? 2 : 0; // Default tab to 'product owner'
          tabLinks[tabId].click();
       }
    }

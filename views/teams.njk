@@ -1,0 +1,229 @@
+{% extends "layout.njk" %}
+{% set active = "teams" %}
+{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
+
+{% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
+   {% set color = "red" %}
+
+   {% if ReleaseDate %}
+
+      {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
+      {% set daysago = ReleaseDate | daysPassed %}
+
+      {% if daysago >= max %}
+         {% set color = "red" %}
+      {% elseif daysago >= min %}
+         {% set color = "yellow" %}
+      {% else %}
+         {% set color = "green" %}
+      {% endif %}
+
+   {% else %}
+      {% set ReleaseDate = "no date loaded" %}
+   {% endif %}
+   {% set colorClass = "td-git-version-" + color %}
+
+   <li class="{{ colorClass }}" title="{{ ReleaseDate }}">
+      <a class="{{ colorClass }}" href="{{ repoLink }}/releases/tag/{{ version }}">{{ version }}</a>{{addDaysAgo( ReleaseDate ) }}
+   </li>
+{% endmacro %}
+
+{% macro addSonarColorClass(bugs) %}
+   {% if bugs == 0 %}
+      has-background-success-light
+   {% elseif bugs < 10 %}
+      has-background-warning-light
+   {% else %}
+      has-background-danger-light
+   {% endif %}
+{% endmacro %}
+
+{% macro addDepTrackColorClass(critical, high, medium) %}
+   {% if critical != 0 %}
+      has-background-danger-light
+   {% elseif high != 0 or medium != 0 %}
+      has-background-warning-light
+   {% else %}
+      has-background-success-light
+   {% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="tab-container">
+    <div class="columns">
+        <div class="column is-2">
+            <!-- Master checkbox to control all .level1-checkbox -->
+            <div class="masterCheckbox">
+                <input type="checkbox" id="masterCheckbox-id" checked>
+                <label for="masterCheckbox-id"><strong>Select All</strong></label>
+                <hr>
+            </div>
+
+            <form id="filterForm">
+            {% for document in documents %}
+                {% if document %}
+                {% set standardId = setStandardId(document._id) %}
+
+                <div class="no-wrap-inline-contents">
+                    <input type="checkbox" id="{{ standardId }}" class="level1-checkbox" checked>
+                    <label for="{{ standardId }}" class="label-level1-checkbox">{{ document._id }}</label>
+                </div>
+                {% endif %}
+            {% endfor %}
+            </form>
+        </div>
+
+        <div class="column">
+            <table id="tab-table-id" class="table is-striped is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                <th class="row-header-title header-service" id="col-head-service">Service</th>
+                <th class="row-header-title header-git" id="col-head-git-lang">Runtime</th>
+                <th class="row-header-title header-ecs" id="col-head-ecs-cidev">CI Dev</th>
+                <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
+                <th class="row-header-title header-ecs" id="col-head-ecs-live">Live</th>
+                <th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage">Sonar</th>
+                <th class="row-header-title header-deptrack" id="col-head-deptk-date">Dependencies</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for document in documents %}
+                {% if document %}
+                    {% for service in document.services %}
+                    {% if service %}
+                        <tr class="transparent_row"
+                            data-level1="{{ setStandardId(document._id) }}"
+                            data-level2="{{ service.name }}">
+                        <td class="td-name">
+                            <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a>
+                        </td>
+
+                        <td class="td-runtime">
+                            <ul class="td-runtime-info">
+                            {% for info in service.latestVersion.runtime.runtime %}
+                                {% if info %}
+                                {% if info.color == "red" %}
+                                    <span class="tag is-danger">{{ info.value }}</span>
+                                {% elseif info.color == "green" %}
+                                    <span class="tag is-success">{{ info.value }}</span>
+                                {% elseif info.color == "none" %}
+                                    <span class="tag is-info">{{ info.value }}</span>
+                                {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        </td>
+
+                        <!-- CI DEV -->
+                        <td class="td-ecs">
+                            <ul class="td-git-version-info">
+                            {% if service.ecs.cidev.version %}
+                                {{ gitReleaseInfo(
+                                service.ecs.cidev.version,
+                                service.ecs.cidev.gitReleaseDate,
+                                thresholdsCidev[0],
+                                thresholdsCidev[1],
+                                service.gitInfo.repo
+                                ) }}
+                            {% endif %}
+                            </ul>
+                        </td>
+
+                        <!-- STAGING -->
+                        <td class="td-ecs">
+                            <ul class="td-git-version-info">
+                            {% if service.ecs.staging.version %}
+                                {{ gitReleaseInfo(
+                                service.ecs.staging.version,
+                                service.ecs.staging.gitReleaseDate,
+                                thresholdsStaging[0],
+                                thresholdsStaging[1],
+                                service.gitInfo.repo
+                                ) }}
+                            {% endif %}
+                            </ul>
+                        </td>
+
+                        <!-- LIVE -->
+                        <td class="td-ecs">
+                            <ul class="td-git-version-info">
+                            {% if service.ecs.live.version %}
+                                {{ gitReleaseInfo(
+                                service.ecs.live.version,
+                                service.ecs.live.gitReleaseDate,
+                                thresholdsLive[0],
+                                thresholdsLive[1],
+                                service.gitInfo.repo
+                                ) }}
+                            {% endif %}
+                            </ul>
+                        </td>
+
+                        <!-- SONAR -->
+                        {% set sonarBugs = service.sonarMetrics.bugs %}
+                        <td class="td-sonar-metrics {{ addSonarColorClass(sonarBugs) }}">
+                            {% if service.sonarMetrics %}
+                                <div class="level">
+                                    <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
+                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Vulnerabilities">
+                                            {{ service.sonarMetrics.vulnerabilities }}
+                                        </span>
+                                    </a>
+                                    <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
+                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Bugs">
+                                            {{ sonarBugs }}
+                                        </span>
+                                    </a>
+                                    <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
+                                        <span class="tag level-item is-info has-tooltip-bottom" data-tooltip="Code Smells">
+                                            {{ service.sonarMetrics.code_smells }}
+                                        </span>
+                                    </a>
+                                </div>
+                            {% endif%}
+                        </td>
+
+                        <!-- DEP TRACK -->
+                        {% set depTrackCritical = service.latestVersion.metrics.critical %}
+                        {% set depTrackHigh     = service.latestVersion.metrics.high %}
+                        {% set depTrackMedium   = service.latestVersion.metrics.medium %}
+                        {% set depTrackLow      = service.latestVersion.metrics.low %}
+                        {% set uuid             = service.latestVersion.uuid %}
+                        <td class="td-deptrack-metrics {{ addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium) }}">
+                            {% if service.latestVersion.metrics %}
+                                <div class="level">
+                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
+                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Critical">
+                                            {{ depTrackCritical }}
+                                        </span>
+                                    </a>
+                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
+                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="High">
+                                            {{ depTrackHigh }}
+                                        </span>
+                                    </a>
+                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
+                                        <span class="tag level-item is-info has-tooltip-bottom" data-tooltip="Medium">
+                                            {{ depTrackMedium }}
+                                        </span>
+                                    </a>
+                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
+                                        <span class="tag level-item is-white has-tooltip-bottom" data-tooltip="Low">
+                                            {{ depTrackLow }}
+                                        </span>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                        </tr>
+                    {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

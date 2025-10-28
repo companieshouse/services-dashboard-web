@@ -71,7 +71,7 @@
 
 
  <div class="tab-container">
-  <div class="tab-container-left-col">
+  <div class="columns is-2">
       <!-- Master checkbox to control all .level1-checkbox -->
       <div class="masterCheckbox">
             <input type="checkbox" id="masterCheckbox-id">
@@ -103,19 +103,18 @@
   </div>
 
 
-  <div class="tab-container-main-col">
+  <div class="column">
     <table id="tab-table-id">
          <thead>
          <!-- Col Headers -->
             <tr>
                   <!--  1 --><th class="row-header-title header-service" id="col-head-service" data-type="string"> Service</th>
-                  <!--  2 --><th class="row-header-title header-git" id="col-head-git-rel-last" data-type="string"> GitHub Release</th>
-                  <!--  3 --><th class="row-header-title header-ecs" id="col-head-ecs-cidev"    data-type="string"><span>cidev</span></th>
-                  <!--  4 --><th class="row-header-title header-ecs" id="col-head-ecs-stag"     data-type="string"><span>staging</span></th>
-                  <!--  5 --><th class="row-header-title header-ecs" id="col-head-ecs-live"     data-type="string"><span>live</span></th>
-                  <!--  6 --><th class="row-header-title header-git" id="col-head-git-lang"     data-type="string">Runtime</th>
+                  <!--  2 --><th class="row-header-title header-git" id="col-head-git-lang"     data-type="string">Runtime</th>
+                  <!--  3 --><th class="row-header-title header-ecs" id="col-head-ecs-cidev"    data-type="string"><span>CI Dev</span></th>
+                  <!--  4 --><th class="row-header-title header-ecs" id="col-head-ecs-stag"     data-type="string"><span>Staging</span></th>
+                  <!--  5 --><th class="row-header-title header-ecs" id="col-head-ecs-live"     data-type="string"><span>Live</span></th>
                   <!--  7 --><th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage" data-type="number"><span>Sonar</span></th>
-                  <!--  8 --><th class="row-header-title header-deptrack"     id="col-head-deptk-date"     data-type="number">Dep Track</th>
+                  <!--  8 --><th class="row-header-title header-deptrack"     id="col-head-deptk-date"     data-type="number">Dependencies</th>
             </tr>
          </thead>
          <tbody>
@@ -127,13 +126,21 @@
 
                         <tr class="transparent_row" data-level1="{{ setStandardId(document._id) }}" data-level2="{{ service.name }}">
                               <td class="td-name"> <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a></td>
-                              <td class="td-git-version">
-                                 <ul class="td-git-version-info">
-                                    {% for release in service.gitInfo.releases %}
-                                       {% if release %}
-                                          {{ gitReleaseInfo(release.version, release.date, thresholdsGitRelease[0], thresholdsGitRelease[1],  service.gitInfo.repo) }}
+                              <td class="td-runtime">
+                                 <ul class="td-runtime-info">
+                                 {% for info in service.latestVersion.runtime.runtime %}
+                                    {% if info %}
+                                       {% if info.color === "red" %}
+                                          <span class="tag is-danger">{{ info.value }}</span>
                                        {% endif %}
-                                    {% endfor %}
+                                       {% if info.color === "green" %}
+                                          <span class="tag is-success">{{ info.value }}</span>
+                                       {% endif %}
+                                       {% if info.color === "none" %}
+                                          <span class="tag is-info">{{ info.value }}</span>
+                                       {% endif %}
+                                    {% endif %}
+                                 {% endfor %}
                                  </ul>
                               </td>
                               <td class="td-ecs">
@@ -155,15 +162,6 @@
                                        {% if service.ecs.live.version %}
                                           {{ gitReleaseInfo(service.ecs.live.version, service.ecs.live.gitReleaseDate, thresholdsLive[0], thresholdsLive[1],  service.gitInfo.repo)}}
                                        {% endif %}
-                                 </ul>
-                              </td>
-                              <td class="td-runtime">
-                                 <ul class="td-runtime-info">
-                                 {% for info in service.latestVersion.runtime.runtime %}
-                                    {% if info %}
-                                       {{ colorRuntimeItem(info.value, info.color) }}
-                                    {% endif %}
-                                 {% endfor %}
                                  </ul>
                               </td>
 

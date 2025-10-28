@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config'
 import * as http from "http";
 import * as config from "../config";
 import { logger, logErr } from "../utils/logger";
