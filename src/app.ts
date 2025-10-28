@@ -160,6 +160,30 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Respons
    }
 });
 
+app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Response) => {
+   try {
+      const configData = await mongo.fetchConfig();
+      const endols = configData?.endol ?? {};
+      const thresholds = configData?.thresholds ?? {};
+
+      const documents = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+      res.render("runtimes.njk", {
+         basePath: config.ENDPOINT_DASHBOARD,
+         documents,
+         endols,
+         lastScan: configData?.lastScan ?? "N/A",
+         thresholdsGitRelease: thresholds.gitRelease || thresholds.default,
+         thresholdsCidev:     thresholds.cidev       || thresholds.default,
+         thresholdsStaging:   thresholds.staging     || thresholds.default,
+         thresholdsLive:      thresholds.live        || thresholds.default,
+         depTrackUri: config.DEP_TRACK_URI,
+         sonarUri: config.SONAR_URI
+      });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
 // handler of "Services"-tab
 async function tabServices (req: Request, res: Response) {
    try {
