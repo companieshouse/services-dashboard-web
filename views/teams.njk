@@ -226,4 +226,29 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const master = document.getElementById("masterCheckbox-id");
+  const checkboxes = [...document.querySelectorAll(".level1-checkbox")];
+  const rows = [...document.querySelectorAll("#tab-table-id tbody tr")];
+
+  // Filter table rows based on checked teams
+  function filter() {
+    const active = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
+    rows.forEach(r => r.style.display = active.has(r.dataset.level1) ? "" : "none");
+  }
+
+  // Master checkbox toggles all
+  master.addEventListener("change", () => {
+    checkboxes.forEach(cb => cb.checked = master.checked);
+    filter();
+  });
+
+  // Update filter whenever any checkbox changes
+  checkboxes.forEach(cb => cb.addEventListener("change", filter));
+
+  filter(); // initial render
+});
+</script>
 {% endblock %}

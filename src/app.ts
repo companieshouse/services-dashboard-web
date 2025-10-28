@@ -45,8 +45,8 @@ nunjucksEnv.addGlobal("getGlobal", filters.getGlobal);
 
 // map tab-functions
 const tabs = [
-   { key: "overview", name: "Overview" },
    { key: "teams", name: "Teams" },
+   { key: "details", name: "Details" },
    { key: "runtimes", name: "Runtimes" },
 ];
 
@@ -107,7 +107,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/overview`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD!}/details`, async (req: Request, res: Response) => {
    try {
       const linkId = req.query.linkid as string;
       let   query  = req.query.query  as string;
@@ -123,7 +123,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/overview`, async (req: Request, res: Resp
       const configData = await mongo.fetchConfig();
 
       const documents = await mongo.fetchDocuments(queryParams);
-      res.render("overview.njk", {
+      res.render("details.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "N/A",
          documents: documents,
