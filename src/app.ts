@@ -164,20 +164,29 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
-      const thresholds = configData?.thresholds ?? {};
 
-      const documents = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+      for (const project in endols) {
+         for (const cycle of endols[project]) {
+            if (cycle.eol) {
+               // Try to standardize the date format
+               const date = new Date(cycle.eol);
+               if (!isNaN(date.getTime())) {
+                  cycle.eol = date.toISOString().split("T")[0]; // YYYY-MM-DD
+                  cycle.eolTs = date.getTime();
+               } else {
+                  cycle.eol = null;
+                  cycle.eolTs = null;
+               }
+            }
+         }
+      }
+
       res.render("runtimes.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
-         documents,
-         endols,
+         eolUri: config.EOL_URI,
          lastScan: configData?.lastScan ?? "N/A",
-         thresholdsGitRelease: thresholds.gitRelease || thresholds.default,
-         thresholdsCidev:     thresholds.cidev       || thresholds.default,
-         thresholdsStaging:   thresholds.staging     || thresholds.default,
-         thresholdsLive:      thresholds.live        || thresholds.default,
-         depTrackUri: config.DEP_TRACK_URI,
-         sonarUri: config.SONAR_URI
+         now: new Date().getTime(),
+         endols
       });
    } catch (error) {
       logErr(error);
