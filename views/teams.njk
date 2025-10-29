@@ -50,6 +50,19 @@
 
 {% block content %}
 <div class="tab-container">
+    <div class="field mb-4">
+        <div class="control has-icons-left">
+            <input
+                id="table-search"
+                class="input"
+                type="text"
+                placeholder="Search services..."
+            >
+            <span class="icon is-left">
+            <i class="fas fa-search"></i>
+            </span>
+        </div>
+    </div>
     <div class="columns">
         <div class="column is-2">
             <!-- Master checkbox to control all .level1-checkbox -->
@@ -232,11 +245,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const master = document.getElementById("masterCheckbox-id");
   const checkboxes = [...document.querySelectorAll(".level1-checkbox")];
   const rows = [...document.querySelectorAll("#tab-table-id tbody tr")];
+  const searchInput = document.getElementById("table-search");
 
-  // Filter table rows based on checked teams
+  // Apply filters based on selected teams and search term
   function filter() {
-    const active = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
-    rows.forEach(r => r.style.display = active.has(r.dataset.level1) ? "" : "none");
+    const activeTeams = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
+    const searchTerm = searchInput.value.toLowerCase().trim();
+
+    rows.forEach(row => {
+      const matchesTeam = activeTeams.has(row.dataset.level1);
+      const matchesSearch = row.innerText.toLowerCase().includes(searchTerm);
+      row.style.display = (matchesTeam && matchesSearch) ? "" : "none";
+    });
   }
 
   // Master checkbox toggles all
@@ -245,10 +265,14 @@ document.addEventListener("DOMContentLoaded", () => {
     filter();
   });
 
-  // Update filter whenever any checkbox changes
+  // Individual team filters
   checkboxes.forEach(cb => cb.addEventListener("change", filter));
+
+  // Search input filter (real-time)
+  searchInput.addEventListener("input", filter);
 
   filter(); // initial render
 });
 </script>
+
 {% endblock %}
