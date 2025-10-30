@@ -2,5 +2,23 @@
 {% set active = "home" %}
 
 {% block content %}
-  <h2 class="title">Welcome to the Service Dashboard</h2>
+  <div class="content">
+    <h2 class="title">Welcome to the Service Dashboard</h2>
+    <p>The dashboard provides a snapshot of the health of our services, including:</p>
+    <ul>
+      <li>Vulnerabilities detected by <strong>Dependency track</strong></li>
+      <li>Issues detected by <strong>SonarQube</strong></li>
+      <li>Github details (release dates, ownership, etc)</li>
+      <li>Which versions are deployed in each environment</li>
+      <li>Language/Runtime details</li>
+    </ul>
+    <p>This information should be used by teams to plan, prioritise and monitor maintenance work for the services which they own.</p>
+    <h3>The dashboards</h3>
+    <p>There are 3 tabs, each displaying different information.</p>
+    <ul>
+      <li><strong>Teams</strong> - A list of services, grouped by team</li>
+      <li><strong>All Services</strong> - Every available service version</li>
+      <li><strong>Runtimes</strong> - A reference table with each runtime/language, including end of life dates</li>
+    </ul>
+  </div>
 {% endblock %}
