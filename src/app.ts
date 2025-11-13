@@ -178,6 +178,15 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
                   cycle.eolTs = null;
                }
             }
+
+            // cycle.lts is a string that contains one of; 'true', 'false' or a date
+            const ltsValue = cycle.lts;
+            if (ltsValue !== 'true' && ltsValue !== 'false') {
+               // it must be a date value, however those date values don't seem to correspond 
+               // to any date in the eol DB, so convert them to 'true' and store the date off
+               cycle.ltsDate = ltsValue;
+               cycle.lts = 'true';
+            }
          }
       }
 
