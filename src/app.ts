@@ -200,6 +200,7 @@ app.use(async (req, res) => {
       const configData = await mongo.fetchConfig();
 
       res.status(404).render("404.njk", {
+         basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "N/A",
          url: req.originalUrl
       });
