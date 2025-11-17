@@ -28,13 +28,27 @@
    </li>
 {% endmacro %}
 
-{% macro addSonarColorClass(bugs) %}
-   {% if bugs == 0 %}
-      has-background-success-light
-   {% elseif bugs < 10 %}
+{% macro addSonarColorClass(bugs, coverage) %}
+   {% if coverage == 0 %}
       has-background-warning-light
    {% else %}
-      has-background-danger-light
+    {% if bugs == 0 %}
+        has-background-success-light
+    {% elseif bugs < 10 %}
+        has-background-warning-light
+    {% else %}
+        has-background-danger-light
+    {% endif %}
+   {% endif %}
+{% endmacro %}
+
+{% macro addCoverageColorClass(coverage) %}
+   {% if coverage >= 75 %}
+      is-success
+   {% elseif coverage >= 50  %}
+      is-warning
+   {% else %}
+      is-danger
    {% endif %}
 {% endmacro %}
 
@@ -91,6 +105,7 @@
             <thead>
                 <tr>
                 <th class="row-header-title header-service" id="col-head-service">Service</th>
+                <th class="row-header-title header-service" id="col-head-service">Team</th>
                 <th class="row-header-title header-git" id="col-head-git-lang">Runtime</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-cidev">CI Dev</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
@@ -111,6 +126,9 @@
                         <td class="td-name">
                             <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a>
                         </td>
+                        <td class="td-team">
+                            <span class="tag is-info">{{ document._id }}</span>
+                        </td>
 
                         <td class="td-runtime">
                             <ul class="td-runtime-info">
@@ -120,6 +138,8 @@
                                     <span class="tag is-danger">{{ info.value }}</span>
                                 {% elseif info.color == "green" %}
                                     <span class="tag is-success">{{ info.value }}</span>
+                                {% elseif info.color == "yellow" %}
+                                    <span class="tag is-warning">{{ info.value }}</span>
                                 {% elseif info.color == "none" %}
                                     <span class="tag is-info">{{ info.value }}</span>
                                 {% endif %}
@@ -175,8 +195,18 @@
 
                         <!-- SONAR -->
                         {% set sonarBugs = service.sonarMetrics.bugs %}
-                        <td class="td-sonar-metrics {{ addSonarColorClass(sonarBugs) }}">
+                        {% set coverage = service.sonarMetrics.coverage %}
+                        <td class="td-sonar-metrics {{ addSonarColorClass(sonarBugs, coverage) }}">
                             {% if service.sonarMetrics %}
+                                {% if coverage == 0 %}
+                                    <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
+                                        0
+                                    </progress>
+                                {% else %}
+                                    <progress class="progress {{ addCoverageColorClass(coverage) }}" value="{{coverage}}" max="100" data-tooltip="{{ coverage }}% Overall Coverage">
+                                        {{ coverage }}
+                                    </progress>
+                                {% endif %}
                                 <div class="level">
                                     <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
                                         <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Vulnerabilities">

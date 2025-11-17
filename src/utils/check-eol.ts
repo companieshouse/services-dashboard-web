@@ -1,5 +1,4 @@
 import { differenceInDays, parseISO } from "date-fns";
-import { logger } from "./logger";
 
 export interface RuntimeInfo {
     cycle: string;
@@ -33,6 +32,13 @@ export function checkRuntimesVsEol (
 
     // get the language
     const language = languageArray.length > 0 ? languageArray.map(l => (l ?? "unknown").toLowerCase()) : ["unknown"];
+
+    if (!runtimeArray || runtimeArray.length === 0) {
+      return {
+        total: "red",
+        runtime: [{ value: 'Unknown', color: 'red' }]
+      }
+    }
 
     runtimeArray.forEach(runtime => {
       let matchedRuntime: RuntimeInfo | undefined;

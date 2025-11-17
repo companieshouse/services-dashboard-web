@@ -100,8 +100,13 @@ async function fetchDocuments(queryParams?: type.QueryParameters) {
    }
  }
 
+ export interface ScrumTeamDocument {
+  _id: string;
+  services: any[];
+}
+
 // Aggregate the documents by gitinfo.owner & keep the latest version only
-async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds) {
+async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds): Promise<ScrumTeamDocument[]> {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
 
@@ -154,27 +159,38 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             $sort: { "_id": 1 } // Sort groups alphabetically
           }
       ], { session: mongoSession }).toArray(); // cursor --> array
-      // console.log(JSON.stringify(documents, null, 2));
 
       const transformedDocuments = documents.map((team) => ({
+         _id: team.name,
          ...team,
          services: team.services.map((service: any) => {
-            if (service.latestVersion?.runtime) {
-               const runtimeStr = service.latestVersion.runtime;
-               const langArray = [service.latestVersion.lang, service.gitInfo.lang];
-               //   console.log(`-------------- runtimeStr: ${runtimeStr}`);
-
-               const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
-
-               return {
-                     ...service,
-                     latestVersion: {
-                        ...service.latestVersion,
-                        runtime: runtimeColorResult,
-                     },
-               };
+            if (service.sonarMetrics && Object.keys(service.sonarMetrics).length === 0) {
+               // Some services have an empty object. Convert to null for consistency in the UI.
+               service.sonarMetrics = null;
             }
-            return service;
+
+            if (!service.latestVersion.runtime) {
+               return {
+                  ...service,
+                  latestVersion: {
+                     ...service.latestVersion,
+                     runtime: { total: 'red', runtime: [{ value: 'Unknown', color: 'red' }] }
+                  }
+               }
+            }
+
+            const runtimeStr = service.latestVersion.runtime;
+            const langArray = [service.latestVersion.lang, service.gitInfo.lang];
+
+            const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
+
+            return {
+               ...service,
+               latestVersion: {
+                  ...service.latestVersion,
+                  runtime: runtimeColorResult,
+               },
+            };
          }),
       }));
 

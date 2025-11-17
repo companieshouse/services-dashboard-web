@@ -142,7 +142,19 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Respons
       const endols = configData?.endol ?? {};
       const thresholds = configData?.thresholds ?? {};
 
-      const documents = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+      const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+
+      // for(const document of documents) {
+      //    if (document._id == 'Aardvark') {
+      //       for (const service of document.services) {
+      //          if (service.name == 'presenter-account-consumer' || service.name == 'presenter-account-web') {
+      //             console.log(service.latestVersion);
+      //             console.log(`${service.name}:`, service.latestVersion.runtime.runtime);
+      //          }
+      //       }
+      //    }
+      // }
+
       res.render("teams.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
          documents,
