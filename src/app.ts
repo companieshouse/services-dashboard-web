@@ -1,17 +1,10 @@
 import express, { Request, Response } from "express";
-import { unzip } from 'zlib';
-import { promisify } from 'util';
 import nunjucks from "nunjucks";
-
 import * as config from "./config";
 import * as type from './common/types';
 import {logger, logErr} from "./utils/logger";
 import * as mongo from "./mongo/mongo";
 import * as filters from "./utils/nunjucks-custom-filters";
-
-
-// Convert the zlib.unzip function to return a promise using promisify
-const unzipAsync = promisify(unzip);
 
 export interface TabFunction {
    title: string;
@@ -21,7 +14,6 @@ export interface TabFunction {
 const app = express();
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
 app.use(express.text());   // to parse text/plain requests
-
 
 
 const nunjucksEnv = nunjucks.configure([
@@ -203,70 +195,17 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
    }
 });
 
-// handler of "Services"-tab
-async function tabServices (req: Request, res: Response) {
-   try {
-      const linkId = req.query.linkid as string;
-      let   query  = req.query.query  as string;
-      let   compressedState = "";
-      let   queryParams: type.QueryParameters | undefined;
-      try {
-         queryParams = sourceQueryParams(query);
-      } catch (error) {
-         res.status(400).json({ "error": `${error}` });
-         return;
-      }
-
-      const documents = await mongo.fetchDocuments(queryParams);
-      res.render("tabs/tab-services.njk", {
-         basePath: config.ENDPOINT_DASHBOARD,
-         documents: documents,
-         state: compressedState,
-         depTrackUri: config.DEP_TRACK_URI,
-         sonarUri: config.SONAR_URI
-      });
-   } catch (error) {
-      logErr(error);
-   }
- }
-
- // handler of "End of Life"-tab
-async function tabEndol (req: Request, res: Response) {
+app.use(async (req, res) => {
    try {
       const configData = await mongo.fetchConfig();
-      const endols = configData?.endol ?? {};
-      res.render("tabs/tab-endol.njk", {
-         basePath: config.ENDPOINT_DASHBOARD,
-         eolUri: config.EOL_URI,
-         endols
+
+      res.status(404).render("404.njk", {
+         lastScan: configData?.lastScan ?? "N/A",
+         url: req.originalUrl
       });
    } catch (error) {
       logErr(error);
    }
-}
-
-// handler of "Product Owner"-tab
-async function tabProdOwner (req: Request, res: Response) {
-   try {
-      const configData = await mongo.fetchConfig();
-      const endols = configData?.endol ?? {};
-      const thresholds = configData?.thresholds ?? {};
-
-      const documents = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
-      res.render("tabs/tab-prodowner.njk", {
-         basePath: config.ENDPOINT_DASHBOARD,
-         documents,
-         endols,
-         thresholdsGitRelease: thresholds.gitRelease || thresholds.default,
-         thresholdsCidev:     thresholds.cidev       || thresholds.default,
-         thresholdsStaging:   thresholds.staging     || thresholds.default,
-         thresholdsLive:      thresholds.live        || thresholds.default,
-         depTrackUri: config.DEP_TRACK_URI,
-         sonarUri: config.SONAR_URI
-      });
-   } catch (error) {
-      logErr(error);
-   }
-}
+});
 
 export default app;

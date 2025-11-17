@@ -1,13 +1,6 @@
 import request from 'supertest';
-import express, { Request, Response } from 'express';
-import { promisify } from 'util';
-import { unzip } from 'zlib';
-import nunjucks from 'nunjucks';
 import * as config from '../src/config';
-import * as type from '../src/common/types';
-import { logger, logErr } from '../src/utils/logger';
 import * as mongo from '../src/mongo/mongo';
-import * as filters from '../src/utils/nunjucks-custom-filters';
 import  app  from '../src/app';
 
 jest.mock('../src/mongo/mongo');
@@ -35,28 +28,28 @@ describe('App Tests', () => {
         (mongo.fetchConfig as jest.Mock).mockResolvedValue({});
         (mongo.close as jest.Mock).mockResolvedValue(undefined);
 
-        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/tab/services`);
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/details`);
 
         expect(response.status).toBe(200);
         expect(mongo.fetchDocuments).toHaveBeenCalled();
     });
 
-    it('should handle GET request for End of Life tab', async () => {
+    it('should handle GET request for Runtimes tab', async () => {
         (mongo.init as jest.Mock).mockResolvedValue(undefined);
         (mongo.fetchConfig as jest.Mock).mockResolvedValue({ endol: {} });
         (mongo.close as jest.Mock).mockResolvedValue(undefined);
 
-        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/tab/endol`);
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/runtimes`);
 
         expect(response.status).toBe(200);
         expect(mongo.fetchConfig).toHaveBeenCalled();
     });
 
     it('should return 404 for unknown tab', async () => {
-        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/tab/unknown`);
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/unknown`);
 
         expect(response.status).toBe(404);
-        expect(response.text).toBe('Tab not found');
+        expect(response.text).toContain("Page Not Found");
     });
 
     it('should handle GET request for main page with linkId', async () => {
