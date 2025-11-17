@@ -144,17 +144,6 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Respons
 
       const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
 
-      // for(const document of documents) {
-      //    if (document._id == 'Aardvark') {
-      //       for (const service of document.services) {
-      //          if (service.name == 'presenter-account-consumer' || service.name == 'presenter-account-web') {
-      //             console.log(service.latestVersion);
-      //             console.log(`${service.name}:`, service.latestVersion.runtime.runtime);
-      //          }
-      //       }
-      //    }
-      // }
-
       res.render("teams.njk", {
          basePath: config.ENDPOINT_DASHBOARD,
          documents,
@@ -279,16 +268,5 @@ async function tabProdOwner (req: Request, res: Response) {
       logErr(error);
    }
 }
-
- // Tab Routes
-// app.get(`${config.ENDPOINT_DASHBOARD}/tab/:tabName`, (req: Request, res: Response) => {
-//    const tabName = req.params.tabName;
-
-//    if (tabsMap[tabName]) {
-//        tabsMap[tabName].fun(req, res);
-//    } else {
-//       res.status(404).send('Tab not found');
-//    }
-// });
 
 export default app;
