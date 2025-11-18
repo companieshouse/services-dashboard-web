@@ -203,7 +203,7 @@
                                         0
                                     </progress>
                                 {% else %}
-                                    <progress class="progress {{ addCoverageColorClass(coverage) }}" value="{{coverage}}" max="100" data-tooltip="{{ coverage }}% Overall Coverage">
+                                    <progress class="progress {{ addCoverageColorClass(coverage) }} has-tooltip" value="{{coverage}}" max="100" data-tooltip="{{ coverage }}% Overall Coverage">
                                         {{ coverage }}
                                     </progress>
                                 {% endif %}
