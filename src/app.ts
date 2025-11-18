@@ -6,11 +6,6 @@ import {logger, logErr} from "./utils/logger";
 import * as mongo from "./mongo/mongo";
 import * as filters from "./utils/nunjucks-custom-filters";
 
-export interface TabFunction {
-   title: string;
-   fun: (req: Request, res: Response) => void;
-}
-
 const app = express();
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
 app.use(express.text());   // to parse text/plain requests
@@ -116,6 +111,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/details`, async (req: Request, res: Respo
 
       const documents = await mongo.fetchDocuments(queryParams);
       res.render("details.njk", {
+         title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "N/A",
          documents: documents,
@@ -137,6 +133,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Respons
       const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
 
       res.render("teams.njk", {
+         title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          documents,
          endols,
@@ -184,6 +181,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
       }
 
       res.render("runtimes.njk", {
+         title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          eolUri: config.EOL_URI,
          lastScan: configData?.lastScan ?? "N/A",
@@ -205,6 +203,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/service/:serviceName`, async (req: Reques
       const service: mongo.ServiceDocument | null = await mongo.fetchDocument(serviceName, endols, thresholds);
 
       res.render("service.njk", {
+         title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          serviceName,
          service,
@@ -227,6 +226,7 @@ app.use(async (req, res) => {
       const configData = await mongo.fetchConfig();
 
       res.status(404).render("404.njk", {
+         title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "N/A",
          url: req.originalUrl
