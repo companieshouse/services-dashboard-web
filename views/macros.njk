@@ -115,3 +115,13 @@ The select will have:
         {% endfor %}
    </select>
 {% endmacro %}
+
+{% macro addCoverageColorClass(coverage) %}
+   {% if coverage >= 75 %}
+      is-success
+   {% elseif coverage >= 50  %}
+      is-warning
+   {% else %}
+      is-danger
+   {% endif %}
+{% endmacro %}

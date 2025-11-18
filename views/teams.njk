@@ -1,6 +1,6 @@
 {% extends "layout.njk" %}
 {% set active = "teams" %}
-{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId %}
+{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass %}
 
 {% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
    {% set color = "red" %}
@@ -39,16 +39,6 @@
     {% else %}
         has-background-danger-light
     {% endif %}
-   {% endif %}
-{% endmacro %}
-
-{% macro addCoverageColorClass(coverage) %}
-   {% if coverage >= 75 %}
-      is-success
-   {% elseif coverage >= 50  %}
-      is-warning
-   {% else %}
-      is-danger
    {% endif %}
 {% endmacro %}
 
@@ -124,7 +114,7 @@
                             data-level1="{{ setStandardId(document._id) }}"
                             data-level2="{{ service.name }}">
                         <td class="td-name">
-                            <a href="{{ service.gitInfo.repo }}">{{ service.name }}</a>
+                            <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
                         </td>
                         <td class="td-team">
                             <span class="tag is-info">{{ document._id }}</span>

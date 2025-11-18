@@ -105,6 +105,50 @@ async function fetchDocuments(queryParams?: type.QueryParameters) {
   services: any[];
 }
 
+export interface ServiceDocument {
+   _id: ObjectId;
+   name: string;
+   versions: any[];
+   gitInfo: any;
+   ecs: any;
+}
+
+export async function fetchDocument(name: String, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
+   try {
+      const collection = database.collection<ServiceDocument>(config.MONGO_COLLECTION_PROJECTS!);
+
+      const document = await collection.findOne({ name });
+      
+      if (document) {
+         const langArray = [document.gitInfo.lang];
+
+         for (const version of document.versions) {
+            langArray.push(version.lang);
+            if (version.runtime) {
+               version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
+            }
+
+            const deployments = [];
+            if (version.version == document.ecs?.cidev?.version) {
+               deployments.push('CI-Dev');
+            }
+            if (version.version == document.ecs?.staging?.version) {
+               deployments.push('Staging');
+            }
+            if (version.version == document.ecs?.live?.version) {
+               deployments.push('Live');
+            }
+            version.deployments = deployments;
+         }
+      }
+
+      return document;
+   } catch (error) {
+      logErr(error, "Error fetching documents:");
+      return null;
+   }
+}
+
 // Aggregate the documents by gitinfo.owner & keep the latest version only
 async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds): Promise<ScrumTeamDocument[]> {
    try {
