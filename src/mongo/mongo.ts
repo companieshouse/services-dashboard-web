@@ -111,6 +111,7 @@ export interface ServiceDocument {
    versions: any[];
    gitInfo: any;
    ecs: any;
+   sonarMetrics: any;
 }
 
 export async function fetchDocument(name: String, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
@@ -139,6 +140,15 @@ export async function fetchDocument(name: String, endol: EndOfLifeData, threshol
                deployments.push('Live');
             }
             version.deployments = deployments;
+         }
+
+         // most recent versions first
+         document.versions = document.versions.sort((a:any, b:any) => a.version.localeCompare(b.version)).reverse();
+         
+         if (document.sonarMetrics) {
+            if (Object.keys(document.sonarMetrics).length == 0) {
+               document.sonarMetrics = null; // normalise to make things easier on the FE
+            }
          }
       }
 

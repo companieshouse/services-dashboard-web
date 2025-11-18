@@ -6,8 +6,9 @@
     {% if service %}
         {% set gitInfo = service.gitInfo %}
         {% set ecs = service.ecs %}
-        <h1 class="title is-2">{{ serviceName }}</h1>
 
+        <h1 class="title is-2">{{ serviceName }}</h1>
+        <h2 class="is-size-3">Overview</h2>
         <div class="columns">
             <div class="column">
                 <table class="table is-bordered is-fullwidth">
@@ -56,14 +57,14 @@
                                     <strong>{{ecs.live.version}} </strong>
                                     - {{ecs.live.gitReleaseDate | date(dateFormat)}}
                                 {% else %}
-                                    Unkown
+                                    Unknown
                                 {% endif %}
                             </td>
                         </tr>
                         {% if service.sonarMetrics %}
                         {% set coverage = service.sonarMetrics.coverage %}
                             <tr>
-                                <th>Sonar</th>
+                                <th>SonarQube Metrics</th>
                                 <td>
                                     {% if coverage == 0 %}
                                         <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
@@ -114,62 +115,61 @@
                 </table>
             </div>
         </div>
-        
-        <section>
-            <table class="table is-fullwidth">
-                <thead>
-                    <tr>
-                        <th>Version</th>
-                        <th>Environments</th>
-                        <th>Last BOM Import</th>
-                        <th>Language</th>
-                        <th>Runtimes</th>
-                        <th>Dependency Track</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for version in service.versions %}
-                    <tr>
-                        <td>
-                            <a href="{{depTrackUri}}/projects/{{version.uuid}}/findings">
-                                {{version.version}}
-                            </a>
-                        </td>
-                        <td>
-                            {% for value in version.deployments %}
-                                <span class="tag is-info">{{value}}</span>
-                            {% endfor %}
-                        </td>
-                        <td>{{version.lastBomImport | date(dateFormat)}}</td>
-                        <td>{{version.lang}}</td>
-                        <td>
-                            {% for info in version.runtimeData.runtime%}
-                                {% if info.color == "red" %}
-                                    <span class="tag is-danger">{{ info.value }}</span>
-                                {% elseif info.color == "green" %}
-                                    <span class="tag is-success">{{ info.value }}</span>
-                                {% elseif info.color == "yellow" %}
-                                    <span class="tag is-warning">{{ info.value }}</span>
-                                {% elseif info.color == "none" %}
-                                    <span class="tag is-info">{{ info.value }}</span>
-                                {% endif %}
-                            {% endfor %}
-                        </td>
-                        <td>
-                            <div class="level">
-                                <span class="tag is-danger has-tooltip" data-tooltip="Critical">{{version.metrics.critical}}</span>
-                                <span class="tag is-warning has-tooltip" data-tooltip="High">{{version.metrics.high}}</span>
-                                <span class="tag is-info has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
-                                <span class="tag has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
-                                <span class="tag has-tooltip" data-tooltip="Vulnerabilities">{{version.metrics.vulnerabilities}}</span>
-                                <span class="tag is-success has-tooltip" data-tooltip="Components">{{version.metrics.components}}</span>
-                            </div>
-                        </td>
-                    <tr>     
-                {% endfor %}
-                </tbody>
-            </table>
-        </section>
+    
+        <h2 class="is-size-3">Dependency Track</h2>
+        <table class="table is-fullwidth mt-5">
+            <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Environments</th>
+                    <th class="has-tooltip" data-tooltip="When the version was uploaded to DepTrack">Last BOM Import</th>
+                    <th>Language</th>
+                    <th>Runtimes</th>
+                    <th>Dependency Track</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for version in service.versions %}
+                <tr>
+                    <td>
+                        <a href="{{depTrackUri}}/projects/{{version.uuid}}/findings">
+                            {{version.version}}
+                        </a>
+                    </td>
+                    <td>
+                        {% for value in version.deployments %}
+                            <span class="tag is-info">{{value}}</span>
+                        {% endfor %}
+                    </td>
+                    <td>{{version.lastBomImport | date(dateFormat)}}</td>
+                    <td>{{version.lang}}</td>
+                    <td>
+                        {% for info in version.runtimeData.runtime%}
+                            {% if info.color == "red" %}
+                                <span class="tag is-danger">{{ info.value }}</span>
+                            {% elseif info.color == "green" %}
+                                <span class="tag is-success">{{ info.value }}</span>
+                            {% elseif info.color == "yellow" %}
+                                <span class="tag is-warning">{{ info.value }}</span>
+                            {% elseif info.color == "none" %}
+                                <span class="tag is-info">{{ info.value }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="level">
+                            <span class="tag is-danger has-tooltip" data-tooltip="Critical">{{version.metrics.critical}}</span>
+                            <span class="tag is-warning has-tooltip" data-tooltip="High">{{version.metrics.high}}</span>
+                            <span class="tag is-info has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
+                            <span class="tag has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
+                            <span class="tag has-tooltip" data-tooltip="Vulnerabilities">{{version.metrics.vulnerabilities}}</span>
+                            <span class="tag is-success has-tooltip" data-tooltip="Components">{{version.metrics.components}}</span>
+                        </div>
+                    </td>
+                <tr>     
+            {% endfor %}
+            </tbody>
+        </table>
     {% else %}
         <h1>We couldn't find that service.</h1>
     {% endif %}

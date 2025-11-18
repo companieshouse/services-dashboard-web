@@ -9,7 +9,7 @@ jest.mock('../src/utils/logger');
 describe('App Tests', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-});
+    });
 
     afterAll(() => {
         jest.restoreAllMocks();
@@ -68,5 +68,30 @@ describe('App Tests', () => {
 
         expect(response.status).toBe(200);
         expect(response.text).toContain(config.APP_TITLE);
+    });
+
+    it('should handle GET request for a service', async () => {
+        const serviceName = 'some-service-name';
+        (mongo.init as jest.Mock).mockResolvedValue(undefined);
+        (mongo.fetchDocument as jest.Mock).mockResolvedValue({name: serviceName});
+        (mongo.fetchConfig as jest.Mock).mockResolvedValue({});
+        (mongo.close as jest.Mock).mockResolvedValue(undefined);
+        
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD!}/service/${serviceName}`);
+
+        expect(response.status).toBe(200);
+        expect(mongo.fetchDocument).toHaveBeenCalled();
+        expect(response.text).toContain(serviceName);
+    });
+
+    it('should display error message for a missing service', async () => {
+        (mongo.init as jest.Mock).mockResolvedValue(undefined);
+        (mongo.fetchDocument as jest.Mock).mockResolvedValue(null); //missing
+        
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD!}/service/missing`);
+
+        expect(response.status).toBe(200);
+        expect(mongo.fetchDocument).toHaveBeenCalled();
+        expect(response.text).toContain(`We couldn't find that service.`);
     });
 });
