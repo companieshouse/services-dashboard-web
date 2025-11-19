@@ -4,7 +4,7 @@ import * as config from "../config";
 import * as type from '../common/types';
 import {logger, logErr} from "../utils/logger";
 import {checkRuntimesVsEol, EndOfLifeData, Thresholds} from "../utils/check-eol";
-
+import { getDb, getSession } from "./db";
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
@@ -12,27 +12,27 @@ let mongoClient: MongoClient;
 let database: Db;
 let mongoSession: ClientSession;
 
-async function init() {
-   try {
-      logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`);
-      mongoClient = new MongoClient(config.MONGO_URI);
-      await mongoClient.connect();
-      database = mongoClient.db(config.MONGO_DB_NAME);
-      mongoSession = mongoClient.startSession();
-   } catch (error) {
-      logger.error(`Error connecting to Mongo: ${(error as Error).message}`);
-   }
-}
+// async function init() {
+//    try {
+//       logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`);
+//       mongoClient = new MongoClient(config.MONGO_URI);
+//       await mongoClient.connect();
+//       database = mongoClient.db(config.MONGO_DB_NAME);
+//       mongoSession = mongoClient.startSession();
+//    } catch (error) {
+//       logger.error(`Error connecting to Mongo: ${(error as Error).message}`);
+//    }
+// }
 
-async function close() {
-   try {
-      await mongoSession.endSession();
-      await mongoClient.close();
-      logger.info("Mongo connection closed.");
-   } catch (error) {
-      logger.error(`Error closing Mongo connection: ${(error as Error).message}`);
-   }
-}
+// async function close() {
+//    try {
+//       await mongoSession.endSession();
+//       await mongoClient.close();
+//       logger.info("Mongo connection closed.");
+//    } catch (error) {
+//       logger.error(`Error closing Mongo connection: ${(error as Error).message}`);
+//    }
+// }
 
 // ex.
 // https://......./dashboard/?query={"overs":["last"],"api":["last"]}
@@ -41,18 +41,18 @@ async function close() {
 //                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
 async function fetchDocuments(queryParams?: type.QueryParameters) {
    try {
-      const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
+      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
 
       let documents;
       // Return all documents if no queryParams are provided or if name is "*"
       if (!queryParams || queryParams.hasOwnProperty("*")) {
-         documents = await collection.find({}, { session: mongoSession }).sort({ name: 1 }).toArray();
+         documents = await collection.find({}, { session: getSession() }).sort({ name: 1 }).toArray();
       } else {
          // Build the regex queries for each name
          const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, "i"));
 
          // Find the documents by names using regex
-         documents = await collection.find({ name: { $in: namePatterns }}, { session: mongoSession }).toArray();
+         documents = await collection.find({ name: { $in: namePatterns }}, { session: getSession() }).toArray();
          // Filter the versions for each document
          documents = documents.map(doc => {
             const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
@@ -116,7 +116,8 @@ export interface ServiceDocument {
 
 export async function fetchDocument(name: String, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
    try {
-      const collection = database.collection<ServiceDocument>(config.MONGO_COLLECTION_PROJECTS!);
+      const db = getDb();
+      const collection = db.collection<ServiceDocument>(config.MONGO_COLLECTION_PROJECTS!);
 
       const document = await collection.findOne({ name });
       
@@ -162,7 +163,7 @@ export async function fetchDocument(name: String, endol: EndOfLifeData, threshol
 // Aggregate the documents by gitinfo.owner & keep the latest version only
 async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds): Promise<ScrumTeamDocument[]> {
    try {
-      const collection = database.collection(config.MONGO_COLLECTION_PROJECTS!);
+      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
 
       const documents = await collection.aggregate([
          {
@@ -219,7 +220,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
           {
             $sort: { "_id": 1 } // Sort groups alphabetically
           }
-      ], { session: mongoSession }).toArray(); // cursor --> array
+      ], { session: getSession() }).toArray(); // cursor --> array
 
       const transformedDocuments = documents.map((team) => ({
          _id: team.name,
@@ -264,10 +265,10 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
 
 async function fetchConfig() {
    try {
-      const collection = database.collection(config.MONGO_COLLECTION_CONFIG!);
+      const collection = getDb().collection(config.MONGO_COLLECTION_CONFIG!);
       const configData = await collection.findOne(
          { _id: config.MONGO_CONFIG_SINGLETON as any },
-         {session: mongoSession }
+         {session: getSession() }
       );
       // return "endol" sorted by key (ex. "amazon-corretto" before "go")
       if (configData && configData.endol) {
@@ -289,7 +290,7 @@ async function getState(linkId: string|undefined): Promise<string> {
    let state = '';
    if (linkId !== undefined ) {
       try {
-         const collection = database.collection(config.MONGO_COLLECTION_LINKS!);
+         const collection = getDb().collection(config.MONGO_COLLECTION_LINKS!);
          const objectId   = new ObjectId(linkId);
          const now = new Date()
 
@@ -297,7 +298,7 @@ async function getState(linkId: string|undefined): Promise<string> {
          const document = await collection.findOneAndUpdate(
             { _id: objectId },
             { $set: { lastUsed: now } },
-            { returnDocument: 'after', session: mongoSession }
+            { returnDocument: 'after', session: getSession() }
          );
 
          // 2.3 get ready to return its state
@@ -309,7 +310,7 @@ async function getState(linkId: string|undefined): Promise<string> {
          const cutoffDate = new Date(now.getTime() - MilliSecRetentionStateLinks);
          await collection.deleteMany(
             { lastUsed: { $lt: cutoffDate } },
-            { session: mongoSession }
+            { session: getSession() }
           );
       } catch (error) {
          logger.info(`Error getting link state: ${error}`);
@@ -322,7 +323,7 @@ async function addState(state: string): Promise<string | undefined> {
    let linkId = undefined;
    if (state) {
       try {
-         const collection = database.collection(config.MONGO_COLLECTION_LINKS!);
+         const collection = getDb().collection(config.MONGO_COLLECTION_LINKS!);
 
          // Find the document with the matching state
          const document = await collection.findOneAndUpdate(
@@ -330,7 +331,7 @@ async function addState(state: string): Promise<string | undefined> {
             { $set: { lastUsed: new Date() } },
             {  returnDocument: 'after',
                upsert: true,  // upsert creates a new document if none exists
-               session: mongoSession
+               session: getSession()
             }
          );
          if (document) {
@@ -344,4 +345,4 @@ async function addState(state: string): Promise<string | undefined> {
    return linkId;
 }
 
-export { init, close, fetchDocuments, fetchDocumentsGoupedByScrum, fetchConfig, getState, addState };
+export { fetchDocuments, fetchDocumentsGoupedByScrum, fetchConfig, getState, addState };

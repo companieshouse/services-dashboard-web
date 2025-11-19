@@ -5,7 +5,7 @@ import * as http from "http";
 import * as config from "../config";
 import { logger, logErr } from "../utils/logger";
 import app from "../app";
-import * as mongo from "../mongo/mongo";
+import { closeDb, connectToDb } from '../mongo/db';
 
 const forcefullyShutdownMS = 10000;
 // Get port from environment and store in Express.
@@ -46,8 +46,8 @@ function onError(error: any) {
 function gracefulShutdown() {
   logger.info("Shutting down gracefully...");
   server.close(async () => {
+    await closeDb();
     logger.info("Closed out remaining connections.");
-    mongo.close();
     process.exit(0);
   });
 
@@ -59,7 +59,7 @@ function gracefulShutdown() {
 }
 
 // Initialize MongoDB connection
-mongo.init().then(() => {
+connectToDb().then(() => {
   logger.info("MongoDB initialized successfully.");
 }).catch((error) => {
   logger.error(`Failed to initialize MongoDB: ${(error as Error).message}`);
