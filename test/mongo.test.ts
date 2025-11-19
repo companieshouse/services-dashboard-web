@@ -37,16 +37,16 @@ describe("fetchDocument()", () => {
       _id: "123",
       name: "some-service",
       gitInfo: { lang: "node" },
-      sonarMetrics: {},
+      sonarMetrics: null,
       ecs: {
-        cidev:   { version: "1.0.0" },
-        staging: { version: "2.0.0" },
-        live:    { version: "3.0.0" }
+        cidev:   { version: "2.0.0" },
+        staging: { version: "0.1.100" },
+        live:    { version: "0.1.99" }
       },
       versions: [
-        { version: "1.0.0", lang: "js",  runtime: "node 16" },
-        { version: "2.0.0", lang: "ts",  runtime: "node 18" },
-        { version: "3.0.0", lang: "tsx", runtime: "node 20" }
+        { version: "0.1.99", lang: "ts",  runtime: "node 18" },
+        { version: "0.1.100", lang: "js",  runtime: "node 20" },
+        { version: "2.0.0", lang: "tsx", runtime: "node 24" }
       ]
     });
 
@@ -56,15 +56,39 @@ describe("fetchDocument()", () => {
 
     // --- versions sorted descending ---
     expect(result!.versions.map(v => v.version))
-      .toEqual(["3.0.0", "2.0.0", "1.0.0"]);
+      .toEqual(["2.0.0", "0.1.100", "0.1.99"]);
 
     // --- runtimeData added using mocked fn ---
     expect(result!.versions[0].runtimeData).toBe("MOCK_RUNTIME_DATA");
 
     // --- deployments based on ecs versions ---
-    expect(result!.versions[0].deployments).toEqual(["Live"]);
+    expect(result!.versions[0].deployments).toEqual(["CI-Dev"]);
     expect(result!.versions[1].deployments).toEqual(["Staging"]);
-    expect(result!.versions[2].deployments).toEqual(["CI-Dev"]);
+    expect(result!.versions[2].deployments).toEqual(["Live"]);
+
+    // --- sonarMetrics normalized ---
+    expect(result!.sonarMetrics).toBeNull();
+  });
+
+  test("gracefully handles non-semver versioning", async () => {
+    mockCollection.findOne.mockResolvedValue({
+      _id: "123",
+      name: "some-service",
+      gitInfo: { lang: "node" },
+      sonarMetrics: {},
+      versions: [
+        { version: "ecs-service-1.0.99", lang: "ts",  runtime: "node 18" },
+        { version: "ecs-service-1.1.0", lang: "ts",  runtime: "node 24" },
+      ]
+    });
+
+    const result = await fetchDocument("some-service", {}, {});
+
+    expect(result).not.toBeNull();
+
+    // --- versions sorted descending ---
+    expect(result!.versions.map(v => v.version))
+      .toEqual(["ecs-service-1.1.0", "ecs-service-1.0.99"]);
 
     // --- sonarMetrics normalized ---
     expect(result!.sonarMetrics).toBeNull();

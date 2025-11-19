@@ -1,5 +1,5 @@
 import { Db, MongoClient, ObjectId, ClientSession } from "mongodb";
-
+import semver from "semver";
 import * as config from "../config";
 import * as type from '../common/types';
 import {logger, logErr} from "../utils/logger";
@@ -144,7 +144,11 @@ export async function fetchDocument(name: String, endol: EndOfLifeData, threshol
          }
 
          // most recent versions first
-         document.versions = document.versions.sort((a:any, b:any) => a.version.localeCompare(b.version)).reverse();
+         document.versions = document.versions.sort((a:any, b:any) => 
+            semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
+            semver.compare(a.version, b.version) : // try and sort using semver...
+            a.version.localeCompare(b.version) // else, use string comparison
+         ).reverse();
          
          if (document.sonarMetrics) {
             if (Object.keys(document.sonarMetrics).length == 0) {
