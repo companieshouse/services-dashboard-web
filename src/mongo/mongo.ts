@@ -1,4 +1,4 @@
-import { Db, MongoClient, ObjectId, ClientSession } from "mongodb";
+import { ObjectId } from "mongodb";
 import semver from "semver";
 import * as config from "../config";
 import * as type from '../common/types';
@@ -7,32 +7,6 @@ import {checkRuntimesVsEol, EndOfLifeData, Thresholds} from "../utils/check-eol"
 import { getDb, getSession } from "./db";
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
-
-let mongoClient: MongoClient;
-let database: Db;
-let mongoSession: ClientSession;
-
-// async function init() {
-//    try {
-//       logger.info(`connecting to Mongo: ${config.MONGO_HOST_AND_PORT}`);
-//       mongoClient = new MongoClient(config.MONGO_URI);
-//       await mongoClient.connect();
-//       database = mongoClient.db(config.MONGO_DB_NAME);
-//       mongoSession = mongoClient.startSession();
-//    } catch (error) {
-//       logger.error(`Error connecting to Mongo: ${(error as Error).message}`);
-//    }
-// }
-
-// async function close() {
-//    try {
-//       await mongoSession.endSession();
-//       await mongoClient.close();
-//       logger.info("Mongo connection closed.");
-//    } catch (error) {
-//       logger.error(`Error closing Mongo connection: ${(error as Error).message}`);
-//    }
-// }
 
 // ex.
 // https://......./dashboard/?query={"overs":["last"],"api":["last"]}
