@@ -226,22 +226,22 @@
                             {% if service.latestVersion.metrics %}
                                 <div class="level">
                                     <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Critical">
+                                        <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
                                             {{ depTrackCritical }}
                                         </span>
                                     </a>
                                     <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="High">
+                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
                                             {{ depTrackHigh }}
                                         </span>
                                     </a>
                                     <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-info has-tooltip-bottom" data-tooltip="Medium">
+                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
                                             {{ depTrackMedium }}
                                         </span>
                                     </a>
                                     <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-white has-tooltip-bottom" data-tooltip="Low">
+                                        <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
                                             {{ depTrackLow }}
                                         </span>
                                     </a>

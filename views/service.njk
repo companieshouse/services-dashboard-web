@@ -125,7 +125,7 @@
                     <th class="has-tooltip" data-tooltip="When the version was uploaded to DepTrack">Last BOM Import</th>
                     <th>Language</th>
                     <th>Runtimes</th>
-                    <th>Dependency Track</th>
+                    <th>Vulnerabilities</th>
                 </tr>
             </thead>
             <tbody>
@@ -158,12 +158,14 @@
                     </td>
                     <td>
                         <div class="level">
-                            <span class="tag is-danger has-tooltip" data-tooltip="Critical">{{version.metrics.critical}}</span>
-                            <span class="tag is-warning has-tooltip" data-tooltip="High">{{version.metrics.high}}</span>
-                            <span class="tag is-info has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
-                            <span class="tag has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
-                            <span class="tag has-tooltip" data-tooltip="Vulnerabilities">{{version.metrics.vulnerabilities}}</span>
-                            <span class="tag is-success has-tooltip" data-tooltip="Components">{{version.metrics.components}}</span>
+                            <p class="has-tooltip" data-tooltip="Total vulnerabilities, including those unassigned a criticality">
+                                Total: {{version.metrics.vulnerabilities}}
+                            </p>
+                            <span class="tag has-background-danger-30 has-text-white has-tooltip" data-tooltip="Critical">{{version.metrics.critical}}</span>
+                            <span class="tag is-danger has-tooltip" data-tooltip="High">{{version.metrics.high}}</span>
+                            <span class="tag is-warning has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
+                            <span class="tag is-success has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
+                            <span class="tag has-tooltip" data-tooltip="Components">{{version.metrics.components}}</span>
                         </div>
                     </td>
                 <tr>     
