@@ -33,12 +33,12 @@ data "aws_iam_role" "ecs_cluster_iam_role" {
   name = "${local.name_prefix}-ecs-task-execution-role"
 }
 
-data "aws_lb" "rand_lb" {
-  name = "${local.lb_name}"
+data "aws_lb" "dev_tools" {
+  name = local.lb_name
 }
 
-data "aws_lb_listener" "rand_lb_listener" {
-  load_balancer_arn = data.aws_lb.rand_lb.arn
+data "aws_lb_listener" "dev_tools_listener" {
+  load_balancer_arn = data.aws_lb.dev_tools.arn
   port = 443
 }
 

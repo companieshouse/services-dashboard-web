@@ -1,17 +1,17 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                  = "rand-pocs" # this must match the stack name the service deploys into
+  stack_name                  = "dev-tools" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
-  service_name                = "services-dashboard-web"
+  service_name                = "services-dashboard-web-develop"
 
   stack_secrets_path          = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
   service_secrets_path        = "${local.stack_secrets_path}/services-dashboard"
 
   container_port              = "3000" # default node port required here until prod docker container is built allowing port change via env var
-  docker_repo                 = "services-dashboard-web"
+  docker_repo                 = "services-dashboard-web-develop"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
-  lb_name                     = "alb-randd-rand"
+  lb_name                     = "alb-${var.environment}-dev-tools"
   lb_listener_rule_priority   = 19
   lb_listener_paths           = ["/dashboard","/dashboard/*"]
   healthcheck_path            = "/dashboard/healthcheck" #healthcheck path for overseas entities web
