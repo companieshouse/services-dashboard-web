@@ -3,7 +3,7 @@ locals {
   stack_name                  = "dev-tools" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
-  service_name                = "services-dashboard-web"
+  service_name                = "services-dashboard-web-develop"
 
   stack_secrets_path          = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
   service_secrets_path        = "${local.stack_secrets_path}/services-dashboard"
