@@ -100,7 +100,7 @@
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-live">Live</th>
                 <th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage">Sonar</th>
-                <th class="row-header-title header-deptrack" id="col-head-deptk-date">Dependencies</th>
+                <th class="row-header-title header-deptrack" id="col-head-deptrack">Dependencies</th>
                 </tr>
             </thead>
 
@@ -109,9 +109,18 @@
                 {% if document %}
                     {% for service in document.services %}
                     {% if service %}
+                        {% set depTrackCritical = service.latestVersion.metrics.critical %}
+                        {% set depTrackHigh     = service.latestVersion.metrics.high %}
+                        {% set depTrackMedium   = service.latestVersion.metrics.medium %}
+                        {% set depTrackLow      = service.latestVersion.metrics.low %}
                         <tr class="transparent_row"
                             data-level1="{{ setStandardId(document._id) }}"
-                            data-level2="{{ service.name }}">
+                            data-level2="{{ service.name }}"
+                            data-critical="{{ depTrackCritical }}"
+                            data-high="{{ depTrackHigh }}"
+                            data-medium="{{ depTrackMedium }}"
+                            data-low="{{ depTrackLow }}"
+                        >
                         <td class="td-name">
                             <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
                         </td>
@@ -217,10 +226,6 @@
                         </td>
 
                         <!-- DEP TRACK -->
-                        {% set depTrackCritical = service.latestVersion.metrics.critical %}
-                        {% set depTrackHigh     = service.latestVersion.metrics.high %}
-                        {% set depTrackMedium   = service.latestVersion.metrics.medium %}
-                        {% set depTrackLow      = service.latestVersion.metrics.low %}
                         {% set uuid             = service.latestVersion.uuid %}
                         <td class="td-deptrack-metrics {{ addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium) }}">
                             {% if service.latestVersion.metrics %}
@@ -290,6 +295,53 @@ document.addEventListener("DOMContentLoaded", () => {
   searchInput.addEventListener("input", filter);
 
   filter(); // initial render
+
+  /* -------------------------------------------------------------------------- */
+  /* SORTING BY DEPENDENCIES                                                    */
+  /* -------------------------------------------------------------------------- */
+
+  const depHeader = document.querySelector("#col-head-deptrack");
+  const tableBody = document.querySelector("#tab-table-id tbody");
+
+  let sortDirection = "desc"; // toggle between desc → asc
+
+  depHeader.style.cursor = "pointer";  
+  depHeader.title = "Sort by Dependencies";
+
+  depHeader.addEventListener("click", () => {
+    const rows = [...tableBody.querySelectorAll("tr")];
+
+    rows.sort((a, b) => {
+      const aVals = [
+        Number(a.dataset.critical),
+        Number(a.dataset.high),
+        Number(a.dataset.medium),
+        Number(a.dataset.low)
+      ];
+      const bVals = [
+        Number(b.dataset.critical),
+        Number(b.dataset.high),
+        Number(b.dataset.medium),
+        Number(b.dataset.low)
+      ];
+
+      // multi-level compare function
+      for (let i = 0; i < 4; i++) {
+        if (aVals[i] !== bVals[i]) {
+          return sortDirection === "desc"  
+            ? bVals[i] - aVals[i]
+            : aVals[i] - bVals[i];
+        }
+      }
+      return 0;
+    });
+
+    // Append rows back in new order
+    rows.forEach(row => tableBody.appendChild(row));
+
+    // Toggle sort direction
+    sortDirection = sortDirection === "desc" ? "asc" : "desc";
+  });
 });
 </script>
 
