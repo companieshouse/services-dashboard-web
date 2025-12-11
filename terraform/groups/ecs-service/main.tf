@@ -1,6 +1,5 @@
 terraform {
   backend "s3" {
-    workspace_key_prefix = "services-dashboard-web-develop"
   }
   required_version = "~> 1.3.0"
   required_providers {
