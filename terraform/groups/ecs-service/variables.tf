@@ -115,8 +115,3 @@ variable "services_dashboard_web_version" {
   type        = string
   description = "The version of the services dashboard web container to run."
 }
-
-variable "workspace_key_prefix" {
-  type = string
-  description = "Repo name to use as the workspace key prefix in terraform bucket"
-}
