@@ -1,6 +1,6 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                  = "rand-pocs" # this must match the stack name the service deploys into
+  stack_name                  = "dev-tools" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "services-dashboard-web"
@@ -11,7 +11,7 @@ locals {
   container_port              = "3000" # default node port required here until prod docker container is built allowing port change via env var
   docker_repo                 = "services-dashboard-web"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
-  lb_name                     = "alb-randd-rand"
+  lb_name                     = "alb-${var.environment}-dev-tools"
   lb_listener_rule_priority   = 19
   lb_listener_paths           = ["/dashboard","/dashboard/*"]
   healthcheck_path            = "/dashboard/healthcheck" #healthcheck path for overseas entities web
@@ -71,5 +71,5 @@ locals {
   # TASK ENVIRONMENT: GLOBAL SECRET Version + SERVICE SECRET Version
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { "name": "NODE_PORT", "value": "${local.container_port}" }
-    ])
+  ])
 }
