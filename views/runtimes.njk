@@ -1,0 +1,62 @@
+{% extends "layout.njk" %}
+{% set active = "runtimes" %}
+
+{% from "macros.njk" import addDaysAgo %}
+
+{% block content %}
+<div class="table-container">
+  <table class="table is-fullwidth">
+    <thead>
+      <!-- Col Headers -->
+      <tr>
+          <th class="row-header-title header-project"         id="col-head-project"         data-type="string">Runtime</th>
+          <th class="row-header-title header-cycle"           id="col-head-cycle"           data-type="string">Version</th>
+          <th class="row-header-title header-eol"             id="col-head-eol"             data-type="date">EOL</th>
+          <th class="row-header-title header-latest"          id="col-head-latest"          data-type="string">Latest</th>
+          <th class="row-header-title header-latest-rel-date" id="col-head-latest-rel-date" data-type="date">Latest Release Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project, projArray in endols %}
+        {% for cycle in projArray %}
+          {% set oneYearLater = now + (365 * 24 * 60 * 60 * 1000) %}
+          {% if not cycle.eolTs %}
+            {% set eolClass = "" %}
+          {% else %}
+            {% if cycle.eolTs < now %}
+              {% set eolClass = "has-background-danger-light" %}
+            {% elif cycle.eolTs <= oneYearLater %}
+              {% set eolClass = "has-background-warning-light" %}
+            {% else %}
+              {% set eolClass = "has-background-success-light" %}
+            {% endif %}
+          {% endif %}
+
+          <tr data-level1="{{ project }}" data-level2="{{ cycle.cycle }}">
+            <td class="td-project">
+              <a href="{{ eolUri }}/{{ project }}">{{ project }}</a>
+            </td>
+            <td class="td-cycle">
+              {{ cycle.cycle }}
+              {% if cycle.lts == 'true' %}
+                <span>(LTS)</span>
+              {% endif %}
+            </td>
+            <td class="td-eol {{eolClass}}">
+              {% if cycle.eol %}
+                <span>{{ cycle.eol }}</span>{{ addDaysAgo(cycle.eol) }}
+              {% else %}
+                <span>Unknown</span>
+              {% endif %}
+            </td>
+            <td class="td-latest">{{ cycle.latest }}</td>
+            <td class="td-latest-rel-date">
+              <span>{{ cycle.latestReleaseDate }}</span>{{ addDaysAgo(cycle.latestReleaseDate) }}
+            </td>
+          </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
