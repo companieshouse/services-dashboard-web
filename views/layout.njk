@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>{{ title }}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip/dist/bulma-tooltip.min.css">
+  <link rel="stylesheet" href="{{basePath}}/css/bulma.min.css"> {# Bulma CSS v1.0.4 #}
+  <link rel="stylesheet" href="{{basePath}}/css/bulma-tooltip.min.css"> {# Bulma CSS - Tooltip v1.2.0 #}
   <link rel="stylesheet" href="{{basePath}}/css/common.css">
   <script src="{{basePath}}/js/libs/pako/2.0.4/pako.min.js"></script>
   <script src="{{basePath}}/js/common.js"></script>
@@ -27,8 +27,10 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      /*
+      * Convert all anchor links to external sites to open in a new tab.
+      */
       const currentHost = window.location.host;
-      console.log("Current host: ", currentHost);
       document.querySelectorAll("a[href]").forEach(a => {
         try {
           const url = new URL(a.href);
