@@ -3,13 +3,13 @@ locals {
   stack_name                  = "dev-tools" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
-  service_name                = "services-dashboard-web-develop"
+  service_name                = "services-dashboard-web"
 
   stack_secrets_path          = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
   service_secrets_path        = "${local.stack_secrets_path}/services-dashboard"
 
   container_port              = "3000" # default node port required here until prod docker container is built allowing port change via env var
-  docker_repo                 = "services-dashboard-web-develop"
+  docker_repo                 = "services-dashboard-web"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_name                     = "alb-${var.environment}-dev-tools"
   lb_listener_rule_priority   = 19
@@ -71,5 +71,5 @@ locals {
   # TASK ENVIRONMENT: GLOBAL SECRET Version + SERVICE SECRET Version
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { "name": "NODE_PORT", "value": "${local.container_port}" }
-  ])
+    ])
 }
