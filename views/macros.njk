@@ -37,7 +37,7 @@
 
 {% macro depTrackLink(depTrackUri, metricVal, uuid, arg) %}
     {% if uuid %}
-        <a class="deptrack-link" href="{{ depTrackUri }}/projects/{{ uuid }}/{{ arg }}">{{metricVal}}</a>
+        <a class="deptrack-link has-text-black" href="{{ depTrackUri }}/projects/{{ uuid }}/{{ arg }}">{{metricVal}}</a>
     {% else %}
         {{ metricVal }}
     {% endif %}

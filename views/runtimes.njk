@@ -24,11 +24,11 @@
             {% set eolClass = "" %}
           {% else %}
             {% if cycle.eolTs < now %}
-              {% set eolClass = "has-background-danger-light" %}
+              {% set eolClass = "has-background-danger-light has-text-black" %}
             {% elif cycle.eolTs <= oneYearLater %}
-              {% set eolClass = "has-background-warning-light" %}
+              {% set eolClass = "has-background-warning-light has-text-black" %}
             {% else %}
-              {% set eolClass = "has-background-success-light" %}
+              {% set eolClass = "has-background-success-light has-text-black" %}
             {% endif %}
           {% endif %}
 
