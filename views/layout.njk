@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{basePath}}/css/bulma.min.css"> {# Bulma CSS v1.0.4 #}
+  <link rel="stylesheet" href="{{basePath}}/css/bulma-tooltip.min.css"> {# Bulma CSS - Tooltip v1.2.0 #}
+  <link rel="stylesheet" href="{{basePath}}/css/common.css">
+  <script src="{{basePath}}/js/libs/pako/2.0.4/pako.min.js"></script>
+  <script src="{{basePath}}/js/common.js"></script>
+  <script type="module" src="{{basePath}}/js/main.js"></script>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="hero-body">
+      <p class="title">Companies House Service Dashboard</p>
+      <p class="subtitle">Last scan: {{ lastScan | date("DD MMM YYYY - h:mm:ss A") }}</p>
+    </div>
+  </section>
+
+  {% include "partials/tabs.njk" %}
+
+  <section class="section">
+    {% block content %}{% endblock %}
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      /*
+      * Convert all anchor links to external sites to open in a new tab.
+      */
+      const currentHost = window.location.host;
+      document.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const url = new URL(a.href);
+          if (url.host !== currentHost) {
+            a.setAttribute("target", "_blank");
+            a.setAttribute("rel", "noopener noreferrer");
+          }
+        } catch (e) {
+          // Ignore invalid URLs
+        }
+      });
+    });
+  </script>
+</body>
+</html>
