@@ -5,6 +5,9 @@
   top: 0;
   z-index: 2; /* keep above rows */
 }
+a {
+  text-decoration: underline;
+}
 
 .has-tooltip::before,
 .has-tooltip::after,
