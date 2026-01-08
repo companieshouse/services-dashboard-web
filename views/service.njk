@@ -104,7 +104,9 @@
                         {% for release in service.gitInfo.releases %}
                             <tr>
                                 <td>
-                                    {{release.version}}
+                                    <a href="{{ service.gitInfo.repo }}/releases/tag/{{ release.version }}">
+                                        {{release.version}}
+                                    </a>
                                 </td>
                                 <td>
                                     {{release.date | date(dateFormat)}}
