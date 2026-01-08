@@ -80,7 +80,6 @@
             <thead>
                 <tr>
                 <th class="row-header-title header-service" id="col-head-service">Service</th>
-                <th class="row-header-title header-service" id="col-head-service">Team</th>
                 <th class="row-header-title header-git" id="col-head-git-lang">Runtime</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-cidev">CI Dev</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
@@ -108,12 +107,12 @@
                             data-low="{{ depTrackLow }}"
                         >
                         <td class="td-name">
-                            <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
+                            <div class="is-flex-direction-row is-justify-content-space-between">
+                                <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
+                                <span>- {{ document._id }}</span>
+                            </div>
                         </td>
-                        <td class="td-team">
-                            <span class="tag is-info">{{ document._id }}</span>
-                        </td>
-
+                        
                         <td class="td-runtime">
                             {% for info in service.latestVersion.runtime.runtime %}
                                 {% if info %}
