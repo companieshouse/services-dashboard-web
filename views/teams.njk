@@ -10,7 +10,7 @@
    {% endif %}
 
    <li title="{{ ReleaseDate }}">
-      <a href="{{ repoLink }}/releases/tag/{{ version }}">{{ version }}</a>{{addDaysAgo( ReleaseDate ) }}
+      <p>{{ version }}</p>{{addDaysAgo( ReleaseDate ) }}
    </li>
 {% endmacro %}
 
@@ -208,26 +208,18 @@
                         <td class="td-deptrack-metrics {{ addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium) }}">
                             {% if service.latestVersion.metrics %}
                                 <div class="level">
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
-                                            {{ depTrackCritical }}
-                                        </span>
-                                    </a>
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
-                                            {{ depTrackHigh }}
-                                        </span>
-                                    </a>
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
-                                            {{ depTrackMedium }}
-                                        </span>
-                                    </a>
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
-                                            {{ depTrackLow }}
-                                        </span>
-                                    </a>
+                                    <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
+                                        {{ depTrackCritical }}
+                                    </span>
+                                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
+                                        {{ depTrackHigh }}
+                                    </span>
+                                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
+                                        {{ depTrackMedium }}
+                                    </span>
+                                    <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
+                                        {{ depTrackLow }}
+                                    </span>
                                 </div>
                             {% endif %}
                         </td>
