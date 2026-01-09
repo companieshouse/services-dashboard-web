@@ -3,28 +3,14 @@
 {% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass %}
 
 {% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
-   {% set color = "red" %}
-
    {% if ReleaseDate %}
-
       {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
-      {% set daysago = ReleaseDate | daysPassed %}
-
-      {% if daysago >= max %}
-         {% set color = "red" %}
-      {% elseif daysago >= min %}
-         {% set color = "yellow" %}
-      {% else %}
-         {% set color = "green" %}
-      {% endif %}
-
    {% else %}
       {% set ReleaseDate = "no date loaded" %}
    {% endif %}
-   {% set colorClass = "td-git-version-" + color %}
 
-   <li class="{{ colorClass }}" title="{{ ReleaseDate }}">
-      <a class="{{ colorClass }}" href="{{ repoLink }}/releases/tag/{{ version }}">{{ version }}</a>{{addDaysAgo( ReleaseDate ) }}
+   <li title="{{ ReleaseDate }}">
+      <p>{{ version }}</p>{{addDaysAgo( ReleaseDate ) }}
    </li>
 {% endmacro %}
 
@@ -55,19 +41,19 @@
 {% block content %}
     <div class="field mb-4">
         <div class="control has-icons-left">
+            <label for="table-search">
+                Search: 
+            </label>
             <input
                 id="table-search"
                 class="input"
                 type="text"
-                placeholder="Search services..."
+                placeholder="Search table..."
             >
-            <span class="icon is-left">
-            <i class="fas fa-search"></i>
-            </span>
         </div>
     </div>
     <div class="columns">
-        <div class="column is-2">
+        <div class="column is-narrow">
             <!-- Master checkbox to control all .level1-checkbox -->
             <div class="masterCheckbox">
                 <input type="checkbox" id="masterCheckbox-id" checked>
@@ -94,7 +80,6 @@
             <thead>
                 <tr>
                 <th class="row-header-title header-service" id="col-head-service">Service</th>
-                <th class="row-header-title header-service" id="col-head-service">Team</th>
                 <th class="row-header-title header-git" id="col-head-git-lang">Runtime</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-cidev">CI Dev</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
@@ -122,14 +107,13 @@
                             data-low="{{ depTrackLow }}"
                         >
                         <td class="td-name">
-                            <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
+                            <div class="is-flex-direction-row is-justify-content-space-between">
+                                <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
+                                <span>- {{ document._id }}</span>
+                            </div>
                         </td>
-                        <td class="td-team">
-                            <span class="tag is-info">{{ document._id }}</span>
-                        </td>
-
+                        
                         <td class="td-runtime">
-                            <ul class="td-runtime-info">
                             {% for info in service.latestVersion.runtime.runtime %}
                                 {% if info %}
                                 {% if info.color == "red" %}
@@ -143,7 +127,6 @@
                                 {% endif %}
                                 {% endif %}
                             {% endfor %}
-                            </ul>
                         </td>
 
                         <!-- CI DEV -->
@@ -206,21 +189,15 @@
                                     </progress>
                                 {% endif %}
                                 <div class="level">
-                                    <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
-                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Vulnerabilities">
-                                            {{ service.sonarMetrics.vulnerabilities }}
-                                        </span>
-                                    </a>
-                                    <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
-                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Bugs">
-                                            {{ sonarBugs }}
-                                        </span>
-                                    </a>
-                                    <a href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">
-                                        <span class="tag level-item is-info has-tooltip-bottom" data-tooltip="Code Smells">
-                                            {{ service.sonarMetrics.code_smells }}
-                                        </span>
-                                    </a>
+                                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Vulnerabilities">
+                                        {{ service.sonarMetrics.vulnerabilities }}
+                                    </span>
+                                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Bugs">
+                                        {{ sonarBugs }}
+                                    </span>
+                                    <span class="tag level-item is-info has-tooltip-bottom" data-tooltip="Code Smells">
+                                        {{ service.sonarMetrics.code_smells }}
+                                    </span>
                                 </div>
                             {% endif%}
                         </td>
@@ -230,26 +207,18 @@
                         <td class="td-deptrack-metrics {{ addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium) }}">
                             {% if service.latestVersion.metrics %}
                                 <div class="level">
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
-                                            {{ depTrackCritical }}
-                                        </span>
-                                    </a>
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
-                                            {{ depTrackHigh }}
-                                        </span>
-                                    </a>
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
-                                            {{ depTrackMedium }}
-                                        </span>
-                                    </a>
-                                    <a href="{{depTrackUri}}/projects/{{ uuid }}/findings">
-                                        <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
-                                            {{ depTrackLow }}
-                                        </span>
-                                    </a>
+                                    <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
+                                        {{ depTrackCritical }}
+                                    </span>
+                                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
+                                        {{ depTrackHigh }}
+                                    </span>
+                                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
+                                        {{ depTrackMedium }}
+                                    </span>
+                                    <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
+                                        {{ depTrackLow }}
+                                    </span>
                                 </div>
                             {% endif %}
                         </td>

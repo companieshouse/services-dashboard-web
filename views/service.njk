@@ -7,8 +7,8 @@
         {% set gitInfo = service.gitInfo %}
         {% set ecs = service.ecs %}
 
-        <h1 class="title is-2">{{ serviceName }}</h1>
-        <h2 class="is-size-3">Overview</h2>
+        <h2 class="title is-3">{{ serviceName }}</h2>
+        <h3 class="is-size-4">Overview</h3>
         <div class="columns">
             <div class="column">
                 <table class="table is-bordered is-fullwidth">
@@ -104,7 +104,9 @@
                         {% for release in service.gitInfo.releases %}
                             <tr>
                                 <td>
-                                    {{release.version}}
+                                    <a href="{{ service.gitInfo.repo }}/releases/tag/{{ release.version }}">
+                                        {{release.version}}
+                                    </a>
                                 </td>
                                 <td>
                                     {{release.date | date(dateFormat)}}
