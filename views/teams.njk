@@ -208,16 +208,24 @@
                             {% if service.latestVersion.metrics %}
                                 <div class="level">
                                     <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
-                                        {{ depTrackCritical }}
+                                        <a class="has-text-white" href="{{depTrackUri}}/projects/{{uuid}}/findings">
+                                            {{ depTrackCritical }}
+                                        </a>
                                     </span>
                                     <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
-                                        {{ depTrackHigh }}
+                                        <a class="has-text-black" href="{{depTrackUri}}/projects/{{uuid}}/findings">
+                                            {{ depTrackHigh }}
+                                        </a>
                                     </span>
                                     <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
-                                        {{ depTrackMedium }}
+                                        <a class="has-text-black" href="{{depTrackUri}}/projects/{{uuid}}/findings">
+                                            {{ depTrackMedium }}
+                                        </a>
                                     </span>
                                     <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
-                                        {{ depTrackLow }}
+                                        <a class="has-text-black" href="{{depTrackUri}}/projects/{{uuid}}/findings">
+                                            {{ depTrackLow }}
+                                        </a>
                                     </span>
                                 </div>
                             {% endif %}
