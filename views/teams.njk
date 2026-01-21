@@ -2,16 +2,28 @@
 {% set active = "teams" %}
 {% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass %}
 
-{% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
-   {% if ReleaseDate %}
-      {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
-   {% else %}
-      {% set ReleaseDate = "no date loaded" %}
-   {% endif %}
+{% macro gitReleaseInfo(versionData, min, max) %}
+    {% set ReleaseDate = versionData.gitReleaseDate%}
+    
+    {% if ReleaseDate %}
+        {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
+    {% else %}
+        {% set ReleaseDate = "no date loaded" %}
+    {% endif %}
 
-   <li title="{{ ReleaseDate }}">
-      <p>{{ version }}</p>{{addDaysAgo( ReleaseDate ) }}
-   </li>
+    <li title="{{ ReleaseDate }}">
+        {% if versionData.uuid %}
+            <a href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
+                {{ versionData.version }}
+            </a>
+            {{addDaysAgo( ReleaseDate ) }}
+        {% else %}
+            <a href="{{depTrackFallback}}">
+                {{ versionData.version }}
+            </a>
+            {{addDaysAgo( ReleaseDate ) }}
+        {% endif %}
+    </li>
 {% endmacro %}
 
 {% macro addSonarColorClass(bugs, coverage) %}
@@ -46,11 +58,9 @@
         <td class="td-ecs {{ addDepTrackColorClass(metrics.critical, metrics.high, metrics.medium) }}">
             <ul class="td-git-version-info">
                 {{ gitReleaseInfo(
-                    versionData.version,
-                    versionData.gitReleaseDate,
+                    versionData,
                     thresholdsLive[0],
-                    thresholdsLive[1],
-                    service.gitInfo.repo
+                    thresholdsLive[1]
                 ) }}
                 {% if versionData.metrics %}
                     <div class="level">
