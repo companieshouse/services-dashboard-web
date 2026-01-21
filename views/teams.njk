@@ -30,12 +30,53 @@
 
 {% macro addDepTrackColorClass(critical, high, medium) %}
    {% if critical != 0 %}
+      has-background-danger
+   {% elseif high != 0 %}
       has-background-danger-light
-   {% elseif high != 0 or medium != 0 %}
+   {% elseif medium != 0 %}
       has-background-warning-light
    {% else %}
       has-background-success-light
    {% endif %}
+{% endmacro %}
+
+{% macro buildServiceVersionCell(versionData) %}
+    {% if versionData.version %}
+        {% set metrics = versionData.metrics %}
+        <td class="td-ecs {{ addDepTrackColorClass(metrics.critical, metrics.high, metrics.medium) }}">
+            <ul class="td-git-version-info">
+                {{ gitReleaseInfo(
+                    versionData.version,
+                    versionData.gitReleaseDate,
+                    thresholdsLive[0],
+                    thresholdsLive[1],
+                    service.gitInfo.repo
+                ) }}
+                {% if versionData.metrics %}
+                    <div class="level">
+                        <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
+                            {{ versionData.metrics.critical }}
+                        </span>
+                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
+                            {{ versionData.metrics.high }}
+                        </span>
+                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
+                            {{ versionData.metrics.medium }}
+                        </span>
+                        <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
+                            {{ versionData.metrics.low }}
+                        </span>
+                    </div>
+                {% else %}
+                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="SBOM for this version is missing from Dependency Track">
+                        SBOM Missing
+                    </span>
+                {% endif %}
+            </ul>
+        </td>
+    {% else %}
+        <td />
+    {% endif %}
 {% endmacro %}
 
 {% block content %}
@@ -85,7 +126,6 @@
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-live">Live</th>
                 <th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage">Sonar</th>
-                <th class="row-header-title header-deptrack" id="col-head-deptrack">Dependencies</th>
                 </tr>
             </thead>
 
@@ -130,49 +170,13 @@
                         </td>
 
                         <!-- CI DEV -->
-                        <td class="td-ecs">
-                            <ul class="td-git-version-info">
-                            {% if service.ecs.cidev.version %}
-                                {{ gitReleaseInfo(
-                                service.ecs.cidev.version,
-                                service.ecs.cidev.gitReleaseDate,
-                                thresholdsCidev[0],
-                                thresholdsCidev[1],
-                                service.gitInfo.repo
-                                ) }}
-                            {% endif %}
-                            </ul>
-                        </td>
+                        {{ buildServiceVersionCell(service.ecs.cidev) }}
 
                         <!-- STAGING -->
-                        <td class="td-ecs">
-                            <ul class="td-git-version-info">
-                            {% if service.ecs.staging.version %}
-                                {{ gitReleaseInfo(
-                                service.ecs.staging.version,
-                                service.ecs.staging.gitReleaseDate,
-                                thresholdsStaging[0],
-                                thresholdsStaging[1],
-                                service.gitInfo.repo
-                                ) }}
-                            {% endif %}
-                            </ul>
-                        </td>
+                        {{ buildServiceVersionCell(service.ecs.staging) }}
 
                         <!-- LIVE -->
-                        <td class="td-ecs">
-                            <ul class="td-git-version-info">
-                            {% if service.ecs.live.version %}
-                                {{ gitReleaseInfo(
-                                service.ecs.live.version,
-                                service.ecs.live.gitReleaseDate,
-                                thresholdsLive[0],
-                                thresholdsLive[1],
-                                service.gitInfo.repo
-                                ) }}
-                            {% endif %}
-                            </ul>
-                        </td>
+                        {{ buildServiceVersionCell(service.ecs.live) }}
 
                         <!-- SONAR -->
                         {% set sonarBugs = service.sonarMetrics.bugs %}
@@ -201,28 +205,7 @@
                                 </div>
                             {% endif%}
                         </td>
-
-                        <!-- DEP TRACK -->
-                        {% set uuid             = service.latestVersion.uuid %}
-                        <td class="td-deptrack-metrics {{ addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium) }}">
-                            {% if service.latestVersion.metrics %}
-                                <div class="level">
-                                    <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
-                                        {{ depTrackCritical }}
-                                    </span>
-                                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
-                                        {{ depTrackHigh }}
-                                    </span>
-                                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
-                                        {{ depTrackMedium }}
-                                    </span>
-                                    <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
-                                        {{ depTrackLow }}
-                                    </span>
-                                </div>
-                            {% endif %}
-                        </td>
-                        </tr>
+                    </tr>
                     {% endif %}
                     {% endfor %}
                 {% endif %}
