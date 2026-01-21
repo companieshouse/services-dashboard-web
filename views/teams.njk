@@ -1,6 +1,6 @@
 {% extends "layout.njk" %}
 {% set active = "teams" %}
-{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass %}
+{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass, addVulnerabilityKey %}
 
 {% macro gitReleaseInfo(versionData, min, max) %}
     {% set ReleaseDate = versionData.gitReleaseDate%}
@@ -13,12 +13,12 @@
 
     <li title="{{ ReleaseDate }}">
         {% if versionData.uuid %}
-            <a href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
+            <a class="has-text-black" href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
                 {{ versionData.version }}
             </a>
             {{addDaysAgo( ReleaseDate ) }}
         {% else %}
-            <a href="{{depTrackFallback}}">
+            <a class="has-text-black" href="{{depTrackFallback}}">
                 {{ versionData.version }}
             </a>
             {{addDaysAgo( ReleaseDate ) }}
@@ -124,6 +124,8 @@
                 {% endif %}
             {% endfor %}
             </form>
+            <hr>
+            {{addVulnerabilityKey("is-flex-direction-column", "mt-2")}}
         </div>
 
         <div class="column table-container">

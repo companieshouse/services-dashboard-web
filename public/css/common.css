@@ -19,6 +19,14 @@ a {
   text-decoration: underline;
 }
 
+.tag:hover {
+  cursor: default;
+}
+
+.service-vulnerability-keys {
+  max-width: 15em;
+}
+
 .has-tooltip::before,
 .has-tooltip::after,
 .has-tooltip-bottom::before,
