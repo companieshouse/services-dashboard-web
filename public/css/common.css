@@ -19,6 +19,20 @@ a {
   text-decoration: underline;
 }
 
+span[data-tooltip] {
+  /* By default, tooltip adds a dashed border under each span - we'll override it */
+  border-bottom: 1px solid black; 
+}
+
+.tag {
+  border: 1px solid black !important;
+}
+
+.progress {
+  border: 1px solid black;
+  border-radius: 0;
+}
+
 .tag:hover {
   cursor: default;
 }

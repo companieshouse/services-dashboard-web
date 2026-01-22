@@ -168,15 +168,15 @@
                         <td class="td-runtime">
                             {% for info in service.latestVersion.runtime.runtime %}
                                 {% if info %}
-                                {% if info.color == "red" %}
-                                    <span class="tag is-danger">{{ info.value }}</span>
-                                {% elseif info.color == "green" %}
-                                    <span class="tag is-success">{{ info.value }}</span>
-                                {% elseif info.color == "yellow" %}
-                                    <span class="tag is-warning">{{ info.value }}</span>
-                                {% elseif info.color == "none" %}
-                                    <span class="tag is-info">{{ info.value }}</span>
-                                {% endif %}
+                                    {% if info.color == "red" %}
+                                        <span class="tag is-danger">{{ info.value }}</span>
+                                    {% elseif info.color == "green" %}
+                                        <span class="tag is-success">{{ info.value }}</span>
+                                    {% elseif info.color == "yellow" %}
+                                        <span class="tag is-warning">{{ info.value }}</span>
+                                    {% elseif info.color == "none" %}
+                                        <span class="tag is-info">{{ info.value }}</span>
+                                    {% endif %}
                                 {% endif %}
                             {% endfor %}
                         </td>
