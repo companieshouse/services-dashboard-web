@@ -124,7 +124,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/details`, async (req: Request, res: Respo
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (_: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
@@ -143,6 +143,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (req: Request, res: Respons
          thresholdsStaging:   thresholds.staging     || thresholds.default,
          thresholdsLive:      thresholds.live        || thresholds.default,
          depTrackUri: config.DEP_TRACK_URI,
+         depTrackFallback: "https://companieshouse.atlassian.net/wiki/x/UwACHwE", // Documentation on uploading SBOM to DepTrack
          sonarUri: config.SONAR_URI
       });
    } catch (error) {

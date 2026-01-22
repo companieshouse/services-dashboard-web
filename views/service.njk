@@ -1,5 +1,5 @@
 {% extends "layout.njk" %}
-{% from "macros.njk" import addCoverageColorClass %}
+{% from "macros.njk" import addCoverageColorClass, addVulnerabilityKey %}
 
 {% block content %}
     {% set dateFormat = "DD MMM YYYY - h:mm:ss A"%}
@@ -67,23 +67,25 @@
                                 <th>SonarQube Metrics</th>
                                 <td>
                                     {% if coverage == 0 %}
+                                        <p>Overall Coverage: </p>
                                         <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
                                             0
                                         </progress>
                                     {% else %}
+                                        <p>Overall Coverage: </p>
                                         <progress class="progress {{ addCoverageColorClass(coverage) }} has-tooltip" value="{{coverage}}" max="100" data-tooltip="{{ coverage }}% Overall Coverage">
                                             {{ coverage }}
                                         </progress>
                                     {% endif %}
                                     <div class="level">
                                         <span class="tag level-item is-danger has-tooltip" data-tooltip="Vulnerabilities">
-                                            {{ service.sonarMetrics.vulnerabilities }}
+                                            Vulnerabilities: {{ service.sonarMetrics.vulnerabilities }}
                                         </span>
                                         <span class="tag level-item is-warning has-tooltip" data-tooltip="Bugs">
-                                            {{ service.sonarMetrics.bugs }}
+                                            Bugs: {{ service.sonarMetrics.bugs }}
                                         </span>
                                         <span class="tag level-item is-info has-tooltip" data-tooltip="Code Smells">
-                                            {{ service.sonarMetrics.code_smells }}
+                                            Code Smells: {{ service.sonarMetrics.code_smells }}
                                         </span>
                                     </div>
                                 </td>
@@ -119,6 +121,9 @@
         </div>
     
         <h2 class="is-size-3">Dependency Track</h2>
+        <div class="service-vulnerability-keys">
+            {{addVulnerabilityKey("is-flex-direction-row", "ml-2")}}
+        </div>
         <table class="table is-fullwidth mt-5">
             <thead>
                 <tr>

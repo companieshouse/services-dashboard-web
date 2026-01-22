@@ -1,17 +1,29 @@
 {% extends "layout.njk" %}
 {% set active = "teams" %}
-{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass %}
+{% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass, addVulnerabilityKey %}
 
-{% macro gitReleaseInfo(version, ReleaseDate, min, max, repoLink) %}
-   {% if ReleaseDate %}
-      {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
-   {% else %}
-      {% set ReleaseDate = "no date loaded" %}
-   {% endif %}
+{% macro gitReleaseInfo(versionData, min, max) %}
+    {% set ReleaseDate = versionData.gitReleaseDate%}
+    
+    {% if ReleaseDate %}
+        {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
+    {% else %}
+        {% set ReleaseDate = "no date loaded" %}
+    {% endif %}
 
-   <li title="{{ ReleaseDate }}">
-      <p>{{ version }}</p>{{addDaysAgo( ReleaseDate ) }}
-   </li>
+    <li title="{{ ReleaseDate }}">
+        {% if versionData.uuid %}
+            <a class="has-text-black" href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
+                {{ versionData.version }}
+            </a>
+            {{addDaysAgo( ReleaseDate ) }}
+        {% else %}
+            <a class="has-text-black" href="{{depTrackFallback}}">
+                {{ versionData.version }}
+            </a>
+            {{addDaysAgo( ReleaseDate ) }}
+        {% endif %}
+    </li>
 {% endmacro %}
 
 {% macro addSonarColorClass(bugs, coverage) %}
@@ -30,12 +42,51 @@
 
 {% macro addDepTrackColorClass(critical, high, medium) %}
    {% if critical != 0 %}
+      has-background-danger
+   {% elseif high != 0 %}
       has-background-danger-light
-   {% elseif high != 0 or medium != 0 %}
+   {% elseif medium != 0 %}
       has-background-warning-light
    {% else %}
       has-background-success-light
    {% endif %}
+{% endmacro %}
+
+{% macro buildServiceVersionCell(versionData) %}
+    {% if versionData.version %}
+        {% set metrics = versionData.metrics %}
+        <td class="td-ecs {{ addDepTrackColorClass(metrics.critical, metrics.high, metrics.medium) }}">
+            <ul class="td-git-version-info">
+                {{ gitReleaseInfo(
+                    versionData,
+                    thresholdsLive[0],
+                    thresholdsLive[1]
+                ) }}
+                {% if versionData.metrics %}
+                    <div class="level">
+                        <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
+                            {{ versionData.metrics.critical }}
+                        </span>
+                        <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
+                            {{ versionData.metrics.high }}
+                        </span>
+                        <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
+                            {{ versionData.metrics.medium }}
+                        </span>
+                        <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
+                            {{ versionData.metrics.low }}
+                        </span>
+                    </div>
+                {% else %}
+                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="SBOM for this version is missing from Dependency Track">
+                        SBOM Missing
+                    </span>
+                {% endif %}
+            </ul>
+        </td>
+    {% else %}
+        <td />
+    {% endif %}
 {% endmacro %}
 
 {% block content %}
@@ -73,6 +124,8 @@
                 {% endif %}
             {% endfor %}
             </form>
+            <hr>
+            {{addVulnerabilityKey("is-flex-direction-column", "mt-2")}}
         </div>
 
         <div class="column table-container">
@@ -85,7 +138,6 @@
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-live">Live</th>
                 <th class="row-header-title header-sonar-metric" id="col-head-sonar-coverage">Sonar</th>
-                <th class="row-header-title header-deptrack" id="col-head-deptrack">Dependencies</th>
                 </tr>
             </thead>
 
@@ -116,63 +168,27 @@
                         <td class="td-runtime">
                             {% for info in service.latestVersion.runtime.runtime %}
                                 {% if info %}
-                                {% if info.color == "red" %}
-                                    <span class="tag is-danger">{{ info.value }}</span>
-                                {% elseif info.color == "green" %}
-                                    <span class="tag is-success">{{ info.value }}</span>
-                                {% elseif info.color == "yellow" %}
-                                    <span class="tag is-warning">{{ info.value }}</span>
-                                {% elseif info.color == "none" %}
-                                    <span class="tag is-info">{{ info.value }}</span>
-                                {% endif %}
+                                    {% if info.color == "red" %}
+                                        <span class="tag is-danger">{{ info.value }}</span>
+                                    {% elseif info.color == "green" %}
+                                        <span class="tag is-success">{{ info.value }}</span>
+                                    {% elseif info.color == "yellow" %}
+                                        <span class="tag is-warning">{{ info.value }}</span>
+                                    {% elseif info.color == "none" %}
+                                        <span class="tag is-info">{{ info.value }}</span>
+                                    {% endif %}
                                 {% endif %}
                             {% endfor %}
                         </td>
 
                         <!-- CI DEV -->
-                        <td class="td-ecs">
-                            <ul class="td-git-version-info">
-                            {% if service.ecs.cidev.version %}
-                                {{ gitReleaseInfo(
-                                service.ecs.cidev.version,
-                                service.ecs.cidev.gitReleaseDate,
-                                thresholdsCidev[0],
-                                thresholdsCidev[1],
-                                service.gitInfo.repo
-                                ) }}
-                            {% endif %}
-                            </ul>
-                        </td>
+                        {{ buildServiceVersionCell(service.ecs.cidev) }}
 
                         <!-- STAGING -->
-                        <td class="td-ecs">
-                            <ul class="td-git-version-info">
-                            {% if service.ecs.staging.version %}
-                                {{ gitReleaseInfo(
-                                service.ecs.staging.version,
-                                service.ecs.staging.gitReleaseDate,
-                                thresholdsStaging[0],
-                                thresholdsStaging[1],
-                                service.gitInfo.repo
-                                ) }}
-                            {% endif %}
-                            </ul>
-                        </td>
+                        {{ buildServiceVersionCell(service.ecs.staging) }}
 
                         <!-- LIVE -->
-                        <td class="td-ecs">
-                            <ul class="td-git-version-info">
-                            {% if service.ecs.live.version %}
-                                {{ gitReleaseInfo(
-                                service.ecs.live.version,
-                                service.ecs.live.gitReleaseDate,
-                                thresholdsLive[0],
-                                thresholdsLive[1],
-                                service.gitInfo.repo
-                                ) }}
-                            {% endif %}
-                            </ul>
-                        </td>
+                        {{ buildServiceVersionCell(service.ecs.live) }}
 
                         <!-- SONAR -->
                         {% set sonarBugs = service.sonarMetrics.bugs %}
@@ -201,28 +217,7 @@
                                 </div>
                             {% endif%}
                         </td>
-
-                        <!-- DEP TRACK -->
-                        {% set uuid             = service.latestVersion.uuid %}
-                        <td class="td-deptrack-metrics {{ addDepTrackColorClass(depTrackCritical, depTrackHigh, depTrackMedium) }}">
-                            {% if service.latestVersion.metrics %}
-                                <div class="level">
-                                    <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
-                                        {{ depTrackCritical }}
-                                    </span>
-                                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
-                                        {{ depTrackHigh }}
-                                    </span>
-                                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
-                                        {{ depTrackMedium }}
-                                    </span>
-                                    <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
-                                        {{ depTrackLow }}
-                                    </span>
-                                </div>
-                            {% endif %}
-                        </td>
-                        </tr>
+                    </tr>
                     {% endif %}
                     {% endfor %}
                 {% endif %}

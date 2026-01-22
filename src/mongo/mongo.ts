@@ -5,6 +5,7 @@ import * as type from '../common/types';
 import {logger, logErr} from "../utils/logger";
 import {checkRuntimesVsEol, EndOfLifeData, Thresholds} from "../utils/check-eol";
 import { getDb, getSession } from "./db";
+import { servicesVersion } from "typescript";
 
 const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
 
@@ -145,9 +146,6 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
 
       const documents = await collection.aggregate([
          {
-            $unwind: "$versions"
-         },
-         {
             $sort: { "versions.lastBomImport": -1 }
          },
          {
@@ -209,6 +207,50 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
                service.sonarMetrics = null;
             }
 
+            service.versions = service.latestVersion;
+
+            const langArray = [service.gitInfo.lang];
+
+            for (const version of service.versions) {
+               langArray.push(version.lang);
+               if (version.runtime) {
+                  version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
+               }
+
+               const deployments = [];
+               if (version.version == service.ecs?.cidev?.version) {
+                  deployments.push('CI-Dev');
+                  service.ecs.cidev = {
+                     ...service.ecs.cidev,
+                     ...version
+                  };
+               }
+               if (version.version == service.ecs?.staging?.version) {
+                  deployments.push('Staging');
+                  service.ecs.staging = {
+                     ...service.ecs.staging,
+                     ...version
+                  };
+               }
+               if (version.version == service.ecs?.live?.version) {
+                  deployments.push('Live');
+                  service.ecs.live = {
+                     ...service.ecs.live,
+                     ...version
+                  };
+               }
+               version.deployments = deployments;
+            }
+
+            // most recent versions first
+            service.versions = service.versions.sort((a:any, b:any) => 
+               semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
+               semver.compare(a.version, b.version) : // try and sort using semver...
+               a.version.localeCompare(b.version) // else, use string comparison
+            ).reverse();
+            
+            service.latestVersion = service.versions[0];
+
             if (!service.latestVersion.runtime) {
                return {
                   ...service,
@@ -220,7 +262,6 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             }
 
             const runtimeStr = service.latestVersion.runtime;
-            const langArray = [service.latestVersion.lang, service.gitInfo.lang];
 
             const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
 
