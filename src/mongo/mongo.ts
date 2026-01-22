@@ -262,7 +262,6 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             }
 
             const runtimeStr = service.latestVersion.runtime;
-            // const langArray = [service.latestVersion.lang, service.gitInfo.lang];
 
             const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
 
