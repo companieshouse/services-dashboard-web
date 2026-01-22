@@ -118,7 +118,6 @@ export function checkRuntimesVsEol (
     } else if (hasYellow) {
         totalColor = "yellow";
     }
-    // console.log(`------------------- matchedRuntime: ${JSON.stringify({total: totalColor, runtime: runtimeColors}, null, 2)}`);
 
     return {
         total: totalColor,
