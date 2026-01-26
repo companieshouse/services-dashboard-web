@@ -11,7 +11,7 @@
         {% set ReleaseDate = "no date loaded" %}
     {% endif %}
 
-    <li title="{{ ReleaseDate }}">
+    <li class="has-text-black" title="{{ ReleaseDate }}">
         {% if versionData.uuid %}
             <a class="has-text-black" href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
                 {{ versionData.version }}
