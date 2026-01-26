@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import nunjucks from "nunjucks";
 import * as config from "./config";
-import * as type from './common/types';
 import {logger, logErr} from "./utils/logger";
 import * as mongo from "./mongo/mongo";
 import * as filters from "./utils/nunjucks-custom-filters";
@@ -37,24 +36,6 @@ const tabs = [
    { key: "runtimes", name: "Runtimes" },
 ];
 
-// ex.
-// https://......./dashboard/?query={"overs":["last"],"api":["last"]}
-//                           ?query={"api":"*"}
-//                           ?query={"*":"*"}
-//                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
-function sourceQueryParams(query: string): type.QueryParameters | undefined {
-   let   queryParams: type.QueryParameters | undefined;
-   if (query) {
-      logger.info(`sourcing query: ${query}`);
-      try {
-         queryParams = JSON.parse(query);
-      } catch (error) {
-         throw new Error (`Invalid JSON format for 'query' parameter: ${error}`);
-      }
-      return queryParams;
-   }
-}
-
 app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
    res.status(200).send('OK');
  });
@@ -72,59 +53,7 @@ app.post(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
 });
 
 // handler of main page
-app.get(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
-   try {
-      const linkId = req.query.linkid as string;
-      let   compressedState = "";
-      if (linkId) {
-            logger.info(`reading state from: ${linkId}`);
-            compressedState = await mongo.getState(linkId);
-      }
-
-      const configData = await mongo.fetchConfig();
-      res.render("index.njk", {
-      title: config.APP_TITLE,
-      basePath: config.ENDPOINT_DASHBOARD,
-      lastScan: configData?.lastScan ?? "N/A",
-      tabs,
-      compressedState
-   });
-   } catch (error) {
-      logErr(error);
-   }
-});
-
-app.get(`${config.ENDPOINT_DASHBOARD!}/details`, async (req: Request, res: Response) => {
-   try {
-      const linkId = req.query.linkid as string;
-      let   query  = req.query.query  as string;
-      let   compressedState = "";
-      let   queryParams: type.QueryParameters | undefined;
-      try {
-         queryParams = sourceQueryParams(query);
-      } catch (error) {
-         res.status(400).json({ "error": `${error}` });
-         return;
-      }
-
-      const configData = await mongo.fetchConfig();
-
-      const documents = await mongo.fetchDocuments(queryParams);
-      res.render("details.njk", {
-         title: config.APP_TITLE,
-         basePath: config.ENDPOINT_DASHBOARD,
-         lastScan: configData?.lastScan ?? "N/A",
-         documents: documents,
-         state: compressedState,
-         depTrackUri: config.DEP_TRACK_URI,
-         sonarUri: config.SONAR_URI
-      });
-   } catch (error) {
-      logErr(error);
-   }
-});
-
-app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (_: Request, res: Response) => {
+app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
@@ -132,7 +61,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (_: Request, res: Response)
 
       const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
 
-      res.render("teams.njk", {
+      res.render("index.njk", {
          title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          documents,
@@ -146,6 +75,28 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/teams`, async (_: Request, res: Response)
          depTrackFallback: "https://companieshouse.atlassian.net/wiki/x/UwACHwE", // Documentation on uploading SBOM to DepTrack
          sonarUri: config.SONAR_URI
       });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
+app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response) => {
+   try {
+      const linkId = req.query.linkid as string;
+      let   compressedState = "";
+      if (linkId) {
+            logger.info(`reading state from: ${linkId}`);
+            compressedState = await mongo.getState(linkId);
+      }
+
+      const configData = await mongo.fetchConfig();
+      res.render("help.njk", {
+      title: config.APP_TITLE,
+      basePath: config.ENDPOINT_DASHBOARD,
+      lastScan: configData?.lastScan ?? "N/A",
+      tabs,
+      compressedState
+   });
    } catch (error) {
       logErr(error);
    }

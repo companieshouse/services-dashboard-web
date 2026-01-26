@@ -1,0 +1,27 @@
+{% extends "layout.njk" %}
+{% set active = "help" %}
+
+{% block content %}
+  <div class="content">
+    <h2 class="title">Services Dashboard - Help</h2>
+    <p>
+      We're gathering feedback on people's experience of the dashboard. You can provide feedback 
+      <span><a href="https://forms.office.com/e/xmvWHNhuBb">here.</a></span>
+    </p>
+    <p>The dashboard provides a snapshot of the health of our services in each environment, including:</p>
+    <ul>
+      <li>Vulnerabilities detected by <strong>Dependency track</strong></li>
+      <li>Issues detected by <strong>SonarQube</strong></li>
+      <li>Which versions are deployed</li>
+      <li>Language/Runtime details</li>
+    </ul>
+    <p>This information should be used by teams to plan, prioritise and monitor maintenance work for the services which they own.</p>
+    <h3>The dashboards</h3>
+    <p>There are 3 tabs, each displaying different information.</p>
+    <ul>
+      <li><strong>Services</strong> - A list of services, grouped by team</li>
+      <li><strong>Runtimes</strong> - A reference table with each runtime/language, including end of life dates</li>
+      <li><strong>Help</strong> - Links and supporting documentation</li>
+    </ul>
+  </div>
+{% endblock %}

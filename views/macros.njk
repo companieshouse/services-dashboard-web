@@ -13,18 +13,6 @@
       {% endif %}
 {% endmacro %}
 
-{% macro setLanguage(depTrackLang, gitLang, repo) %}
-   {% if depTrackLang and gitLang and (depTrackLang | lower) == (gitLang | lower) or (depTrackLang and not gitLang) or (gitLang and not depTrackLang) %}
-      <a href="{{ repo }}">{{ depTrackLang or gitLang }}</a>
-   {% elif depTrackLang != gitLang %}
-      <ul>
-         <li><a href="{{ repo }}">{{ gitLang }}</a></li>
-         <li>{{ depTrackLang }}</li>
-      </ul>
-   {% endif %}
-{% endmacro %}
-
-
 {% macro sonarLink(sonarUri, sonarKey, val, name, style, tooltip) %}
    <span title="{{ name }}" class="tag level-item {{style}} has-tooltip-bottom" data-tooltip={{tooltip}}>
       {% if sonarKey %}
@@ -88,33 +76,6 @@ which allows this macro to be reused to create dropdown or radiobutton filters
    {{ uniqueValues | sort | setGlobal('uniqueSortedValues') }}
 {% endmacro %}
 
-
-{#
-macro to create a dropdown filter for a given field in a collection.
-It uses the common macro 'getListUniqueValues' which sets the global var:
-'global.uniqueSortedValues', so that this function can loop it over to create the options.
-
-- collection: to forward to 'getListUniqueValues'
-- field: to forward to 'getListUniqueValues'
-- the unique id to assign to the resulting <select>
-
-The select will have:
- - an "All" option (left always at 1st position)
- - one option for each unique value of the field in the collection
- - sorted values
- #}
-
-{% macro dropdownFilter(collection, field, id) %}
-   {% call getListUniqueValues(collection, field) %}{% endcall %}
-
-   <!-- Generate options -->
-   <select class="header-select" id="{{ id }}">
-        <option value="All">All</option>
-        {% for value in getGlobal('uniqueSortedValues') %}
-            <option value="{{ value }}">{{ value }}</option>
-        {% endfor %}
-   </select>
-{% endmacro %}
 
 {% macro addCoverageColorClass(coverage) %}
    {% if coverage >= 75 %}
