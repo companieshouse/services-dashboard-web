@@ -35,13 +35,21 @@ describe('App Tests', () => {
     });
 
     it('should handle GET request for Services tab', async () => {
-        (fetchDocuments as jest.Mock).mockResolvedValue([]);
+        (fetchDocumentsGoupedByScrum as jest.Mock).mockResolvedValue([]);
         (fetchConfig as jest.Mock).mockResolvedValue({lastScan: Date.now()});
 
-        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/details`);
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/`);
 
         expect(response.status).toBe(200);
-        expect(fetchDocuments).toHaveBeenCalled();
+        expect(fetchDocumentsGoupedByScrum).toHaveBeenCalled();
+    });
+
+    it('should handle GET request for Help tab', async () => {
+        (fetchConfig as jest.Mock).mockResolvedValue({lastScan: Date.now()});
+
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/help`);
+
+        expect(response.status).toBe(200);
     });
 
     it('should handle GET request for Runtimes tab', async () => {
@@ -60,19 +68,19 @@ describe('App Tests', () => {
         expect(response.text).toContain("Page Not Found");
     });
 
-    it('should handle GET request for main page with linkId', async () => {
+    it('should handle GET request for help page with linkId', async () => {
         const linkId = 'linkId';
         const compressedState = 'compressedState';
         (getState as jest.Mock).mockResolvedValue(compressedState);
 
-        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/?linkid=${linkId}`);
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/help?linkid=${linkId}`);
 
         expect(response.status).toBe(200);
         expect(getState).toHaveBeenCalledWith(linkId);
     });
 
-    it('should handle GET request for main page without linkId', async () => {
-        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD!}/`);
+    it('should handle GET request for help page without linkId', async () => {
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD!}/help`);
 
         expect(response.status).toBe(200);
         expect(response.text).toContain(config.APP_TITLE);
