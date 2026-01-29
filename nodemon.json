@@ -1,6 +1,6 @@
 {
     "exec": "ts-node ./src/bin/server.ts",
-    "ext": "ts,html",
+    "ext": "ts,html,njk",
     "watch": [
         "./src",
         "./views"

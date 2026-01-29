@@ -1,6 +1,15 @@
 {% extends "layout.njk" %}
 {% set active = "help" %}
 
+{% macro faq(text, id) %}
+  </br>
+  <h4 id="{{id}}">
+    <a href="#{{id}}">
+      {{text}}
+    </a>
+  </h4>
+{% endmacro %}
+
 {% block content %}
   <div class="content">
     <h2 class="title">Services Dashboard - Help</h2>
@@ -16,12 +25,83 @@
       <li>Language/Runtime details</li>
     </ul>
     <p>This information should be used by teams to plan, prioritise and monitor maintenance work for the services which they own.</p>
-    <h3>The dashboards</h3>
-    <p>There are 3 tabs, each displaying different information.</p>
-    <ul>
-      <li><strong>Services</strong> - A list of services, grouped by team</li>
-      <li><strong>Runtimes</strong> - A reference table with each runtime/language, including end of life dates</li>
-      <li><strong>Help</strong> - Links and supporting documentation</li>
-    </ul>
+    <div class="block">
+      <h3>Frequently Asked Questions</h3>
+      {{faq("How do I add a new service to the dashboard?", "faq-add-to-dashboard")}}
+      <p>
+        The dashboard uses Dependency Track as an initial source of truth for which services to bring in. Therefore, the first step is to get your service publishing its SBOM to Dependency Track.
+        Platform have made this straightforward, you should just need to do the following:
+        <pre>
+          <code>
+            In your application's pipeline .yaml file, under the "build-release" task, add:
+
+            - task: create-sbom-cyclonedx
+              file: concourse-resources/tasks/utility/cyclonedx/create-sbom/task.yml
+              params:
+                TYPE: node|go|java
+                DEP_TRACK_PROJ_NAME: < YOUR_SERVICE_NAME >
+          </code>
+        </pre>
+        The documentation for the "create-sbom-cyclonedx" task is <a href="https://github.com/companieshouse/ci-concourse-resources/blob/shared-services/tasks/utility/cyclonedx/create-sbom/README.md">available here</a>.
+      </p>
+      {{faq("I made changes, why isn't the dashboard updating?", "faq-dashboard-not-updating")}}
+      <p>The dashboard pulls from its data sources at various intervals. We call these, "scans".</p>
+      <p><strong>Deep Scan</strong></p>
+      <span>Runs: 07:15am on the first Tuesday of the month</span>
+      <p>The deep scan will:</p>
+      <ol>
+        <li>Pull a list of projects and versions from Dependency Track</li>
+        <li>For each project, pull associated data from the other data sources (Github, Sonar) and update the database</li>
+      </ol>
+      <p><strong>Light Scan</strong></p>
+      <span>Runs: 45mins past the hour, between 06:00 and 17:59, Monday to Friday</span>
+      <p>The light scan will update the Dependency Track entries in the database for each service</p>
+      <p><strong>End of Life Scan</strong></p>
+      <span>Runs: 07:00am, Monday to Friday</span>
+      <p>Pull data from <a href="https://endoflife.date">endoflife.date</a> and update the database</p>
+      {{faq("Can I suggest new features or improvements?", "faq-feature-requests")}}
+      <p>
+        Absolutely — feedback and suggestions are welcome, and they genuinely help shape the dashboard. 
+        You can submit these as part of the <a href="https://forms.office.com/e/xmvWHNhuBb">feedback form</a>.
+        That said, it's important to understand the role of the Services Dashboard.
+      </p>
+      <p>
+        The dashboard is <strong>read-only by design</strong>. Its responsibility is to:
+        <ul>
+          <li>Pull data from existing, authoritative sources (for example Dependency Track, SonarQube, GitHub, CI pipelines)</li>
+          <li>Present that data in a consistent and useful way</li>
+        </ul>
+        It is <strong>not intended to generate, infer, calculate, or enrich new data</strong> that doesn't already exist elsewhere.
+      </p>
+      <p>
+        Because of this, feature requests are most likely to be considered when they:
+        <ul>
+          <li>Improve how existing data is displayed, filtered, or navigated</li>
+          <li>Combine or clarify data that already exists in upstream systems</li>
+          <li>Help teams better understand the current state of their services</li>
+        </ul>
+        Requests that would require the dashboard to:
+        <ul>
+          <li>Create new metrics</li>
+          <li>Derive values that aren't explicitly available</li>
+          <li>Act as a source of truth itself</li>
+        </ul>
+        are unlikely to be accepted. In those cases, the best place to raise the request is with the team that owns the original data source.
+      </p>
+      <p>
+        If you're unsure whether a suggestion fits this model, feel free to submit it anyway — we'll happily help point it in the right direction.
+      </p>
+      {{faq("I rolled back my service, why didn't the version number update?", "faq-rollback-version")}}
+      <p>
+        The version numbers we display for each environment are a "best guess". They are actually determined by tasks run in your project's CI pipeline, which apply a tag to the corresponding image in ECR.
+        Therefore, there can be instances where rolling back a service can cause our version numbers to be out of sync. 
+        The services dashboard isn't a substitution for looking at the version numbers in ECS.
+      </p>
+      {{faq("Why is SonarQube green if it fails against a release version?", "faq-sonarqube-green")}}
+      <p>
+        The SonarQube data we use is coming from the latest scan of the master/main branch. 
+        This means it isn't necessarily reflective of what is in live (or any other environment), unless your main branch is currently deployed to that environment.  
+      </p>
+    </div>
   </div>
 {% endblock %}
