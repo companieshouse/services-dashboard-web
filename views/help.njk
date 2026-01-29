@@ -30,7 +30,19 @@
       {{faq("How do I add a new service to the dashboard?", "faq-add-to-dashboard")}}
       <p>
         The dashboard uses Dependency Track as an initial source of truth for which services to bring in. Therefore, the first step is to get your service publishing its SBOM to Dependency Track.
-        Platform have made this straightforward, you can follow the <a href="#">steps outlined here</a>.
+        Platform have made this straightforward, you should just need to do the following:
+        <pre>
+          <code>
+            In your application's pipeline .yaml file, under the "build-release" task, add:
+
+            - task: create-sbom-cyclonedx
+              file: concourse-resources/tasks/utility/cyclonedx/create-sbom/task.yml
+              params:
+                TYPE: node|go|java
+                DEP_TRACK_PROJ_NAME: < YOUR_SERVICE_NAME >
+          </code>
+        </pre>
+        The documentation for the "create-sbom-cyclonedx" task is <a href="https://github.com/companieshouse/ci-concourse-resources/blob/shared-services/tasks/utility/cyclonedx/create-sbom/README.md">available here</a>.
       </p>
       {{faq("I made changes, why isn't the dashboard updating?", "faq-dashboard-not-updating")}}
       <p>The dashboard pulls from its data sources at various intervals. We call these, "scans".</p>
