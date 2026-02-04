@@ -72,7 +72,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
          thresholdsStaging:   thresholds.staging     || thresholds.default,
          thresholdsLive:      thresholds.live        || thresholds.default,
          depTrackUri: config.DEP_TRACK_URI,
-         depTrackFallback: "https://companieshouse.atlassian.net/wiki/x/UwACHwE", // Documentation on uploading SBOM to DepTrack
+         devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
          sonarUri: config.SONAR_URI
       });
    } catch (error) {
@@ -85,8 +85,8 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response
       const linkId = req.query.linkid as string;
       let   compressedState = "";
       if (linkId) {
-            logger.info(`reading state from: ${linkId}`);
-            compressedState = await mongo.getState(linkId);
+         logger.info(`reading state from: ${linkId}`);
+         compressedState = await mongo.getState(linkId);
       }
 
       const configData = await mongo.fetchConfig();
@@ -95,6 +95,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response
       basePath: config.ENDPOINT_DASHBOARD,
       lastScan: configData?.lastScan ?? "N/A",
       tabs,
+      devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
       compressedState
    });
    } catch (error) {
@@ -166,6 +167,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/service/:serviceName`, async (req: Reques
          thresholdsStaging:   thresholds.staging     || thresholds.default,
          thresholdsLive:      thresholds.live        || thresholds.default,
          depTrackUri: config.DEP_TRACK_URI,
+         devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
          sonarUri: config.SONAR_URI
       });
    } catch (error) {

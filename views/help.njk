@@ -14,8 +14,8 @@
   <div class="content">
     <h2 class="title">Services Dashboard - Help</h2>
     <p>
-      We're gathering feedback on people's experience of the dashboard. You can provide feedback 
-      <span><a href="https://forms.office.com/e/xmvWHNhuBb">here.</a></span>
+      We're gathering feedback on people's experience of the dashboard. You can  
+      <span><a href="https://forms.office.com/e/xmvWHNhuBb">provide feedback here</a>.</span>
     </p>
     <p>The dashboard provides a snapshot of the health of our services in each environment, including:</p>
     <ul>
@@ -27,6 +27,10 @@
     <p>This information should be used by teams to plan, prioritise and monitor maintenance work for the services which they own.</p>
     <div class="block">
       <h3>Frequently Asked Questions</h3>
+      {{faq("Are there any developer guides available?", "faq-dev-guides")}}
+      <p>
+        Absolutely! We're collecting a list of developer guides and publishing them <a href={{devGuideDocumentationLink}}>here</a>.
+      </p>
       {{faq("How do I add a new service to the dashboard?", "faq-add-to-dashboard")}}
       <p>
         The dashboard uses Dependency Track as an initial source of truth for which services to bring in. Therefore, the first step is to get your service publishing its SBOM to Dependency Track.
@@ -42,7 +46,9 @@
                 DEP_TRACK_PROJ_NAME: < YOUR_SERVICE_NAME >
           </code>
         </pre>
-        The documentation for the "create-sbom-cyclonedx" task is <a href="https://github.com/companieshouse/ci-concourse-resources/blob/shared-services/tasks/utility/cyclonedx/create-sbom/README.md">available here</a>.
+        <p>Further information is available in the developer guides under, "Adding a service to Dependency Track"
+          <a href={{devGuideDocumentationLink}}>available here</a>.
+        </p>
       </p>
       {{faq("I made changes, why isn't the dashboard updating?", "faq-dashboard-not-updating")}}
       <p>The dashboard pulls from its data sources at various intervals. We call these, "scans".</p>
