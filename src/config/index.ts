@@ -24,3 +24,6 @@ export const MONGO_COLLECTION_PROJECTS = getEnvironmentValue("MONGO_COLLECTION_P
 export const MONGO_COLLECTION_CONFIG = getEnvironmentValue("MONGO_COLLECTION_CONFIG","config");
 export const MONGO_COLLECTION_LINKS = getEnvironmentValue("MONGO_COLLECTION_LINKS","projects_links");
 export const MONGO_CONFIG_SINGLETON = getEnvironmentValue("MONGO_CONFIG_SINGLETON","singletonConfig");
+
+// Documentation
+export const DEV_GUIDE_DOCUMENTATION_LINK = getEnvironmentValue("DEV_GUIDE_DOCUMENTATION_LINK", ENDPOINT_DASHBOARD); // Fallback to the dashboard
