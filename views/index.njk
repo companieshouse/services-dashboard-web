@@ -235,6 +235,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Apply filters based on selected teams and search term
   function filter() {
     const activeTeams = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
+
+    if (activeTeams.size === 0) {
+        master.checked = false;
+    }
+
     const searchTerm = searchInput.value.toLowerCase().trim();
 
     rows.forEach(row => {
