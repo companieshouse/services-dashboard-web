@@ -236,8 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function filter() {
     const activeTeams = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
 
-    console.log("Checkboxes: ", checkboxes.length);
-
     if (checkboxes && checkboxes.length !== activeTeams.size) {
         // Not all checkboxes are checked, so uncheck "Select all"
         master.checked = false;
