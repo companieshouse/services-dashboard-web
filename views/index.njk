@@ -236,6 +236,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function filter() {
     const activeTeams = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
 
+    if (checkboxes) {
+        master.checked = checkboxes.length === activeTeams.size;
+    }
+
+    // No checkboxes are selected
     if (activeTeams.size === 0) {
         master.checked = false;
     }
