@@ -158,8 +158,6 @@
                                 <span class="tag is-success">{{ info.value }}</span>
                             {% elseif info.color == "yellow" %}
                                 <span class="tag is-warning">{{ info.value }}</span>
-                            {% elseif info.color == "none" %}
-                                <span class="tag is-info">{{ info.value }}</span>
                             {% endif %}
                         {% endfor %}
                     </td>
@@ -168,10 +166,10 @@
                             <p class="has-tooltip" data-tooltip="Total vulnerabilities, including those unassigned a criticality">
                                 Total: {{version.metrics.vulnerabilities}}
                             </p>
-                            <span class="tag has-background-danger-30 has-text-white has-tooltip" data-tooltip="Critical">{{version.metrics.critical}}</span>
-                            <span class="tag is-danger has-tooltip" data-tooltip="High">{{version.metrics.high}}</span>
-                            <span class="tag is-warning has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
-                            <span class="tag is-success has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
+                            <span class="tag is-critical-vuln has-tooltip" data-tooltip="Critical">{{version.metrics.critical}}</span>
+                            <span class="tag is-high-vuln has-tooltip" data-tooltip="High">{{version.metrics.high}}</span>
+                            <span class="tag is-medium-vuln has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
+                            <span class="tag is-low-vuln has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
                             <span class="tag has-tooltip" data-tooltip="Components">{{version.metrics.components}}</span>
                         </div>
                     </td>

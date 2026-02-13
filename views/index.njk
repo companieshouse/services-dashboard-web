@@ -11,14 +11,14 @@
         {% set ReleaseDate = "no date loaded" %}
     {% endif %}
 
-    <div class="has-text-black" title="{{ ReleaseDate }}">
+    <div title="{{ ReleaseDate }}">
         {% if versionData.uuid %}
-            <a class="has-text-black" href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
+            <a href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
                 {{ versionData.version }}
             </a>
             {{addDaysAgo( ReleaseDate ) }}
         {% else %}
-            <a class="has-text-black" href="{{devGuideDocumentationLink}}">
+            <a href="{{devGuideDocumentationLink}}">
                 {{ versionData.version }}
             </a>
             {{addDaysAgo( ReleaseDate ) }}
@@ -40,39 +40,41 @@
    {% endif %}
 {% endmacro %}
 
-{% macro addDepTrackColorClass(critical, high, medium) %}
+{% macro addDepTrackColorClass(critical, high, medium, low) %}
    {% if critical != 0 %}
-      has-background-danger
+      is-critical-vuln
    {% elseif high != 0 %}
-      has-background-danger-light
+      is-high-vuln
    {% elseif medium != 0 %}
-      has-background-warning-light
+      is-medium-vuln
+   {% elseif low != 0 %}
+      is-low-vuln
    {% else %}
-      has-background-success-light
+      has-background-success
    {% endif %}
 {% endmacro %}
 
 {% macro buildServiceVersionCell(versionData) %}
     {% if versionData.version %}
         {% set metrics = versionData.metrics %}
-        <td class="td-ecs {{ addDepTrackColorClass(metrics.critical, metrics.high, metrics.medium) }}">
+        <td class="td-ecs {{ addDepTrackColorClass(metrics.critical, metrics.high, metrics.medium, metrics.low) }}">
             {{ gitReleaseInfo(
                 versionData,
                 thresholdsLive[0],
                 thresholdsLive[1]
             ) }}
             {% if versionData.metrics %}
-                <div class="level">
-                    <span class="tag level-item tag has-background-danger-30 has-text-white has-tooltip has-tooltip-bottom" data-tooltip="Critical">
+                <div class="level mt-1">
+                    <span class="tag level-item tag is-critical-vuln has-tooltip has-tooltip-bottom" data-tooltip="Critical">
                         {{ versionData.metrics.critical }}
                     </span>
-                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="High">
+                    <span class="tag level-item is-high-vuln has-tooltip-bottom" data-tooltip="High">
                         {{ versionData.metrics.high }}
                     </span>
-                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Medium">
+                    <span class="tag level-item is-medium-vuln has-tooltip-bottom" data-tooltip="Medium">
                         {{ versionData.metrics.medium }}
                     </span>
-                    <span class="tag level-item is-success has-tooltip-bottom" data-tooltip="Low">
+                    <span class="tag level-item is-low-vuln has-tooltip-bottom" data-tooltip="Low">
                         {{ versionData.metrics.low }}
                     </span>
                 </div>
@@ -172,8 +174,6 @@
                                         <span class="tag is-success">{{ info.value }}</span>
                                     {% elseif info.color == "yellow" %}
                                         <span class="tag is-warning">{{ info.value }}</span>
-                                    {% elseif info.color == "none" %}
-                                        <span class="tag is-info">{{ info.value }}</span>
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
