@@ -17,6 +17,7 @@ nav {
 
 a {
   text-decoration: underline;
+  color: inherit;
 }
 
 span[data-tooltip] {
@@ -50,4 +51,24 @@ span[data-tooltip] {
 .has-tooltip-left::before,
 .has-tooltip-left::after {
   z-index: 9999 !important;
+}
+
+.is-critical-vuln {
+  background-color: hsl(0, 79%, 46%) !important;
+  color: white !important;
+}
+
+.is-high-vuln {
+  background-color: hsl(40.3, 81.6%, 49%) !important;
+  color: black;
+}
+
+.is-medium-vuln {
+  background-color: hsl(54, 95%, 51%) !important;
+  color: black;
+}
+
+.is-low-vuln {
+  background-color: hsl(0, 0%, 42%) !important;
+  color: white;
 }
