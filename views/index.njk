@@ -50,7 +50,7 @@
    {% elseif low != 0 %}
       is-low-vuln
    {% else %}
-      has-background-success
+      is-clear-vuln
    {% endif %}
 {% endmacro %}
 
@@ -166,14 +166,30 @@
                         </td>
                         
                         <td class="td-runtime">
+                            {% set lang = service.latestVersion.lang %}
                             {% for info in service.latestVersion.runtime.runtime %}
                                 {% if info %}
                                     {% if info.color == "red" %}
-                                        <span class="tag is-danger">{{ info.value }}</span>
+                                        <span class="tag is-danger">
+                                            {% if lang === 'go' %}
+                                                {{lang}} - 
+                                            {% endif %}
+                                            {{ info.value }}
+                                        </span>
                                     {% elseif info.color == "green" %}
-                                        <span class="tag is-success">{{ info.value }}</span>
+                                        <span class="tag is-success">
+                                            {% if lang === 'go' %}
+                                                {{lang}} - 
+                                            {% endif %}
+                                            {{ info.value }}
+                                        </span>
                                     {% elseif info.color == "yellow" %}
-                                        <span class="tag is-warning">{{ info.value }}</span>
+                                        <span class="tag is-warning">
+                                            {% if lang === 'go' %}
+                                                {{lang}} - 
+                                            {% endif %}
+                                            {{ info.value }}
+                                        </span>
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
