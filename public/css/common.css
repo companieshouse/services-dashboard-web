@@ -1,5 +1,29 @@
 /* public/css/common.css */
 
+:root {
+  --critical-bg: hsl(0, 79%, 46%);
+  --critical-text: #ffffff;
+
+  --high-bg: hsl(40.3, 81.6%, 49%);
+  --high-text: #000000;
+
+  --medium-bg: hsl(54, 95%, 51%);
+  --medium-text: #000000;
+
+  --low-bg: hsl(0, 0%, 42%);
+  --low-text: #ffffff;
+
+  --clear-bg: hsl(106, 82%, 45%);
+  --clear-text: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --high-text: #000000;
+    --medium-text: #000000;
+  }
+}
+
 body {
   padding: 1em;
 }
@@ -54,21 +78,35 @@ span[data-tooltip] {
 }
 
 .is-critical-vuln {
-  background-color: hsl(0, 79%, 46%) !important;
-  color: white !important;
+  --vuln-bg: var(--critical-bg);
+  --vuln-text: var(--critical-text);
 }
 
 .is-high-vuln {
-  background-color: hsl(40.3, 81.6%, 49%) !important;
-  color: black;
+  --vuln-bg: var(--high-bg);
+  --vuln-text: var(--high-text);
 }
 
 .is-medium-vuln {
-  background-color: hsl(54, 95%, 51%) !important;
-  color: black;
+  --vuln-bg: var(--medium-bg);
+  --vuln-text: var(--medium-text);
 }
 
 .is-low-vuln {
-  background-color: hsl(0, 0%, 42%) !important;
-  color: white;
+  --vuln-bg: var(--low-bg);
+  --vuln-text: var(--low-text);
+}
+
+.is-clear-vuln {
+  --vuln-bg: var(--clear-bg);
+  --vuln-text: var(--clear-text);
+}
+
+.is-critical-vuln,
+.is-high-vuln,
+.is-medium-vuln,
+.is-low-vuln,
+.is-clear-vuln {
+  background-color: var(--vuln-bg) !important;
+  color: var(--vuln-text) !important;
 }

@@ -256,7 +256,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
                   ...service,
                   latestVersion: {
                      ...service.latestVersion,
-                     runtime: { total: 'red', runtime: [{ value: 'Unknown', color: 'red' }] }
+                     runtime: { total: 'yellow', runtime: [{ value: 'Unknown', color: 'yellow' }] }
                   }
                }
             }
