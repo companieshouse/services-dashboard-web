@@ -20,13 +20,13 @@
   "license": "MIT",
   "homepage": "https://github.com/companieshouse/services-dashboard-web#readme",
   "dependencies": {
-    "@companieshouse/structured-logging-node": "^2.0.6",
+    "@companieshouse/structured-logging-node": "^2.0.7",
     "@types/mongodb": "^4.0.6",
     "@types/nunjucks": "^3.2.6",
     "cookie": "^1.0.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
-    "express": "^4.21.0",
+    "express": "^5.0.6",
     "mongodb": "^6.9.0",
     "nunjucks": "^3.2.4",
     "nunjucks-date-filter": "^0.1.1",
@@ -35,7 +35,7 @@
     "typescript": "^5.6.2"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.9.1",
     "@types/semver": "^7.7.1",
