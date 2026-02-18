@@ -89,7 +89,7 @@ export interface ServiceDocument {
    sonarMetrics: any;
 }
 
-export async function fetchDocument(name: String, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
+export async function fetchDocument(name: string, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
    try {
       const db = getDb();
       const collection = db.collection<ServiceDocument>(config.MONGO_COLLECTION_PROJECTS!);

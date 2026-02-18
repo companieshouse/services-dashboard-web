@@ -148,7 +148,13 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
 
 app.get(`${config.ENDPOINT_DASHBOARD!}/service/:serviceName`, async (req: Request, res: Response) => {
    try {
-      const serviceName = req.params.serviceName;
+      let { serviceName } = req.params;
+
+      // Normalise array of params
+      if (Array.isArray(serviceName)) {
+         serviceName = serviceName[0];
+      }
+
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
       const thresholds = configData?.thresholds ?? {};
