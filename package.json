@@ -8,7 +8,7 @@
     "prebuild": "rm -rf ./lib",
     "build": "tsc && cp -r views public dist/",
     "test": "jest",
-    "coverage": "jest --coverage --forceExit --passWithNoTests"
+    "coverage": "jest --coverage --forceExit --passWithNoTests --coverageProvider=v8"
   },
   "keywords": [],
   "description": "Frontend for services dashboard",
