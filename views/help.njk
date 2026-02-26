@@ -108,6 +108,13 @@
         The SonarQube data we use is coming from the latest scan of the master/main branch. 
         This means it isn't necessarily reflective of what is in live (or any other environment), unless your main branch is currently deployed to that environment.  
       </p>
+      {{faq("Why does SonarQube say that it is missing new code stats?", "faq-sonarqube-stats")}}
+      <p>
+        The dashboard shows SonarQube stats for both the project overall and new code.
+      </p>
+      <p>
+        "Missing new code stats" means that Sonar only has it's initial scan, and is waiting for you to push changes to your project before it runs another scan.
+      </p>
     </div>
   </div>
 {% endblock %}

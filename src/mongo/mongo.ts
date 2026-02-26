@@ -89,6 +89,40 @@ export interface ServiceDocument {
    sonarMetrics: any;
 }
 
+/*
+   Handles converting flat sonar metrics:
+   { coverage: 77, new_coverage: 81, bugs: 4, ... }
+   Into:
+   {
+      newCode: {
+         coverage: 81,
+         ...
+      },
+      overall: {
+         coverage: 77,
+         ...
+      }
+   }
+*/
+function normaliseSonarMetrics(sonarMetrics: any) {
+   if (Object.keys(sonarMetrics).length == 0) {
+      return null;
+   }
+
+   const newCode: Record<string, any> = {};
+   const overall: Record<string, any> = {};
+
+   Object.keys(sonarMetrics).forEach(key => {
+      if (key.includes('new_')) {
+         newCode[key.replace('new_', '')] = sonarMetrics[key];
+      } else {
+         overall[key] = sonarMetrics[key];
+      }
+   });
+
+   return {newCode, overall};
+}
+
 export async function fetchDocument(name: string, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
    try {
       const db = getDb();
@@ -126,9 +160,7 @@ export async function fetchDocument(name: string, endol: EndOfLifeData, threshol
          ).reverse();
          
          if (document.sonarMetrics) {
-            if (Object.keys(document.sonarMetrics).length == 0) {
-               document.sonarMetrics = null; // normalise to make things easier on the FE
-            }
+            document.sonarMetrics = normaliseSonarMetrics(document.sonarMetrics);
          }
       }
 
@@ -202,9 +234,8 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
          _id: team.name,
          ...team,
          services: team.services.map((service: any) => {
-            if (service.sonarMetrics && Object.keys(service.sonarMetrics).length === 0) {
-               // Some services have an empty object. Convert to null for consistency in the UI.
-               service.sonarMetrics = null;
+            if (service.sonarMetrics) {
+               service.sonarMetrics = normaliseSonarMetrics(service.sonarMetrics);
             }
 
             service.versions = service.latestVersion;

@@ -26,16 +26,16 @@
     </div>
 {% endmacro %}
 
-{% macro addSonarColorClass(bugs, coverage) %}
+{% macro addSonarColorClass(bugs, coverage, vulnerabilities) %}
    {% if coverage == 0 %}
-      has-background-warning-light
+      is-medium-vuln
    {% else %}
-    {% if bugs == 0 %}
-        has-background-success-light
-    {% elseif bugs < 10 %}
-        has-background-warning-light
+    {% if (bugs == 0) and (vulnerabilities == 0) and (coverage > 80) %}
+        is-clear-vuln
+    {% elseif (bugs < 10) and (vulnerabilities == 0) %}
+        is-medium-vuln
     {% else %}
-        has-background-danger-light
+        is-critical-vuln
     {% endif %}
    {% endif %}
 {% endmacro %}
@@ -205,10 +205,16 @@
                         {{ buildServiceVersionCell(service.ecs.live) }}
 
                         <!-- SONAR -->
-                        {% set sonarBugs = service.sonarMetrics.bugs %}
-                        {% set coverage = service.sonarMetrics.coverage %}
-                        <td class="td-sonar-metrics {{ addSonarColorClass(sonarBugs, coverage) }}">
-                            {% if service.sonarMetrics %}
+                        {% if service.sonarMetrics.overall | isEmpty %}
+                            <td>
+                                Sonar not configured
+                            </td>
+                        {% else %}
+                            {% set sonarBugs = service.sonarMetrics.overall.bugs %}
+                            {% set coverage = service.sonarMetrics.overall.coverage %}
+                            {% set vulnerabilities = service.sonarMetrics.overall.vulnerabilities %}
+                            {% set code_smells = service.sonarMetrics.overall.code_smells %}
+                            <td class="td-sonar-metrics {{ addSonarColorClass(sonarBugs, coverage, vulnerabilities) }}">
                                 {% if coverage == 0 %}
                                     <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
                                         0
@@ -219,19 +225,19 @@
                                     </progress>
                                 {% endif %}
                                 <div class="level">
-                                    <span class="tag level-item is-danger has-tooltip-bottom" data-tooltip="Vulnerabilities">
-                                        {{ service.sonarMetrics.vulnerabilities }}
+                                    <span class="tag level-item is-critical-vuln has-tooltip-bottom" data-tooltip="Vulnerabilities">
+                                        {{ vulnerabilities }}
                                     </span>
-                                    <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="Bugs">
+                                    <span class="tag level-item is-medium-vuln has-tooltip-bottom" data-tooltip="Bugs">
                                         {{ sonarBugs }}
                                     </span>
-                                    <span class="tag level-item is-info has-tooltip-bottom" data-tooltip="Code Smells">
-                                        {{ service.sonarMetrics.code_smells }}
+                                    <span class="tag level-item is-low-vuln has-tooltip-bottom" data-tooltip="Code Smells">
+                                        {{ code_smells }}
                                     </span>
                                 </div>
-                            {% endif%}
-                        </td>
-                    </tr>
+                            </td>
+                        {% endif%}
+                        </tr>
                     {% endif %}
                     {% endfor %}
                 {% endif %}

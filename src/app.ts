@@ -26,6 +26,7 @@ nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
 nunjucksEnv.addFilter("daysPassed", filters.daysPassed);
 nunjucksEnv.addFilter("setGlobal", filters.setGlobal);
+nunjucksEnv.addFilter("isEmpty", filters.isEmpty);
 
 nunjucksEnv.addGlobal("getGlobal", filters.getGlobal);
 
@@ -59,7 +60,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
       const endols = configData?.endol ?? {};
       const thresholds = configData?.thresholds ?? {};
 
-      const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+      const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);      
 
       res.render("index.njk", {
          title: config.APP_TITLE,
