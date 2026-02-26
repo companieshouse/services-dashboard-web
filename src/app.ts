@@ -60,7 +60,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
       const endols = configData?.endol ?? {};
       const thresholds = configData?.thresholds ?? {};
 
-      const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);      
+      const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
 
       res.render("index.njk", {
          title: config.APP_TITLE,
