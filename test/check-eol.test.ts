@@ -45,7 +45,7 @@ describe("checkRuntimesVsEol()", () => {
 
         expect(result).toEqual({
             total: "red",
-            runtime: [{ value: "Unknown", color: "red" }]
+            runtime: [{ value: "Unknown", color: "grey" }]
         });
     });
 

@@ -36,7 +36,7 @@ export function checkRuntimesVsEol (
     if (!runtimeArray || runtimeArray.length === 0) {
       return {
         total: "red",
-        runtime: [{ value: 'Unknown', color: 'red' }]
+        runtime: [{ value: 'Unknown', color: 'grey' }]
       }
     }
 
