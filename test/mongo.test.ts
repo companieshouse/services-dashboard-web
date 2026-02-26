@@ -99,12 +99,12 @@ describe("fetchDocument()", () => {
       _id: "123",
       name: "some-service",
       gitInfo: { lang: "node" },
-      sonarMetrics: { bugs: 10 },
+      sonarMetrics: { bugs: 10, new_bugs: 2 },
       ecs: {},
       versions: []
     });
 
     const result = await fetchDocument("some-service", {}, {});
-    expect(result!.sonarMetrics).toEqual({ bugs: 10 });
+    expect(result!.sonarMetrics).toEqual({ overall: { bugs: 10 }, newCode: { bugs: 2 } });
   });
 });

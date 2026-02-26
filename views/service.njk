@@ -1,6 +1,30 @@
 {% extends "layout.njk" %}
 {% from "macros.njk" import addCoverageColorClass, addVulnerabilityKey %}
 
+{% macro buildSonarBlock(label, metrics) %}
+    <p>{{label}}: </p>
+    {% if metrics.coverage == 0 %}
+        <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage on {{label}}">
+            0
+        </progress>
+    {% else %}
+        <progress class="progress {{ addCoverageColorClass(metrics.coverage) }} has-tooltip" value="{{ metrics.coverage }}" max="100" data-tooltip="{{ metrics.coverage }}% {{ label }} Coverage">
+            {{ metrics.coverage }}
+        </progress>
+    {% endif %}
+    <div class="level">
+        <span class="tag level-item is-danger has-tooltip" data-tooltip="Vulnerabilities">
+            Vulnerabilities: {{ metrics.vulnerabilities }}
+        </span>
+        <span class="tag level-item is-warning has-tooltip" data-tooltip="Bugs">
+            Bugs: {{ metrics.bugs }}
+        </span>
+        <span class="tag level-item is-info has-tooltip" data-tooltip="Code Smells">
+            Code Smells: {{ metrics.code_smells }}
+        </span>
+    </div>
+{% endmacro %}
+
 {% block content %}
     {% set dateFormat = "DD MMM YYYY - h:mm:ss A"%}
     {% if service %}
@@ -62,32 +86,19 @@
                             </td>
                         </tr>
                         {% if service.sonarMetrics %}
-                        {% set coverage = service.sonarMetrics.coverage %}
                             <tr>
                                 <th>SonarQube Metrics</th>
                                 <td>
-                                    {% if coverage == 0 %}
-                                        <p>Overall Coverage: </p>
-                                        <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
-                                            0
-                                        </progress>
+                                    {% if service.sonarMetrics.overall | isEmpty %}
+                                        <p class='mt-2'>Missing stats</p>
                                     {% else %}
-                                        <p>Overall Coverage: </p>
-                                        <progress class="progress {{ addCoverageColorClass(coverage) }} has-tooltip" value="{{coverage}}" max="100" data-tooltip="{{ coverage }}% Overall Coverage">
-                                            {{ coverage }}
-                                        </progress>
+                                        {{ buildSonarBlock('Overall', service.sonarMetrics.overall) }}
                                     {% endif %}
-                                    <div class="level">
-                                        <span class="tag level-item is-danger has-tooltip" data-tooltip="Vulnerabilities">
-                                            Vulnerabilities: {{ service.sonarMetrics.vulnerabilities }}
-                                        </span>
-                                        <span class="tag level-item is-warning has-tooltip" data-tooltip="Bugs">
-                                            Bugs: {{ service.sonarMetrics.bugs }}
-                                        </span>
-                                        <span class="tag level-item is-info has-tooltip" data-tooltip="Code Smells">
-                                            Code Smells: {{ service.sonarMetrics.code_smells }}
-                                        </span>
-                                    </div>
+                                    {% if service.sonarMetrics.newCode | isEmpty %}
+                                        <p class='mt-2'>Missing new code stats</p>
+                                    {% else %}
+                                        {{ buildSonarBlock('New Code', service.sonarMetrics.newCode) }}
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endif %}
