@@ -1,19 +1,19 @@
 /* public/css/common.css */
 
 :root {
-  --critical-bg: hsl(0, 79%, 46%);
+  --critical-bg: #d21919;
   --critical-text: #ffffff;
 
-  --high-bg: hsl(40.3, 81.6%, 49%);
+  --high-bg: 	#f9a805;
   --high-text: #000000;
 
-  --medium-bg: hsl(54, 95%, 51%);
+  --medium-bg: 	#f9e10b;
   --medium-text: #000000;
 
-  --low-bg: hsl(0, 0%, 42%);
+  --low-bg: #6b6b6b;
   --low-text: #ffffff;
 
-  --clear-bg: hsl(106, 82%, 45%);
+  --clear-bg: 	#41d115;
   --clear-text: #000000;
 }
 

@@ -13,13 +13,13 @@
         </progress>
     {% endif %}
     <div class="level">
-        <span class="tag level-item is-danger has-tooltip" data-tooltip="Vulnerabilities">
+        <span class="tag level-item is-critical-vuln has-tooltip" data-tooltip="Vulnerabilities">
             Vulnerabilities: {{ metrics.vulnerabilities }}
         </span>
-        <span class="tag level-item is-warning has-tooltip" data-tooltip="Bugs">
+        <span class="tag level-item is-medium-vuln has-tooltip" data-tooltip="Bugs">
             Bugs: {{ metrics.bugs }}
         </span>
-        <span class="tag level-item is-info has-tooltip" data-tooltip="Code Smells">
+        <span class="tag level-item is-low-vuln has-tooltip" data-tooltip="Code Smells">
             Code Smells: {{ metrics.code_smells }}
         </span>
     </div>
@@ -164,11 +164,11 @@
                     <td>
                         {% for info in version.runtimeData.runtime%}
                             {% if info.color == "red" %}
-                                <span class="tag is-danger">{{ info.value }}</span>
+                                <span class="tag is-critical-vuln">{{ info.value }}</span>
                             {% elseif info.color == "green" %}
-                                <span class="tag is-success">{{ info.value }}</span>
-                            {% elseif info.color == "yellow" %}
-                                <span class="tag is-warning">{{ info.value }}</span>
+                                <span class="tag is-clear-vuln">{{ info.value }}</span>
+                            {% elseif info.color == "grey" %}
+                                <span class="tag is-medium-vuln">{{ info.value }}</span>
                             {% endif %}
                         {% endfor %}
                     </td>

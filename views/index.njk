@@ -170,21 +170,28 @@
                             {% for info in service.latestVersion.runtime.runtime %}
                                 {% if info %}
                                     {% if info.color == "red" %}
-                                        <span class="tag is-danger">
+                                        <span class="tag is-critical-vuln">
                                             {% if lang === 'go' %}
                                                 {{lang}} - 
                                             {% endif %}
                                             {{ info.value }}
                                         </span>
                                     {% elseif info.color == "green" %}
-                                        <span class="tag is-success">
+                                        <span class="tag is-clear-vuln">
                                             {% if lang === 'go' %}
                                                 {{lang}} - 
                                             {% endif %}
                                             {{ info.value }}
                                         </span>
                                     {% elseif info.color == "yellow" %}
-                                        <span class="tag is-warning">
+                                        <span class="tag is-medium-vuln">
+                                            {% if lang === 'go' %}
+                                                {{lang}} - 
+                                            {% endif %}
+                                            {{ info.value }}
+                                        </span>
+                                    {% elseif info.color == "grey" %}
+                                        <span class="tag is-low-vuln">
                                             {% if lang === 'go' %}
                                                 {{lang}} - 
                                             {% endif %}
