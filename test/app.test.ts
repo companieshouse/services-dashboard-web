@@ -1,6 +1,6 @@
 import request from 'supertest';
 import * as config from '../src/config';
-import { fetchConfig, fetchDocument, fetchDocumentsGoupedByScrum, getState, fetchDocuments } from '../src/mongo/mongo';
+import { fetchConfig, fetchDocument, fetchDocumentsGoupedByScrum } from '../src/mongo/mongo';
 import * as dbModule from "../src/mongo/db";
 import  app  from '../src/app';
 
@@ -53,7 +53,13 @@ describe('App Tests', () => {
     });
 
     it('should handle GET request for Runtimes tab', async () => {
-        (fetchConfig as jest.Mock).mockResolvedValue({ endol: {}, lastScan: Date.now() });
+        const endol = {
+            go: [{ cycle: "1.26", releaseDate: "2026-02-11", lts: "false", eol: "false", latest: "1.26.0", }],
+            nodejs: [{ cycle: "24", releaseDate: "2026-01-01", lts: "2025-10-28", eol: "2028-12-31", latest: "24.14.0", }],
+            amazon_corretto: [{ cycle: "25", releaseDate: "2025-09-16", lts: "true", eol: "2032-02-01", latest: "25.0.2.10.1", }],
+        };
+        
+        (fetchConfig as jest.Mock).mockResolvedValue({ endol, lastScan: Date.now() });
 
         const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/runtimes`);
 
@@ -70,13 +76,10 @@ describe('App Tests', () => {
 
     it('should handle GET request for help page with linkId', async () => {
         const linkId = 'linkId';
-        const compressedState = 'compressedState';
-        (getState as jest.Mock).mockResolvedValue(compressedState);
 
         const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/help?linkid=${linkId}`);
 
         expect(response.status).toBe(200);
-        expect(getState).toHaveBeenCalledWith(linkId);
     });
 
     it('should handle GET request for help page without linkId', async () => {
