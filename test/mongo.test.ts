@@ -1,4 +1,4 @@
-import { fetchDocument, normaliseSonarMetrics } from "../src/mongo/mongo";
+import { fetchDocument, normaliseSonarMetrics, sortVersions } from "../src/mongo/mongo";
 import * as dbModule from "../src/mongo/db";
 import * as config from "../src/config";
 
@@ -150,6 +150,34 @@ describe("fetchDocument()", () => {
         { overall: { bugs: 1, vulnerabilities: 1, code_smells: 1, coverage: 1 }, 
           newCode: { bugs: 2, vulnerabilities: 2, code_smells: 2, coverage: 2 } 
         }
+      );
+    });
+  });
+
+  describe('sortVersions', () => {
+    it('returns a correctly sorted list', () => {
+      const versions = [
+        { version: "0.1.100" },
+        { version: "0.1.99" },
+      ];
+    
+      expect(sortVersions(versions)).toEqual(
+        [
+          { version: "0.1.99" },
+          { version: "0.1.100" },]
+      );
+    });
+
+    it('handles non-semver versions correctly', () => {
+      const versions = [
+        { version: "ecs-service-1.0.99" },
+        { version: "ecs-service-1.1.0" },
+      ];
+    
+      expect(sortVersions(versions)).toEqual(
+        [
+          { version: "ecs-service-1.0.99" },
+          { version: "ecs-service-1.1.0" },]
       );
     });
   });
