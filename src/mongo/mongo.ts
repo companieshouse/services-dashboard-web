@@ -53,6 +53,14 @@ export function normaliseSonarMetrics(sonarMetrics: any) {
    return {newCode, overall};
 }
 
+export function sortVersions(versions: any[]) {
+   return versions.sort((a:any, b:any) => 
+      semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
+      semver.compare(a.version, b.version) : // try and sort using semver...
+      a.version.localeCompare(b.version) // else, use string comparison
+   );
+}
+
 export async function fetchDocument(name: string, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
    try {
       const db = getDb();
@@ -83,11 +91,7 @@ export async function fetchDocument(name: string, endol: EndOfLifeData, threshol
          }
 
          // most recent versions first
-         document.versions = document.versions.sort((a:any, b:any) => 
-            semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
-            semver.compare(a.version, b.version) : // try and sort using semver...
-            a.version.localeCompare(b.version) // else, use string comparison
-         ).reverse();
+         document.versions = sortVersions(document.versions).reverse();
          
          if (document.sonarMetrics) {
             document.sonarMetrics = normaliseSonarMetrics(document.sonarMetrics);
@@ -204,11 +208,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             }
 
             // most recent versions first
-            service.versions = service.versions.sort((a:any, b:any) => 
-               semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
-               semver.compare(a.version, b.version) : // try and sort using semver...
-               a.version.localeCompare(b.version) // else, use string comparison
-            ).reverse();
+            service.versions = sortVersions(service.versions).reverse();
             
             service.latestVersion = service.versions[0];
 
@@ -253,7 +253,7 @@ async function fetchConfig() {
       // return "endol" sorted by key (ex. "amazon-corretto" before "go")
       if (configData && configData.endol) {
          configData.endol = Object.keys(configData.endol)
-            .sort()
+            .sort((a, b) => a.localeCompare(b))
             .reduce((sortedObj, key) => {
                sortedObj[key] = configData.endol[key];
                return sortedObj;
