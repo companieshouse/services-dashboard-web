@@ -4,7 +4,6 @@ import * as config from "../config";
 import { logErr } from "../utils/logger";
 import { checkRuntimesVsEol, EndOfLifeData, Thresholds } from "../utils/check-eol";
 import { getDb, getSession } from "./db";
-import { versions } from "process";
 
 export interface ScrumTeamDocument {
   _id: string;
