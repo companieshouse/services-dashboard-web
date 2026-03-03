@@ -1,4 +1,4 @@
-import { fetchDocument } from "../src/mongo/mongo";
+import { fetchDocument, normaliseSonarMetrics, sortVersions } from "../src/mongo/mongo";
 import * as dbModule from "../src/mongo/db";
 import * as config from "../src/config";
 
@@ -106,5 +106,79 @@ describe("fetchDocument()", () => {
 
     const result = await fetchDocument("some-service", {}, {});
     expect(result!.sonarMetrics).toEqual({ overall: { bugs: 10 }, newCode: { bugs: 2 } });
+  });
+
+  describe('normaliseSonarMetrics', () => {
+    it('handles overall stats', () => {
+      const sonarMetrics = {
+        bugs: 10,
+        vulnerabilities: 5,
+        code_smells: 20,
+        coverage: 85.5,
+      };
+      expect(normaliseSonarMetrics(sonarMetrics)).toEqual(
+        { overall: { bugs: 10, vulnerabilities: 5, code_smells: 20, coverage: 85.5 }, 
+          newCode: {} 
+        }
+      );
+    });
+    it('handles newCode stats', () => {
+      const sonarMetrics = {
+        new_bugs: 10,
+        new_vulnerabilities: 5,
+        new_code_smells: 20,
+        new_coverage: 85.5,
+      };
+      expect(normaliseSonarMetrics(sonarMetrics)).toEqual(
+        { overall: {}, 
+          newCode: { bugs: 10, vulnerabilities: 5, code_smells: 20, coverage: 85.5 } 
+        }
+      );
+    });
+    it('handles both stats together', () => {
+      const sonarMetrics = {
+        bugs: 1,
+        new_bugs: 2,
+        vulnerabilities: 1,
+        new_vulnerabilities: 2,
+        code_smells: 1,
+        new_code_smells: 2,
+        coverage: 1,
+        new_coverage: 2,
+      };
+      expect(normaliseSonarMetrics(sonarMetrics)).toEqual(
+        { overall: { bugs: 1, vulnerabilities: 1, code_smells: 1, coverage: 1 }, 
+          newCode: { bugs: 2, vulnerabilities: 2, code_smells: 2, coverage: 2 } 
+        }
+      );
+    });
+  });
+
+  describe('sortVersions', () => {
+    it('returns a correctly sorted list', () => {
+      const versions = [
+        { version: "0.1.100" },
+        { version: "0.1.99" },
+      ];
+    
+      expect(sortVersions(versions)).toEqual(
+        [
+          { version: "0.1.99" },
+          { version: "0.1.100" },]
+      );
+    });
+
+    it('handles non-semver versions correctly', () => {
+      const versions = [
+        { version: "ecs-service-1.0.99" },
+        { version: "ecs-service-1.1.0" },
+      ];
+    
+      expect(sortVersions(versions)).toEqual(
+        [
+          { version: "ecs-service-1.0.99" },
+          { version: "ecs-service-1.1.0" },]
+      );
+    });
   });
 });

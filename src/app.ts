@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import nunjucks from "nunjucks";
 import * as config from "./config";
-import {logger, logErr} from "./utils/logger";
+import { logErr } from "./utils/logger";
 import * as mongo from "./mongo/mongo";
 import * as filters from "./utils/nunjucks-custom-filters";
 
@@ -41,18 +41,6 @@ app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
    res.status(200).send('OK');
  });
 
-app.post(config.ENDPOINT_DASHBOARD!, async (req: Request, res: Response) => {
-   try {
-      const compressedState = req.body;
-      const linkId = await mongo.addState( compressedState);
-      (linkId !== undefined) ?
-         res.send(linkId) :
-         res.status(400).send('Error saving link');
-   } catch (error) {
-      logErr(error);
-   }
-});
-
 // handler of main page
 app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
    try {
@@ -83,13 +71,6 @@ app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
 
 app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response) => {
    try {
-      const linkId = req.query.linkid as string;
-      let   compressedState = "";
-      if (linkId) {
-         logger.info(`reading state from: ${linkId}`);
-         compressedState = await mongo.getState(linkId);
-      }
-
       const configData = await mongo.fetchConfig();
       res.render("help.njk", {
       title: config.APP_TITLE,
@@ -97,7 +78,6 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response
       lastScan: configData?.lastScan ?? "N/A",
       tabs,
       devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
-      compressedState
    });
    } catch (error) {
       logErr(error);

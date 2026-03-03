@@ -1,81 +1,11 @@
 import { ObjectId } from "mongodb";
 import semver from "semver";
 import * as config from "../config";
-import * as type from '../common/types';
-import {logger, logErr} from "../utils/logger";
-import {checkRuntimesVsEol, EndOfLifeData, Thresholds} from "../utils/check-eol";
+import { logErr } from "../utils/logger";
+import { checkRuntimesVsEol, EndOfLifeData, Thresholds } from "../utils/check-eol";
 import { getDb, getSession } from "./db";
-import { servicesVersion } from "typescript";
 
-const MilliSecRetentionStateLinks = Number(config.DAYS_RETENTION_STATE_LINKS) * 24 * 60 * 60 * 1000;
-
-// ex.
-// https://......./dashboard/?query={"overs":["last"],"api":["last"]}
-//                           ?query={"api":"*"}
-//                           ?query={"*":"*"}
-//                           ?query={"overs":"[1.1.340,1.1.348,1.1.364]"}
-async function fetchDocuments(queryParams?: type.QueryParameters) {
-   try {
-      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
-
-      let documents;
-      // Return all documents if no queryParams are provided or if name is "*"
-      if (!queryParams || queryParams.hasOwnProperty("*")) {
-         documents = await collection.find({}, { session: getSession() }).sort({ name: 1 }).toArray();
-      } else {
-         // Build the regex queries for each name
-         const namePatterns = Object.keys(queryParams).map(name => new RegExp(name, "i"));
-
-         // Find the documents by names using regex
-         documents = await collection.find({ name: { $in: namePatterns }}, { session: getSession() }).toArray();
-         // Filter the versions for each document
-         documents = documents.map(doc => {
-            const matchingKey = Object.keys(queryParams).find(key => doc.name.toLowerCase().includes(key.toLowerCase()));
-            if (!matchingKey) {
-               return null;
-            }
-            let filteredVersions;
-            filteredVersions = doc.versions;
-
-            // for versions: handle empty array "[]" and keyword "*" (both meaning ALL versions)
-            if ( ! ( queryParams[matchingKey].length === 0 ||
-                     queryParams[matchingKey].includes("*"))) {
-               filteredVersions = doc.versions.filter((v: any) => queryParams[matchingKey].includes(v.version));
-            }
-            // for versions: handle keyword "last" (meaning most recent "lastBomImport")
-            if (queryParams[matchingKey].includes("last")) {
-               const latestVersion = doc.versions.reduce((prev: any, current: any) =>
-                  (new Date(current.lastBomImport) > new Date(prev.lastBomImport)) ? current : prev
-               );
-               const versionExists = filteredVersions.some((item: any) => item.version === latestVersion.version);
-               if (!versionExists) {
-                  filteredVersions.push(latestVersion);
-               }
-            }
-            return {
-               ...doc,
-               versions: filteredVersions
-            };
-         }).filter(doc => doc !== null);
-      }
-      // sort "versions" array by "version"
-      documents.forEach(doc => {
-         doc.versions.sort((a:any, b:any) => a.version.localeCompare(b.version));
-         // Modify each version's runtime into an array
-         doc.versions.forEach((version:any) => {
-            if (version.runtime) {
-               version.runtime = version.runtime.split(' ');
-            }
-         });
-      });
-     return documents;
-   } catch (error) {
-      logErr(error, "Error fetching documents:");
-      return [];
-   }
- }
-
- export interface ScrumTeamDocument {
+export interface ScrumTeamDocument {
   _id: string;
   services: any[];
 }
@@ -104,7 +34,7 @@ export interface ServiceDocument {
       }
    }
 */
-function normaliseSonarMetrics(sonarMetrics: any) {
+export function normaliseSonarMetrics(sonarMetrics: any) {
    if (Object.keys(sonarMetrics).length == 0) {
       return null;
    }
@@ -123,55 +53,86 @@ function normaliseSonarMetrics(sonarMetrics: any) {
    return {newCode, overall};
 }
 
+export function sortVersions(versions: any[]) {
+   return versions.sort((a:any, b:any) => 
+      semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
+      semver.compare(a.version, b.version) : // try and sort using semver...
+      a.version.localeCompare(b.version) // else, use string comparison
+   );
+}
+
+export function processVersions(gitLang: string, serviceVersions: any[], endol: EndOfLifeData, thresholds: Thresholds) {
+   const langArray = [gitLang];
+
+   return serviceVersions.map(version => {
+      langArray.push(version.lang);
+      if (version.runtime) {
+         version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
+      }
+      return version;
+   });
+}
+
+export function processDeployments(document: ServiceDocument) {
+   for (const version of document.versions) {
+      const deployments = [];
+      if (version.version == document.ecs?.cidev?.version) {
+         deployments.push('CI-Dev');
+         document.ecs.cidev = {
+            ...document.ecs.cidev,
+            ...version
+         };
+      }
+      if (version.version == document.ecs?.staging?.version) {
+         deployments.push('Staging');
+         document.ecs.staging = {
+            ...document.ecs.staging,
+            ...version
+         };
+      }
+      if (version.version == document.ecs?.live?.version) {
+         deployments.push('Live');
+         document.ecs.live = {
+            ...document.ecs.live,
+            ...version
+         }; 
+      }
+      version.deployments = deployments;
+   }
+}
+
+export function processMetricsAndDeployments(document: ServiceDocument, endol: EndOfLifeData, thresholds: Thresholds) {
+   if (document.sonarMetrics) {
+      document.sonarMetrics = normaliseSonarMetrics(document.sonarMetrics);
+   }
+
+   document.versions = processVersions(document.gitInfo.lang, document.versions, endol, thresholds);
+
+   processDeployments(document);
+
+   // most recent versions first
+   document.versions = sortVersions(document.versions).reverse();
+}
+
 export async function fetchDocument(name: string, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
    try {
       const db = getDb();
       const collection = db.collection<ServiceDocument>(config.MONGO_COLLECTION_PROJECTS!);
 
       const document = await collection.findOne({ name });
+
+      if (!document) return null;
       
-      if (document) {
-         const langArray = [document.gitInfo.lang];
-
-         for (const version of document.versions) {
-            langArray.push(version.lang);
-            if (version.runtime) {
-               version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
-            }
-
-            const deployments = [];
-            if (version.version == document.ecs?.cidev?.version) {
-               deployments.push('CI-Dev');
-            }
-            if (version.version == document.ecs?.staging?.version) {
-               deployments.push('Staging');
-            }
-            if (version.version == document.ecs?.live?.version) {
-               deployments.push('Live');
-            }
-            version.deployments = deployments;
-         }
-
-         // most recent versions first
-         document.versions = document.versions.sort((a:any, b:any) => 
-            semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
-            semver.compare(a.version, b.version) : // try and sort using semver...
-            a.version.localeCompare(b.version) // else, use string comparison
-         ).reverse();
-         
-         if (document.sonarMetrics) {
-            document.sonarMetrics = normaliseSonarMetrics(document.sonarMetrics);
-         }
-      }
+      processMetricsAndDeployments(document, endol, thresholds);
 
       return document;
    } catch (error) {
-      logErr(error, "Error fetching documents:");
+      logErr(error, "Error fetching document:");
       return null;
    }
 }
 
-// Aggregate the documents by gitinfo.owner & keep the latest version only
+// Aggregate the documents by gitinfo.owner
 async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds): Promise<ScrumTeamDocument[]> {
    try {
       const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
@@ -184,7 +145,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             $group: {
                _id: "$_id",
                name: { $first: "$name" },
-               latestVersion: { $first: "$versions" },
+               versions: { $first: "$versions" },
                sonarKey: { $first: "$sonarKey" },
                sonarMetrics: { $first: "$sonarMetrics" },
                gitInfo: { $first: "$gitInfo" },
@@ -196,13 +157,13 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
                _id: { $ifNull: ["$gitInfo.owner", "unassigned"] },
                services: {
                   $push: {
-                  _id: "$_id",
-                  name: "$name",
-                  latestVersion: "$latestVersion",
-                  sonarKey: "$sonarKey",
-                  sonarMetrics: "$sonarMetrics",
-                  gitInfo: "$gitInfo",
-                  ecs: "$ecs"
+                     _id: "$_id",
+                     name: "$name",
+                     versions: "$versions",
+                     sonarKey: "$sonarKey",
+                     sonarMetrics: "$sonarMetrics",
+                     gitInfo: "$gitInfo",
+                     ecs: "$ecs"
                   }
                }
             }
@@ -234,51 +195,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
          _id: team.name,
          ...team,
          services: team.services.map((service: any) => {
-            if (service.sonarMetrics) {
-               service.sonarMetrics = normaliseSonarMetrics(service.sonarMetrics);
-            }
-
-            service.versions = service.latestVersion;
-
-            const langArray = [service.gitInfo.lang];
-
-            for (const version of service.versions) {
-               langArray.push(version.lang);
-               if (version.runtime) {
-                  version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
-               }
-
-               const deployments = [];
-               if (version.version == service.ecs?.cidev?.version) {
-                  deployments.push('CI-Dev');
-                  service.ecs.cidev = {
-                     ...service.ecs.cidev,
-                     ...version
-                  };
-               }
-               if (version.version == service.ecs?.staging?.version) {
-                  deployments.push('Staging');
-                  service.ecs.staging = {
-                     ...service.ecs.staging,
-                     ...version
-                  };
-               }
-               if (version.version == service.ecs?.live?.version) {
-                  deployments.push('Live');
-                  service.ecs.live = {
-                     ...service.ecs.live,
-                     ...version
-                  };
-               }
-               version.deployments = deployments;
-            }
-
-            // most recent versions first
-            service.versions = service.versions.sort((a:any, b:any) => 
-               semver.valid(a.version) && semver.valid(b.version) ? // if version is valid semver... 
-               semver.compare(a.version, b.version) : // try and sort using semver...
-               a.version.localeCompare(b.version) // else, use string comparison
-            ).reverse();
+            processMetricsAndDeployments(service, endol, thresholds);
             
             service.latestVersion = service.versions[0];
 
@@ -293,8 +210,10 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             }
 
             const runtimeStr = service.latestVersion.runtime;
+            const versionLangs = service.versions.map((v: any) => v.lang);
+            versionLangs.push(service.gitInfo.lang);
 
-            const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
+            const runtimeColorResult = checkRuntimesVsEol(versionLangs, runtimeStr.split(' '), endol, thresholds);
 
             return {
                ...service,
@@ -323,7 +242,7 @@ async function fetchConfig() {
       // return "endol" sorted by key (ex. "amazon-corretto" before "go")
       if (configData && configData.endol) {
          configData.endol = Object.keys(configData.endol)
-            .sort()
+            .sort((a, b) => a.localeCompare(b))
             .reduce((sortedObj, key) => {
                sortedObj[key] = configData.endol[key];
                return sortedObj;
@@ -334,65 +253,6 @@ async function fetchConfig() {
       logErr(error, "Error fetching Config:");
       return null;
    }
- }
-
-async function getState(linkId: string|undefined): Promise<string> {
-   let state = '';
-   if (linkId !== undefined ) {
-      try {
-         const collection = getDb().collection(config.MONGO_COLLECTION_LINKS!);
-         const objectId   = new ObjectId(linkId);
-         const now = new Date()
-
-         // 1.3 find the link and update its "lastUsed" timestamp to now
-         const document = await collection.findOneAndUpdate(
-            { _id: objectId },
-            { $set: { lastUsed: now } },
-            { returnDocument: 'after', session: getSession() }
-         );
-
-         // 2.3 get ready to return its state
-         if (document) {
-            logger.info(`Reading - state: ${document.state}`);
-            state = document.state;
-         }
-         // 3.3 tidy up the collection (removing old entries)
-         const cutoffDate = new Date(now.getTime() - MilliSecRetentionStateLinks);
-         await collection.deleteMany(
-            { lastUsed: { $lt: cutoffDate } },
-            { session: getSession() }
-          );
-      } catch (error) {
-         logger.info(`Error getting link state: ${error}`);
-      }
-   }
-   return state;
 }
 
-async function addState(state: string): Promise<string | undefined> {
-   let linkId = undefined;
-   if (state) {
-      try {
-         const collection = getDb().collection(config.MONGO_COLLECTION_LINKS!);
-
-         // Find the document with the matching state
-         const document = await collection.findOneAndUpdate(
-            { state: state },
-            { $set: { lastUsed: new Date() } },
-            {  returnDocument: 'after',
-               upsert: true,  // upsert creates a new document if none exists
-               session: getSession()
-            }
-         );
-         if (document) {
-               linkId = document._id.toString();
-         }
-      } catch (error) {
-         logger.info(`Error creating link state: ${error}`);
-      }
-   }
-   logger.info(`Returning id: ${linkId}`);
-   return linkId;
-}
-
-export { fetchDocuments, fetchDocumentsGoupedByScrum, fetchConfig, getState, addState };
+export { fetchDocumentsGoupedByScrum, fetchConfig };
