@@ -4,6 +4,7 @@ import * as config from "../config";
 import { logErr } from "../utils/logger";
 import { checkRuntimesVsEol, EndOfLifeData, Thresholds } from "../utils/check-eol";
 import { getDb, getSession } from "./db";
+import { versions } from "process";
 
 export interface ScrumTeamDocument {
   _id: string;
@@ -61,51 +62,78 @@ export function sortVersions(versions: any[]) {
    );
 }
 
+export function processVersions(gitLang: string, serviceVersions: any[], endol: EndOfLifeData, thresholds: Thresholds) {
+   const langArray = [gitLang];
+
+   return serviceVersions.map(version => {
+      langArray.push(version.lang);
+      if (version.runtime) {
+         version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
+      }
+      return version;
+   });
+}
+
+export function processDeployments(document: ServiceDocument) {
+   for (const version of document.versions) {
+      const deployments = [];
+      if (version.version == document.ecs?.cidev?.version) {
+         deployments.push('CI-Dev');
+         document.ecs.cidev = {
+            ...document.ecs.cidev,
+            ...version
+         };
+      }
+      if (version.version == document.ecs?.staging?.version) {
+         deployments.push('Staging');
+         document.ecs.staging = {
+            ...document.ecs.staging,
+            ...version
+         };
+      }
+      if (version.version == document.ecs?.live?.version) {
+         deployments.push('Live');
+         document.ecs.live = {
+            ...document.ecs.live,
+            ...version
+         }; 
+      }
+      version.deployments = deployments;
+   }
+}
+
+export function processMetricsAndDeployments(document: ServiceDocument, endol: EndOfLifeData, thresholds: Thresholds) {
+   if (document.sonarMetrics) {
+      document.sonarMetrics = normaliseSonarMetrics(document.sonarMetrics);
+   }
+
+   document.versions = processVersions(document.gitInfo.lang, document.versions, endol, thresholds);
+
+   processDeployments(document);
+
+   // most recent versions first
+   document.versions = sortVersions(document.versions).reverse();
+}
+
 export async function fetchDocument(name: string, endol: EndOfLifeData, thresholds: Thresholds): Promise<ServiceDocument | null> {
    try {
       const db = getDb();
       const collection = db.collection<ServiceDocument>(config.MONGO_COLLECTION_PROJECTS!);
 
       const document = await collection.findOne({ name });
+
+      if (!document) return null;
       
-      if (document) {
-         const langArray = [document.gitInfo.lang];
-
-         for (const version of document.versions) {
-            langArray.push(version.lang);
-            if (version.runtime) {
-               version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
-            }
-
-            const deployments = [];
-            if (version.version == document.ecs?.cidev?.version) {
-               deployments.push('CI-Dev');
-            }
-            if (version.version == document.ecs?.staging?.version) {
-               deployments.push('Staging');
-            }
-            if (version.version == document.ecs?.live?.version) {
-               deployments.push('Live');
-            }
-            version.deployments = deployments;
-         }
-
-         // most recent versions first
-         document.versions = sortVersions(document.versions).reverse();
-         
-         if (document.sonarMetrics) {
-            document.sonarMetrics = normaliseSonarMetrics(document.sonarMetrics);
-         }
-      }
+      processMetricsAndDeployments(document, endol, thresholds);
 
       return document;
    } catch (error) {
-      logErr(error, "Error fetching documents:");
+      logErr(error, "Error fetching document:");
       return null;
    }
 }
 
-// Aggregate the documents by gitinfo.owner & keep the latest version only
+// Aggregate the documents by gitinfo.owner
 async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thresholds): Promise<ScrumTeamDocument[]> {
    try {
       const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
@@ -118,7 +146,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             $group: {
                _id: "$_id",
                name: { $first: "$name" },
-               latestVersion: { $first: "$versions" },
+               versions: { $first: "$versions" },
                sonarKey: { $first: "$sonarKey" },
                sonarMetrics: { $first: "$sonarMetrics" },
                gitInfo: { $first: "$gitInfo" },
@@ -130,13 +158,13 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
                _id: { $ifNull: ["$gitInfo.owner", "unassigned"] },
                services: {
                   $push: {
-                  _id: "$_id",
-                  name: "$name",
-                  latestVersion: "$latestVersion",
-                  sonarKey: "$sonarKey",
-                  sonarMetrics: "$sonarMetrics",
-                  gitInfo: "$gitInfo",
-                  ecs: "$ecs"
+                     _id: "$_id",
+                     name: "$name",
+                     versions: "$versions",
+                     sonarKey: "$sonarKey",
+                     sonarMetrics: "$sonarMetrics",
+                     gitInfo: "$gitInfo",
+                     ecs: "$ecs"
                   }
                }
             }
@@ -168,47 +196,7 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
          _id: team.name,
          ...team,
          services: team.services.map((service: any) => {
-            if (service.sonarMetrics) {
-               service.sonarMetrics = normaliseSonarMetrics(service.sonarMetrics);
-            }
-
-            service.versions = service.latestVersion;
-
-            const langArray = [service.gitInfo.lang];
-
-            for (const version of service.versions) {
-               langArray.push(version.lang);
-               if (version.runtime) {
-                  version.runtimeData = checkRuntimesVsEol(langArray, version.runtime.split(' '), endol, thresholds);
-               }
-
-               const deployments = [];
-               if (version.version == service.ecs?.cidev?.version) {
-                  deployments.push('CI-Dev');
-                  service.ecs.cidev = {
-                     ...service.ecs.cidev,
-                     ...version
-                  };
-               }
-               if (version.version == service.ecs?.staging?.version) {
-                  deployments.push('Staging');
-                  service.ecs.staging = {
-                     ...service.ecs.staging,
-                     ...version
-                  };
-               }
-               if (version.version == service.ecs?.live?.version) {
-                  deployments.push('Live');
-                  service.ecs.live = {
-                     ...service.ecs.live,
-                     ...version
-                  };
-               }
-               version.deployments = deployments;
-            }
-
-            // most recent versions first
-            service.versions = sortVersions(service.versions).reverse();
+            processMetricsAndDeployments(service, endol, thresholds);
             
             service.latestVersion = service.versions[0];
 
@@ -223,8 +211,10 @@ async function fetchDocumentsGoupedByScrum(endol: EndOfLifeData, thresholds: Thr
             }
 
             const runtimeStr = service.latestVersion.runtime;
+            const versionLangs = service.versions.map((v: any) => v.lang);
+            versionLangs.push(service.gitInfo.lang);
 
-            const runtimeColorResult = checkRuntimesVsEol(langArray, runtimeStr.split(' '), endol, thresholds);
+            const runtimeColorResult = checkRuntimesVsEol(versionLangs, runtimeStr.split(' '), endol, thresholds);
 
             return {
                ...service,
