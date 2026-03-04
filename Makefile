@@ -20,10 +20,6 @@ build:
 lint:
 	#npm run lint
 
-.PHONY: sonar
-sonar: test-unit
-#	npm run sonarqube
-
 .PHONY: test-unit
 test-unit: clean
 	npm run coverage
