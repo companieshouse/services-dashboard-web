@@ -93,7 +93,12 @@
     <div class="field mb-4">
         <div class="control has-icons-left">
             <label for="table-search">
-                Search: 
+                Search 
+                {# Just a default value, the actual number of services is 
+                   calculated in the filter() function after initial render. 
+                #}
+                <span id="service-count">{{ documents | length }}</span> 
+                services:
             </label>
             <input
                 id="table-search"
@@ -260,6 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const checkboxes = [...document.querySelectorAll(".level1-checkbox")];
   const rows = [...document.querySelectorAll("#tab-table-id tbody tr")];
   const searchInput = document.getElementById("table-search");
+  const serviceCount = document.getElementById("service-count");
 
   // Apply filters based on selected teams and search term
   function filter() {
@@ -281,6 +287,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const matchesSearch = row.innerText.toLowerCase().includes(searchTerm);
       row.style.display = (matchesTeam && matchesSearch) ? "" : "none";
     });
+
+    // Update service count
+    const visibleCount = rows.filter(row => row.style.display !== "none").length;
+    serviceCount.textContent = visibleCount;
   }
 
   // Master checkbox toggles all
