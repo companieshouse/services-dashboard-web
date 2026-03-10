@@ -99,9 +99,9 @@
       </p>
       {{faq("I rolled back my service, why didn't the version number update?", "faq-rollback-version")}}
       <p>
-        The version numbers we display for each environment are a "best guess". They are actually determined by tasks run in your project's CI pipeline, which apply a tag to the corresponding image in ECR.
-        Therefore, there can be instances where rolling back a service can cause our version numbers to be out of sync. 
-        The services dashboard isn't a substitution for looking at the version numbers in ECS.
+        The version numbers we display for each environment come from ECR tags. They are updated when an ECS deployment finishes successfully.
+        This triggers a Lambda function which updates the version tags for the service in ECR. 
+        If the version number isn't updated after a rollback, it's likely that the Lambda function didn't run successfully, or that the ECS deployment failed.
       </p>
       {{faq("Why is SonarQube green if it fails against a release version?", "faq-sonarqube-green")}}
       <p>
