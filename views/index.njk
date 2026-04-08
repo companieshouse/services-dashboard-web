@@ -133,11 +133,12 @@
         </div>
 
         <div class="column table-container">
-            <table id="tab-table-id" class="table is-striped is-fullwidth is-hoverable">
+            <table id="tab-table-id" class="table is-striped is-fullwidth is-hoverable is-bordered">
             <thead>
                 <tr>
-                <th class="row-header-title header-service" id="col-head-service">Service</th>
-                <th class="row-header-title header-git" id="col-head-git-lang">Runtime</th>
+                <th class="row-header-title header-service is-narrow" id="col-head-service">Service</th>
+                <th class="row-header-title header-git is-narrow" id="col-head-git-lang">Runtime</th>
+                <th class="row-header-title header-ecs" id="col-head-ecs-latest-version">Latest Version</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-cidev">CI Dev</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-stag">Staging</th>
                 <th class="row-header-title header-ecs" id="col-head-ecs-live">Live</th>
@@ -163,48 +164,51 @@
                             data-low="{{ depTrackLow }}"
                         >
                         <td class="td-name">
-                            <div class="is-flex-direction-row is-justify-content-space-between">
-                                <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
-                                <span>- {{ document._id }}</span>
-                            </div>
+                            <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
+                            <span>- {{ document._id }}</span>
                         </td>
                         
                         <td class="td-runtime">
                             {% set lang = service.latestVersion.lang %}
-                            {% for info in service.latestVersion.runtime.runtime %}
-                                {% if info %}
-                                    {% if info.color == "red" %}
-                                        <span class="tag is-critical-vuln">
-                                            {% if lang === 'go' %}
-                                                {{lang}} - 
-                                            {% endif %}
-                                            {{ info.value }}
-                                        </span>
-                                    {% elseif info.color == "green" %}
-                                        <span class="tag is-clear-vuln">
-                                            {% if lang === 'go' %}
-                                                {{lang}} - 
-                                            {% endif %}
-                                            {{ info.value }}
-                                        </span>
-                                    {% elseif info.color == "yellow" %}
-                                        <span class="tag is-medium-vuln">
-                                            {% if lang === 'go' %}
-                                                {{lang}} - 
-                                            {% endif %}
-                                            {{ info.value }}
-                                        </span>
-                                    {% elseif info.color == "grey" %}
-                                        <span class="tag is-low-vuln">
-                                            {% if lang === 'go' %}
-                                                {{lang}} - 
-                                            {% endif %}
-                                            {{ info.value }}
-                                        </span>
+                            <div id="runtime-tags" class="is-flex-direction-column">
+                                {% for info in service.latestVersion.runtime.runtime %}
+                                    {% if info %}
+                                        {% if info.color == "red" %}
+                                            <span class="tag is-critical-vuln">
+                                                {% if lang === 'go' %}
+                                                    {{lang}} - 
+                                                {% endif %}
+                                                {{ info.value }}
+                                            </span>
+                                        {% elseif info.color == "green" %}
+                                            <span class="tag is-clear-vuln">
+                                                {% if lang === 'go' %}
+                                                    {{lang}} - 
+                                                {% endif %}
+                                                {{ info.value }}
+                                            </span>
+                                        {% elseif info.color == "yellow" %}
+                                            <span class="tag is-medium-vuln">
+                                                {% if lang === 'go' %}
+                                                    {{lang}} - 
+                                                {% endif %}
+                                                {{ info.value }}
+                                            </span>
+                                        {% elseif info.color == "grey" %}
+                                            <span class="tag is-low-vuln">
+                                                {% if lang === 'go' %}
+                                                    {{lang}} - 
+                                                {% endif %}
+                                                {{ info.value }}
+                                            </span>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
-                            {% endfor %}
+                                {% endfor %}
+                            </div>
                         </td>
+
+                        <!-- Latest Version -->
+                        {{ buildServiceVersionCell(service.latestVersion) }}
 
                         <!-- CI DEV -->
                         {{ buildServiceVersionCell(service.ecs.cidev) }}

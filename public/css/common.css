@@ -110,3 +110,8 @@ span[data-tooltip] {
   background-color: var(--vuln-bg) !important;
   color: var(--vuln-text) !important;
 }
+
+#runtime-tags {
+  display: flex;
+  gap: 0.25em;
+}
