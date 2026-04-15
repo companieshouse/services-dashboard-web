@@ -40,6 +40,8 @@ describe("fetchDocument()", () => {
       sonarMetrics: null,
       ecs: {
         cidev:   { version: "2.0.0" },
+        rebel1:   { version: "2.0.0" },
+        phoenix:   { version: "2.0.0" },
         staging: { version: "0.1.100" },
         live:    { version: "0.1.99" }
       },
@@ -62,7 +64,7 @@ describe("fetchDocument()", () => {
     expect(result!.versions[0].runtimeData).toBe("MOCK_RUNTIME_DATA");
 
     // --- deployments based on ecs versions ---
-    expect(result!.versions[0].deployments).toEqual(["CI-Dev"]);
+    expect(result!.versions[0].deployments).toEqual(["CI-Dev", "Rebel1", "Phoenix"]);
     expect(result!.versions[1].deployments).toEqual(["Staging"]);
     expect(result!.versions[2].deployments).toEqual(["Live"]);
 

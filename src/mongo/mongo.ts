@@ -83,6 +83,20 @@ export function processDeployments(document: ServiceDocument) {
             ...version
          };
       }
+      if (version.version == document.ecs?.rebel1?.version) {
+         deployments.push('Rebel1');
+         document.ecs.rebel1 = {
+            ...document.ecs.rebel1,
+            ...version
+         };
+      }
+      if (version.version == document.ecs?.phoenix?.version) {
+         deployments.push('Phoenix');
+         document.ecs.phoenix = {
+            ...document.ecs.phoenix,
+            ...version
+         };
+      }
       if (version.version == document.ecs?.staging?.version) {
          deployments.push('Staging');
          document.ecs.staging = {
