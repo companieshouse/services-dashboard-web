@@ -25,6 +25,17 @@
     </div>
 {% endmacro %}
 
+{% macro buildVersionAndDate(version, releaseDate) %}
+    {% if version | isEmpty %}
+        Unknown
+    {% else %}
+        <strong>{{version}} </strong>
+        {% if releaseDate %}
+            - {{releaseDate | date(dateFormat)}}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
 {% block content %}
     {% set dateFormat = "DD MMM YYYY - h:mm:ss A"%}
     {% if service %}
@@ -52,39 +63,7 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        <tr>
-                            <th>CI-Dev</th>
-                            <td>
-                                {% if ecs.cidev.version %}
-                                    <strong>{{ecs.cidev.version}} </strong>
-                                    - {{ecs.cidev.gitReleaseDate | date(dateFormat)}}
-                                {% else %}
-                                    Unknown
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Staging</th>
-                            <td>
-                                {% if ecs.staging.version %}
-                                    <strong>{{ecs.staging.version}} </strong>
-                                    - {{ecs.staging.gitReleaseDate | date(dateFormat)}}
-                                {% else %}
-                                    Unknown
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Live</th>
-                            <td>
-                                {% if ecs.live.version %}
-                                    <strong>{{ecs.live.version}} </strong>
-                                    - {{ecs.live.gitReleaseDate | date(dateFormat)}}
-                                {% else %}
-                                    Unknown
-                                {% endif %}
-                            </td>
-                        </tr>
+                        
                         {% if service.sonarMetrics %}
                             <tr>
                                 <th>SonarQube Metrics</th>
@@ -126,6 +105,54 @@
                                 </td>
                             </tr>
                         {% endfor %}
+                    </tbody>
+                </table>
+
+                <table class="table is-bordered is-fullwidth">
+                    <tbody>
+                        <tr>
+                            <th>CI-Dev</th>
+                            <td>
+                                {% if ecs.cidev.version %}
+                                    {{ buildVersionAndDate(ecs.cidev.version, ecs.cidev.gitReleaseDate) }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {# Double check non-standard envs, if they are missing, don't display them #}
+                        {% if ecs.rebel1.version %}
+                        <tr>
+                            <th>Rebel1</th>
+                            <td>
+                                {{ buildVersionAndDate(ecs.rebel1.version, ecs.rebel1.gitReleaseDate) }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if ecs.phoenix.version %}
+                        <tr>
+                            <th>Phoenix</th>
+                            <td>
+                                {{ buildVersionAndDate(ecs.phoenix.version, ecs.phoenix.gitReleaseDate) }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Staging</th>
+                            <td>
+                                {% if ecs.staging.version %}
+                                    {{ buildVersionAndDate(ecs.staging.version, ecs.staging.gitReleaseDate) }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Live</th>
+                            <td>
+                                {{ buildVersionAndDate(ecs.live.version, ecs.live.gitReleaseDate) }}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
