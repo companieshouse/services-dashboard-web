@@ -94,7 +94,7 @@ describe("checkRuntimesVsEol()", () => {
     it("sets total color to red if any runtime is red, even if others are green", () => {
         const result = checkRuntimesVsEol(
             ["java"],
-            ["amazon-corretto-21", "amazon-corretto-18"],
+            ["java-21", "java-18"],
             eolData,
             thresholds
         );
@@ -102,8 +102,8 @@ describe("checkRuntimesVsEol()", () => {
         expect(result).toEqual({
             total: "red",
             runtime: [
-                { value: "amazon-corretto-21", color: "green" },
-                { value: "amazon-corretto-18", color: "red" }
+                { value: "java-21", color: "green" },
+                { value: "java-18", color: "red" }
             ]
         });
     });
@@ -111,7 +111,7 @@ describe("checkRuntimesVsEol()", () => {
     it("sets total color to yellow if any runtime is yellow", () => {
         const result = checkRuntimesVsEol(
             ["java"],
-            ["amazon-corretto-21", "spring-boot-starter:3.5.9"], // spring-boot has no threshold set, so will use defaults
+            ["java-21", "spring-boot-starter:3.5.9"], // spring-boot has no threshold set, so will use defaults
             eolData,
             thresholds
         );
@@ -119,7 +119,7 @@ describe("checkRuntimesVsEol()", () => {
         expect(result).toEqual({
             total: "yellow",
             runtime: [
-                { value: "amazon-corretto-21", color: "green" },
+                { value: "java-21", color: "green" },
                 { value: "spring-boot-starter:3.5.9", color: "yellow" }
             ]
         });
@@ -128,7 +128,7 @@ describe("checkRuntimesVsEol()", () => {
     it("sets total color to green if all runtimes are green", () => {
         const result = checkRuntimesVsEol(
             ["java"],
-            ["amazon-corretto-21", "spring-boot-starter:4.0.1"], // spring-boot has no threshold set, so will use defaults
+            ["java-21", "spring-boot-starter:4.0.1"], // spring-boot has no threshold set, so will use defaults
             eolData,
             thresholds
         );
@@ -136,7 +136,7 @@ describe("checkRuntimesVsEol()", () => {
         expect(result).toEqual({
             total: "green",
             runtime: [
-                { value: "amazon-corretto-21", color: "green" },
+                { value: "java-21", color: "green" },
                 { value: "spring-boot-starter:4.0.1", color: "green" }
             ]
         });

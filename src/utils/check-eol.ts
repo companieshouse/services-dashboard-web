@@ -47,7 +47,7 @@ export function checkRuntimesVsEol (
 
       //------------ JAVA
       if (language.includes("java")) {
-        if (runtime.match(/corretto/i)) {
+        if (runtime.match(/java/i)) {
           threshold = "amazon-corretto";
           const versionMatch = runtime.match(/\-(\d+)/);
           if (versionMatch) {
