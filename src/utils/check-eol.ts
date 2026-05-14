@@ -47,8 +47,8 @@ export function checkRuntimesVsEol (
 
       //------------ JAVA
       if (language.includes("java")) {
-        if (runtime.match(/corretto/i)) {
-          threshold = "amazon-corretto";
+        if (runtime.match(/corretto/i) || runtime.match(/java/i)) {
+          threshold = "amazon-corretto"; // use amazon-corretto thresholds for both amazon-corretto and java runtimes, as they have the same EOL cycles
           const versionMatch = runtime.match(/\-(\d+)/);
           if (versionMatch) {
               matchedRuntime = endol["amazon-corretto"]?.find(r => r.cycle === versionMatch[1]);

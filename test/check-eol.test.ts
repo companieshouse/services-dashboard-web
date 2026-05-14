@@ -26,6 +26,7 @@ describe("checkRuntimesVsEol()", () => {
             { cycle: "1.19", eol: "false"}
         ],
         "amazon-corretto": [
+            { cycle: "25", eol: "2028-08-25" }, // eol a few years away
             { cycle: "21", eol: "2026-08-25" }, // eol a few months away
             { cycle: "18", eol: "2025-01-01" }  // eol expired
         ],
@@ -94,7 +95,7 @@ describe("checkRuntimesVsEol()", () => {
     it("sets total color to red if any runtime is red, even if others are green", () => {
         const result = checkRuntimesVsEol(
             ["java"],
-            ["amazon-corretto-21", "amazon-corretto-18"],
+            ["java-25", "amazon-corretto-21", "amazon-corretto-18"],
             eolData,
             thresholds
         );
@@ -102,6 +103,7 @@ describe("checkRuntimesVsEol()", () => {
         expect(result).toEqual({
             total: "red",
             runtime: [
+                { value: "java-25", color: "green" },
                 { value: "amazon-corretto-21", color: "green" },
                 { value: "amazon-corretto-18", color: "red" }
             ]
