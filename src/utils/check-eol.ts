@@ -74,7 +74,7 @@ function matchNodeRuntime(runtime: string, endol: EndOfLifeData): RuntimeInfo {
 }
 
 function matchGoRuntime(runtime: string, endol: EndOfLifeData): RuntimeInfo {
-  const versionMatch = /(\d+\.\d+)/.exec(runtime);
+  const versionMatch = /^(\d+\.\d+)/.exec(runtime);
   if (!versionMatch) return { cycle: "", eol: true };
   return endol["go"]?.find(r => r.cycle === versionMatch[1]) || { cycle: "", eol: true };
 }
