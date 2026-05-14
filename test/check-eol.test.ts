@@ -50,6 +50,60 @@ describe("checkRuntimesVsEol()", () => {
         });
     });
 
+    it("returns red if runtime version is missing", () => {
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node"],
+            eolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
+    it("returns red if runtime version is malformed", () => {
+        const result = checkRuntimesVsEol(
+            ["go"],
+            ["go-abc"],
+            eolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
+    it("returns green if eol is false", () => {
+        const customEolData = { ...eolData, nodejs: [{ cycle: "20", eol: false }] };
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-20"],
+            customEolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("green");
+    });
+
+    it("returns red if eol is true", () => {
+        const customEolData = { ...eolData, nodejs: [{ cycle: "21", eol: true }] };
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-21"],
+            customEolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
+    it("returns correct color on threshold boundary", () => {
+        // EOL is exactly 30 days away, threshold for nodejs is [30, 90]
+        const customEolData = { ...eolData, nodejs: [{ cycle: "19", eol: "2026-01-31" }] };
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-19"],
+            customEolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
     it("returns yellow if runtime is matched, within EOL but below max threshold", () => {
         const result = checkRuntimesVsEol(
             ["node"],
