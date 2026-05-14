@@ -43,21 +43,21 @@ function matchJavaRuntime(runtime: string, endol: EndOfLifeData): { matchedRunti
 
   if (/corretto/i.exec(runtime) || /java/i.exec(runtime)) {
     threshold = "amazon-corretto"; // use amazon-corretto thresholds for both amazon-corretto and java runtimes, as they have the same EOL cycles
-    const versionMatch = runtime.match(/\-(\d+)/);
+    const versionMatch = /-(\d+)/.exec(runtime);
     if (!versionMatch) {
       return { matchedRuntime: redRuntime, threshold };
     }
     return { matchedRuntime: matchRuntime("amazon-corretto", endol, versionMatch) || redRuntime, threshold };
   } else if (/spring-core/i.exec(runtime)) {
     threshold = "spring-framework";
-    const versionMatch = runtime.match(/:(\d+\.\d+)/);
+    const versionMatch = /:(\d+\.\d+)/.exec(runtime);
     if (!versionMatch) {
       return { matchedRuntime: redRuntime, threshold };
     }
     return { matchedRuntime: matchRuntime("spring-framework", endol, versionMatch) || redRuntime, threshold };
   } else if (/spring-boot/i.exec(runtime)) {
     threshold = "spring-boot";
-    const versionMatch = runtime.match(/:(\d+\.\d+)/);
+    const versionMatch = /:(\d+\.\d+)/.exec(runtime);
     if (!versionMatch) {
       return { matchedRuntime: redRuntime, threshold };
     }
@@ -101,7 +101,7 @@ export function checkRuntimesVsEol (
     }
 
     runtimeArray.forEach(runtime => {
-      let matchedRuntime: RuntimeInfo = { cycle: "", eol: true };
+      let matchedRuntime: RuntimeInfo;
 
       //------------ JAVA
       if (language.includes("java")) {
