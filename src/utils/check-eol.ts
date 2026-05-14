@@ -1,5 +1,7 @@
 import { differenceInDays, parseISO } from "date-fns";
 
+const DEFAULT_THRESHOLDS: [number, number] = [90, 180];
+
 export interface RuntimeInfo {
     cycle: string;
     eol: string | boolean;
@@ -18,17 +20,75 @@ export interface Thresholds {
   [key: string]: [number, number];
 }
 
+function getRuntimeColor(matchedRuntime: RuntimeInfo, threshold: [number, number]): "green" | "yellow" | "red" {
+  if (typeof matchedRuntime.eol === "string") {
+    const eolDate = parseISO(matchedRuntime.eol);
+    const daysUntilEOL = differenceInDays(eolDate, new Date());
+    if (daysUntilEOL <= threshold[0]) return "red";
+    if (daysUntilEOL <= threshold[1]) return "yellow";
+    return "green";
+  }
+  if (matchedRuntime.eol === false) return "green";
+  if (matchedRuntime.eol === true) return "red";
+  return "green";
+}
+
+function matchRuntime(runtime: string, endol: EndOfLifeData, versionMatch: RegExpMatchArray): RuntimeInfo | undefined {
+  return endol[runtime]?.find(r => r.cycle === versionMatch[1]);
+}
+
+function matchJavaRuntime(runtime: string, endol: EndOfLifeData): { matchedRuntime: RuntimeInfo; threshold: string } {
+  let threshold = "default";
+  const redRuntime: RuntimeInfo = { cycle: "", eol: true };
+
+  if (/corretto/i.exec(runtime) || /java/i.exec(runtime)) {
+    threshold = "amazon-corretto"; // use amazon-corretto thresholds for both amazon-corretto and java runtimes, as they have the same EOL cycles
+    const versionMatch = runtime.match(/\-(\d+)/);
+    if (!versionMatch) {
+      return { matchedRuntime: redRuntime, threshold };
+    }
+    return { matchedRuntime: matchRuntime("amazon-corretto", endol, versionMatch) || redRuntime, threshold };
+  } else if (/spring-core/i.exec(runtime)) {
+    threshold = "spring-framework";
+    const versionMatch = runtime.match(/:(\d+\.\d+)/);
+    if (!versionMatch) {
+      return { matchedRuntime: redRuntime, threshold };
+    }
+    return { matchedRuntime: matchRuntime("spring-framework", endol, versionMatch) || redRuntime, threshold };
+  } else if (/spring-boot/i.exec(runtime)) {
+    threshold = "spring-boot";
+    const versionMatch = runtime.match(/:(\d+\.\d+)/);
+    if (!versionMatch) {
+      return { matchedRuntime: redRuntime, threshold };
+    }
+    return { matchedRuntime: matchRuntime("spring-boot", endol, versionMatch) || redRuntime, threshold };
+  }
+
+  return { matchedRuntime: redRuntime, threshold };
+}
+
+function matchNodeRuntime(runtime: string, endol: EndOfLifeData): RuntimeInfo {
+  const versionMatch = /(\d+)/.exec(runtime);
+  if (!versionMatch) return { cycle: "", eol: true };
+  return endol["nodejs"]?.find(r => r.cycle === versionMatch[1]) || { cycle: "", eol: true };
+}
+
+function matchGoRuntime(runtime: string, endol: EndOfLifeData): RuntimeInfo {
+  const versionMatch = /(\d+\.\d+)/.exec(runtime);
+  if (!versionMatch) return { cycle: "", eol: true };
+  return endol["go"]?.find(r => r.cycle === versionMatch[1]) || { cycle: "", eol: true };
+}
+
 export function checkRuntimesVsEol (
     languageArray: string[],
     runtimeArray: string[],
     endol: EndOfLifeData,
     thresholds: Thresholds
 ): RuntimeColorResult {
-    const today = new Date();
     const runtimeColors: { value: string; color: string }[] = [];
     let hasRed = false;
     let hasYellow = false;
-    let threshold : string = "default";
+    let thresholdKey = "default";
 
     // get the language
     const language = languageArray.length > 0 ? languageArray.map(l => (l ?? "unknown").toLowerCase()) : ["unknown"];
@@ -41,86 +101,44 @@ export function checkRuntimesVsEol (
     }
 
     runtimeArray.forEach(runtime => {
-      let matchedRuntime: RuntimeInfo | undefined;
-      const redRuntime: RuntimeInfo = { cycle: "", eol: true };
-      let color = "green"; // default
+      let matchedRuntime: RuntimeInfo = { cycle: "", eol: true };
 
       //------------ JAVA
       if (language.includes("java")) {
-        if (runtime.match(/corretto/i) || runtime.match(/java/i)) {
-          threshold = "amazon-corretto"; // use amazon-corretto thresholds for both amazon-corretto and java runtimes, as they have the same EOL cycles
-          const versionMatch = runtime.match(/\-(\d+)/);
-          if (versionMatch) {
-              matchedRuntime = endol["amazon-corretto"]?.find(r => r.cycle === versionMatch[1]);
-          }
-          matchedRuntime = matchedRuntime || redRuntime;
-        } else if (runtime.match(/spring-core/i)) {
-          threshold = "spring-framework";
-          const versionMatch = runtime.match(/:(\d+\.\d+)/);
-          if (versionMatch) {
-            matchedRuntime = endol["spring-framework"]?.find(r => r.cycle === versionMatch[1]);
-          }
-          matchedRuntime = matchedRuntime || redRuntime;
-        } else if (runtime.match(/spring-boot/i)) {
-          threshold = "spring-boot";
-          const versionMatch = runtime.match(/:(\d+\.\d+)/);
-          if (versionMatch) {
-            matchedRuntime = endol["spring-boot"]?.find(r => r.cycle === versionMatch[1]);
-          }
-          matchedRuntime = matchedRuntime || redRuntime;
-        }
+        const javaResult = matchJavaRuntime(runtime, endol);
+        matchedRuntime = javaResult.matchedRuntime;
+        thresholdKey = javaResult.threshold;
       //------------ NODE
       } else if (language.includes("node")) {
-        threshold = "nodejs";
-        const versionMatch = runtime.match(/(\d+)/);
-        if (versionMatch) {
-          matchedRuntime = endol["nodejs"]?.find(r => r.cycle === versionMatch[1]);
-        }
-        matchedRuntime = matchedRuntime || redRuntime;
+        const nodeRuntime = matchNodeRuntime(runtime, endol);
+        matchedRuntime = nodeRuntime;
+        thresholdKey = "nodejs";
         //------------ GO
       } else if (language.includes("go")) {
-        threshold = "go";
-        const versionMatch = runtime.match(/(\d+\.\d+)/);
-        if (versionMatch) {
-          matchedRuntime = endol["go"]?.find(r => r.cycle === versionMatch[1]);
-        }
-        matchedRuntime = matchedRuntime || redRuntime;
+        const goRuntime = matchGoRuntime(runtime, endol);
+        matchedRuntime = goRuntime;
+        thresholdKey = "go";
+      } else {
+        // Handle unknown languages
+        matchedRuntime = { cycle: "", eol: true }; // default to red for unknown languages 
+        thresholdKey = "default";
       }
 
-      if (matchedRuntime) {
-          if (typeof matchedRuntime.eol === "string") {
-
-              const eolDate = parseISO(matchedRuntime.eol);
-              const daysUntilEOL = differenceInDays(eolDate, today);
-              const runtimeThreshold: [number, number] = thresholds[threshold] || [90, 180];
-
-              if (daysUntilEOL <= runtimeThreshold[0]) {
-                  color = "red";
-                  hasRed = true;
-              } else if (daysUntilEOL <= runtimeThreshold[1]) {
-                  color = "yellow";
-                  hasYellow = true;
-              }
-          } else if (matchedRuntime.eol === false) {
-              color = "green";
-          } else if (matchedRuntime.eol === true) {
-              color = "red";
-              hasRed = true;
-          }
-      } else { color = "none"; }
-
+      const color = getRuntimeColor(matchedRuntime, thresholds[thresholdKey] || DEFAULT_THRESHOLDS);
+      if (color === "red") hasRed = true;
+      else if (color === "yellow") hasYellow = true;
       runtimeColors.push({ value: runtime, color });
     });
 
     let totalColor = "green";
     if (hasRed) {
-        totalColor = "red";
+      totalColor = "red";
     } else if (hasYellow) {
-        totalColor = "yellow";
+      totalColor = "yellow";
     }
 
     return {
-        total: totalColor,
-        runtime: runtimeColors
+      total: totalColor,
+      runtime: runtimeColors
     };
 }

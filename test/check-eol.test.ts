@@ -143,4 +143,18 @@ describe("checkRuntimesVsEol()", () => {
             ]
         });
     });
+
+    it("handles unknown languages", () => {
+        const result = checkRuntimesVsEol(
+            ["unknown"],
+            ["unknown-runtime"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "unknown-runtime", color: "red" }]
+        });
+    });
 });
