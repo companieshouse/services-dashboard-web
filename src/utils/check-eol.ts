@@ -20,7 +20,7 @@ export interface Thresholds {
   [key: string]: [number, number];
 }
 
-function getRuntimeColor(matchedRuntime: RuntimeInfo, threshold: [number, number]): "green" | "yellow" | "red" {
+export function getRuntimeColor(matchedRuntime: RuntimeInfo, threshold: [number, number]): "green" | "yellow" | "red" {
   if (typeof matchedRuntime.eol === "string") {
     const eolDate = parseISO(matchedRuntime.eol);
     const daysUntilEOL = differenceInDays(eolDate, new Date());

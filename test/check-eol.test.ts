@@ -211,4 +211,46 @@ describe("checkRuntimesVsEol()", () => {
             runtime: [{ value: "unknown-runtime", color: "red" }]
         });
     });
+
+    it("handles missing version match for Java", () => {
+        const result = checkRuntimesVsEol(
+            ["java"],
+            ["java-unknown"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "java-unknown", color: "red" }]
+        });
+    });
+
+    it("handles missing version match for Go", () => {
+        const result = checkRuntimesVsEol(
+            ["go"],
+            ["go-unknown"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "go-unknown", color: "red" }]
+        });
+    });
+    
+    it("handles missing version match for Node", () => {
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-unknown"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "node-unknown", color: "red" }]
+        });
+    });
 });
