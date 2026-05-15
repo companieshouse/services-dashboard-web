@@ -26,6 +26,7 @@ describe("checkRuntimesVsEol()", () => {
             { cycle: "1.19", eol: "false"}
         ],
         "amazon-corretto": [
+            { cycle: "25", eol: "2028-08-25" }, // eol a few years away
             { cycle: "21", eol: "2026-08-25" }, // eol a few months away
             { cycle: "18", eol: "2025-01-01" }  // eol expired
         ],
@@ -47,6 +48,60 @@ describe("checkRuntimesVsEol()", () => {
             total: "red",
             runtime: [{ value: "Unknown", color: "grey" }]
         });
+    });
+
+    it("returns red if runtime version is missing", () => {
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node"],
+            eolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
+    it("returns red if runtime version is malformed", () => {
+        const result = checkRuntimesVsEol(
+            ["go"],
+            ["go-abc"],
+            eolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
+    it("returns green if eol is false", () => {
+        const customEolData = { ...eolData, nodejs: [{ cycle: "20", eol: false }] };
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-20"],
+            customEolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("green");
+    });
+
+    it("returns red if eol is true", () => {
+        const customEolData = { ...eolData, nodejs: [{ cycle: "21", eol: true }] };
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-21"],
+            customEolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
+    });
+
+    it("returns correct color on threshold boundary", () => {
+        // EOL is exactly 30 days away, threshold for nodejs is [30, 90]
+        const customEolData = { ...eolData, nodejs: [{ cycle: "19", eol: "2026-01-31" }] };
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-19"],
+            customEolData,
+            thresholds
+        );
+        expect(result.runtime[0].color).toBe("red");
     });
 
     it("returns yellow if runtime is matched, within EOL but below max threshold", () => {
@@ -94,7 +149,7 @@ describe("checkRuntimesVsEol()", () => {
     it("sets total color to red if any runtime is red, even if others are green", () => {
         const result = checkRuntimesVsEol(
             ["java"],
-            ["amazon-corretto-21", "amazon-corretto-18"],
+            ["java-25", "amazon-corretto-21", "amazon-corretto-18"],
             eolData,
             thresholds
         );
@@ -102,6 +157,7 @@ describe("checkRuntimesVsEol()", () => {
         expect(result).toEqual({
             total: "red",
             runtime: [
+                { value: "java-25", color: "green" },
                 { value: "amazon-corretto-21", color: "green" },
                 { value: "amazon-corretto-18", color: "red" }
             ]
@@ -139,6 +195,62 @@ describe("checkRuntimesVsEol()", () => {
                 { value: "amazon-corretto-21", color: "green" },
                 { value: "spring-boot-starter:4.0.1", color: "green" }
             ]
+        });
+    });
+
+    it("handles unknown languages", () => {
+        const result = checkRuntimesVsEol(
+            ["unknown"],
+            ["unknown-runtime"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "unknown-runtime", color: "red" }]
+        });
+    });
+
+    it("handles missing version match for Java", () => {
+        const result = checkRuntimesVsEol(
+            ["java"],
+            ["java-unknown"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "java-unknown", color: "red" }]
+        });
+    });
+
+    it("handles missing version match for Go", () => {
+        const result = checkRuntimesVsEol(
+            ["go"],
+            ["go-unknown"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "go-unknown", color: "red" }]
+        });
+    });
+    
+    it("handles missing version match for Node", () => {
+        const result = checkRuntimesVsEol(
+            ["node"],
+            ["node-unknown"],
+            eolData,
+            thresholds
+        );
+
+        expect(result).toEqual({
+            total: "red",
+            runtime: [{ value: "node-unknown", color: "red" }]
         });
     });
 });
