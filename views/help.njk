@@ -50,6 +50,15 @@
           <a href={{devGuideDocumentationLink}}>Developer Guides</a>.
         </p>
       </p>
+      {{faq("How do I remove a service from the dashboard?", "faq-remove-service")}}
+      <p>
+        To remove a service from the dashboard, you need to do the following:
+        <ol>
+          <li>Remove the SBOM publishing from your pipeline</li>
+          <li>Delete any existing entries for the service in Dependency Track (will require appropriate permissions, Team Photon can help with this)</li>
+          <li>Raise a request to Team Photon to remove the service from the dashboard's back end</li>
+        </ol>
+      </p>
       {{faq("I made changes, why isn't the dashboard updating?", "faq-dashboard-not-updating")}}
       <p>The dashboard pulls from its data sources at various intervals. We call these, "scans".</p>
       <p><strong>Deep Scan</strong></p>
