@@ -119,7 +119,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
          basePath: config.ENDPOINT_DASHBOARD,
          eolUri: config.EOL_URI,
          lastScan: configData?.lastScan ?? "N/A",
-         now: new Date().getTime(),
+         now: Date.now(),
          endols
       });
    } catch (error) {
