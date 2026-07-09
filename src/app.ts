@@ -42,7 +42,7 @@ app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
  });
 
 // handler of main page
-app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
+app.get(config.ENDPOINT_DASHBOARD, async (_: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
@@ -69,7 +69,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/help`, async (req: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       res.render("help.njk", {
@@ -111,7 +111,7 @@ const prepareEolData = (endols: any) => {
    }
 }
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/runtimes`, async (req: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
@@ -131,7 +131,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/service/:serviceName`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/service/:serviceName`, async (req: Request, res: Response) => {
    try {
       let { serviceName } = req.params;
 
