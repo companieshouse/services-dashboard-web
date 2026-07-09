@@ -270,17 +270,108 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("table-search");
   const serviceCount = document.getElementById("service-count");
 
+  // Sort state: remembers last sorted column + direction
+  const sortState = {
+    column: null,
+    dir: "desc" // first click sorts highest critical count first
+  };
+
+  // Header -> column index in the table
+  const sortableHeaders = [
+    { id: "col-head-ecs-latest-version", colIndex: 2 },
+    { id: "col-head-ecs-cidev",          colIndex: 3 },
+    { id: "col-head-ecs-stag",           colIndex: 4 },
+    { id: "col-head-ecs-live",           colIndex: 5 }
+  ];
+
+    function initializeSortIndicators() {
+        sortableHeaders.forEach(({ id }) => {
+            const header = document.getElementById(id);
+            if (!header) return;
+
+            header.setAttribute("aria-sort", "none");
+
+            const label = header.textContent.trim();
+            header.innerHTML = `${label} <span class="sort-indicator" aria-hidden="true">⇅</span>`;
+        });
+    }
+
+    function updateSortIndicators() {
+        sortableHeaders.forEach(({ id, colIndex }) => {
+            const header = document.getElementById(id);
+            if (!header) return;
+
+            const indicator = header.querySelector(".sort-indicator");
+            const isActive = sortState.column === colIndex;
+
+            if (!indicator) return;
+
+            if (!isActive) {
+                indicator.textContent = "⇅";
+                indicator.style.opacity = "0.55";
+                header.setAttribute("aria-sort", "none");
+                return;
+            }
+
+            indicator.textContent = sortState.dir === "desc" ? "↓" : "↑";
+            indicator.style.opacity = "1";
+            header.setAttribute("aria-sort", sortState.dir === "desc" ? "descending" : "ascending");
+        });
+    }
+
+  // Reads critical count from a version cell.
+  // Uses the first "critical" tag in that cell; if missing, treat as -1.
+  function getCriticalFromCell(cell) {
+    const criticalTag = cell?.querySelector(".level .tag.is-critical-vuln");
+    const value = Number.parseInt(criticalTag?.textContent?.trim() || "", 10);
+    return Number.isFinite(value) ? value : -1;
+  }
+
+  function sortRowsByColumn(colIndex) {
+    const tbody = document.querySelector("#tab-table-id tbody");
+
+    // Toggle direction if user clicks same column; otherwise default desc
+    if (sortState.column === colIndex) {
+      sortState.dir = sortState.dir === "desc" ? "asc" : "desc";
+    } else {
+      sortState.column = colIndex;
+      sortState.dir = "desc";
+    }
+
+    const direction = sortState.dir === "desc" ? -1 : 1;
+
+    rows.sort((a, b) => {
+      const aVal = getCriticalFromCell(a.cells[colIndex]);
+      const bVal = getCriticalFromCell(b.cells[colIndex]);
+
+      if (aVal !== bVal) {
+        return (aVal - bVal) * direction;
+      }
+
+      // Tie-breaker for stable UX: by service name
+      const aName = (a.dataset.level2 || "").toLowerCase();
+      const bName = (b.dataset.level2 || "").toLowerCase();
+      return aName.localeCompare(bName);
+    });
+
+    tbody.append(...rows);
+        updateSortIndicators();
+
+    // Reapply existing filters/search and refresh service count
+    filter();
+  }
+
   // Apply filters based on selected teams and search term
   function filter() {
     const activeTeams = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
 
     if (checkboxes) {
-        master.checked = checkboxes.length === activeTeams.size;
+      master.checked = checkboxes.length === activeTeams.size;
     }
 
     // No checkboxes are selected
     if (activeTeams.size === 0) {
-        master.checked = false;
+      master.checked = false;
     }
 
     const searchTerm = searchInput.value.toLowerCase().trim();
@@ -307,6 +398,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Search input filter (real-time)
   searchInput.addEventListener("input", filter);
+
+    initializeSortIndicators();
+    updateSortIndicators();
+
+  // Click-to-sort bindings for env/version headers
+  sortableHeaders.forEach(({ id, colIndex }) => {
+    const header = document.getElementById(id);
+    if (!header) return;
+
+    header.style.cursor = "pointer";
+    header.title = "Sort by critical vulnerabilities";
+
+    header.addEventListener("click", () => {
+      sortRowsByColumn(colIndex);
+    });
+  });
 
   filter(); // initial render
 });
