@@ -42,7 +42,7 @@ app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
  });
 
 // handler of main page
-app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
+app.get(config.ENDPOINT_DASHBOARD, async (_: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
@@ -69,7 +69,7 @@ app.get(config.ENDPOINT_DASHBOARD!, async (_: Request, res: Response) => {
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/help`, async (req: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       res.render("help.njk", {
@@ -84,42 +84,46 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/help`, async (req: Request, res: Response
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Response) => {
+const prepareEolData = (endols: any) => {
+   for (const project in endols) {
+      for (const cycle of endols[project]) {
+         if (cycle.eol) {
+            // Try to standardize the date format
+            const date = new Date(cycle.eol);
+            if (!Number.isNaN(date.getTime())) {
+               cycle.eol = date.toISOString().split("T")[0]; // YYYY-MM-DD
+               cycle.eolTs = date.getTime();
+            } else {
+               cycle.eol = null;
+               cycle.eolTs = null;
+            }
+         }
+
+         // cycle.lts is a string that contains one of; 'true', 'false' or a date
+         const ltsValue = cycle.lts;
+         if (ltsValue !== 'true' && ltsValue !== 'false') {
+            // it must be a date value, however those date values don't seem to correspond 
+            // to any date in the eol DB, so convert them to 'true' and store the date off
+            cycle.ltsDate = ltsValue;
+            cycle.lts = 'true';
+         }
+      }
+   }
+}
+
+app.get(`${config.ENDPOINT_DASHBOARD}/runtimes`, async (req: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
 
-      for (const project in endols) {
-         for (const cycle of endols[project]) {
-            if (cycle.eol) {
-               // Try to standardize the date format
-               const date = new Date(cycle.eol);
-               if (!isNaN(date.getTime())) {
-                  cycle.eol = date.toISOString().split("T")[0]; // YYYY-MM-DD
-                  cycle.eolTs = date.getTime();
-               } else {
-                  cycle.eol = null;
-                  cycle.eolTs = null;
-               }
-            }
-
-            // cycle.lts is a string that contains one of; 'true', 'false' or a date
-            const ltsValue = cycle.lts;
-            if (ltsValue !== 'true' && ltsValue !== 'false') {
-               // it must be a date value, however those date values don't seem to correspond 
-               // to any date in the eol DB, so convert them to 'true' and store the date off
-               cycle.ltsDate = ltsValue;
-               cycle.lts = 'true';
-            }
-         }
-      }
+      prepareEolData(endols);
 
       res.render("runtimes.njk", {
          title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          eolUri: config.EOL_URI,
          lastScan: configData?.lastScan ?? "N/A",
-         now: new Date().getTime(),
+         now: Date.now(),
          endols
       });
    } catch (error) {
@@ -127,7 +131,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD!}/service/:serviceName`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/service/:serviceName`, async (req: Request, res: Response) => {
    try {
       let { serviceName } = req.params;
 
