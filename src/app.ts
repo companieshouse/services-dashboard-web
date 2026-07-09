@@ -94,7 +94,7 @@ app.get(`${config.ENDPOINT_DASHBOARD!}/runtimes`, async (req: Request, res: Resp
             if (cycle.eol) {
                // Try to standardize the date format
                const date = new Date(cycle.eol);
-               if (!isNaN(date.getTime())) {
+               if (!Number.isNaN(date.getTime())) {
                   cycle.eol = date.toISOString().split("T")[0]; // YYYY-MM-DD
                   cycle.eolTs = date.getTime();
                } else {
