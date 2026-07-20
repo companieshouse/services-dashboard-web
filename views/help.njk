@@ -112,6 +112,14 @@
         "Missing new code stats" means that SonarQube only has stats for its initial scan. 
         If you push further changes, SonarQube will run additional scans for this 'new code', and generate the stats as expected.
       </p>
+      {{faq("Why am I being warned about policy violations?", "faq-policy-violations")}}
+      <p>We are using Dependency Track's internal "Policy Violations" feature to track policy violations in our dependencies.</p>
+      <p>These violations could include:</p>
+      <ul>
+        <li>Using an out of date library or SDK</li>
+        <li>Using a dependency with an inappropriate license</li>
+      </ul>
+      <p>You can usually resolve these violations by updating the offending dependency or replacing it with an appropriate alternative.</p>
     </div>
   </div>
 {% endblock %}

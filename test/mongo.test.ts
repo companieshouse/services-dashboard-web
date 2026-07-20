@@ -46,9 +46,9 @@ describe("fetchDocument()", () => {
         live:    { version: "0.1.99" }
       },
       versions: [
-        { version: "0.1.99", lang: "ts",  runtime: "node 18" },
-        { version: "0.1.100", lang: "js",  runtime: "node 20" },
-        { version: "2.0.0", lang: "tsx", runtime: "node 24" }
+        { version: "0.1.99", lang: "ts",  runtime: "node 18", metrics: { critical: 10, high: 20, medium: 30, low: 40, vulnerabilities: 50, components: 60, policyViolationsTotal: 70, policyViolationsFail: 80, policyViolationsWarn: 90 } },
+        { version: "0.1.100", lang: "js",  runtime: "node 20", metrics: { critical: 10, high: 20, medium: 30, low: 40, vulnerabilities: 50, components: 60, policyViolationsTotal: 70, policyViolationsFail: 80, policyViolationsWarn: 90 } },
+        { version: "2.0.0", lang: "tsx", runtime: "node 24", metrics: { critical: 10, high: 20, medium: 30, low: 40, vulnerabilities: 50, components: 60, policyViolationsTotal: 70, policyViolationsFail: 80, policyViolationsWarn: 90 } }
       ]
     });
 
@@ -59,6 +59,11 @@ describe("fetchDocument()", () => {
     // --- versions sorted descending ---
     expect(result!.versions.map(v => v.version))
       .toEqual(["2.0.0", "0.1.100", "0.1.99"]);
+
+    // DepTrack metrics should be preserved
+    expect(result!.versions[0].metrics).toEqual({ critical: 10, high: 20, medium: 30, low: 40, vulnerabilities: 50, components: 60, policyViolationsTotal: 70, policyViolationsFail: 80, policyViolationsWarn: 90 });
+    expect(result!.versions[1].metrics).toEqual({ critical: 10, high: 20, medium: 30, low: 40, vulnerabilities: 50, components: 60, policyViolationsTotal: 70, policyViolationsFail: 80, policyViolationsWarn: 90 });
+    expect(result!.versions[2].metrics).toEqual({ critical: 10, high: 20, medium: 30, low: 40, vulnerabilities: 50, components: 60, policyViolationsTotal: 70, policyViolationsFail: 80, policyViolationsWarn: 90 });
 
     // --- runtimeData added using mocked fn ---
     expect(result!.versions[0].runtimeData).toBe("MOCK_RUNTIME_DATA");

@@ -171,6 +171,7 @@
                     <th>Language</th>
                     <th>Runtimes</th>
                     <th>Vulnerabilities</th>
+                    <th>Policy Violations</th>
                 </tr>
             </thead>
             <tbody>
@@ -209,6 +210,15 @@
                             <span class="tag is-medium-vuln has-tooltip" data-tooltip="Medium">{{version.metrics.medium}}</span>
                             <span class="tag is-low-vuln has-tooltip" data-tooltip="Low">{{version.metrics.low}}</span>
                             <span class="tag has-tooltip" data-tooltip="Components">{{version.metrics.components}}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="level">
+                            <p class="has-tooltip" data-tooltip="Total Policy Violations">
+                                Total: {{version.metrics.policyViolationsTotal}}
+                            </p>
+                            <span class="tag is-critical-vuln has-tooltip" data-tooltip="Failing policies">{{version.metrics.policyViolationsFail}}</span>
+                            <span class="tag is-high-vuln has-tooltip" data-tooltip="Policy warnings">{{version.metrics.policyViolationsWarn}}</span>
                         </div>
                     </td>
                 <tr>     
