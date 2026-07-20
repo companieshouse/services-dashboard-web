@@ -76,8 +76,19 @@
                     </span>
                     <span class="tag level-item is-low-vuln has-tooltip-bottom" data-tooltip="Low">
                         {{ versionData.metrics.low }}
+                    </span>                    
+                </div>
+                {% if versionData.metrics.policyViolationsTotal > 0 %}
+                <div class="level mt-1">
+                    <span class="tag level-item is-high-vuln has-tooltip-bottom" data-tooltip="Policy Violations">
+                        {% if versionData.uuid %}
+                            <a href="{{depTrackUri}}/projects/{{versionData.uuid}}/policyViolations">
+                                Policy Violations: {{ versionData.metrics.policyViolationsTotal }}
+                            </a>
+                        {% endif %}
                     </span>
                 </div>
+                {% endif %}
             {% else %}
                 <span class="tag level-item is-warning has-tooltip-bottom" data-tooltip="SBOM for this version is missing from Dependency Track">
                     SBOM Missing
