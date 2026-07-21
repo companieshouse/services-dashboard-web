@@ -19,6 +19,11 @@ export interface ServiceDocument {
    sonarMetrics: any;
 }
 
+export interface Notice {
+   _id: ObjectId;
+   message: string;
+}
+
 /*
    Handles converting flat sonar metrics:
    { coverage: 77, new_coverage: 81, bugs: 4, ... }
@@ -265,6 +270,20 @@ async function fetchConfig() {
       return configData;
    } catch (error) {
       logErr(error, "Error fetching Config:");
+      return null;
+   }
+}
+
+export async function getNotice(): Promise<Notice | null> {
+   try {
+      const collection = getDb().collection<Notice>(config.MONGO_COLLECTION_NOTICES!);
+      const document = await collection.findOne();
+
+      if (!document) return null;
+      
+      return document;
+   } catch (error) {
+      logErr(error, "Error fetching Notice:");
       return null;
    }
 }

@@ -49,6 +49,7 @@ app.get(config.ENDPOINT_DASHBOARD, async (_: Request, res: Response) => {
       const thresholds = configData?.thresholds ?? {};
 
       const documents: mongo.ScrumTeamDocument[] = await mongo.fetchDocumentsGoupedByScrum(endols, thresholds);
+      const notice: mongo.Notice | null = await mongo.getNotice();
 
       res.render("index.njk", {
          title: config.APP_TITLE,
@@ -62,7 +63,8 @@ app.get(config.ENDPOINT_DASHBOARD, async (_: Request, res: Response) => {
          thresholdsLive:      thresholds.live        || thresholds.default,
          depTrackUri: config.DEP_TRACK_URI,
          devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
-         sonarUri: config.SONAR_URI
+         sonarUri: config.SONAR_URI,
+         notice,
       });
    } catch (error) {
       logErr(error);
