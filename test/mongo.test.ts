@@ -1,4 +1,4 @@
-import { fetchDocument, normaliseSonarMetrics, sortVersions } from "../src/mongo/mongo";
+import { fetchDocument, getNotice, normaliseSonarMetrics, sortVersions } from "../src/mongo/mongo";
 import * as dbModule from "../src/mongo/db";
 import * as config from "../src/config";
 
@@ -6,6 +6,40 @@ import * as config from "../src/config";
 jest.mock("../src/utils/check-eol", () => ({
   checkRuntimesVsEol: jest.fn().mockReturnValue("MOCK_RUNTIME_DATA")
 }));
+
+describe("notices()", () => {
+  const mockCollection = {
+    findOne: jest.fn()
+  };
+
+  const mockDb = {
+    collection: jest.fn().mockReturnValue(mockCollection),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    jest.spyOn(dbModule, "getDb").mockReturnValue(mockDb as any);
+
+    // ---- Mock config ----
+    (config as any).MONGO_COLLECTION_NOTICES = "notices";
+  });
+
+  test("returns null when no notice found", async () => {
+    mockCollection.findOne.mockResolvedValue(null);
+
+    const result = await getNotice();
+    expect(result).toBeNull();
+  });
+
+  test("returns notice when found", async () => {
+    const mockNotice = { _id: "notice123", message: "This is a notice" };
+    mockCollection.findOne.mockResolvedValue(mockNotice);
+
+    const result = await getNotice();
+    expect(result).toEqual(mockNotice);
+  });
+});
 
 describe("fetchDocument()", () => {
   const mockCollection = {

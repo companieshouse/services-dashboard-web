@@ -21,6 +21,12 @@
   </nav>
 
   <main>
+    {% if notice %}
+      <div class="notification is-warning">
+        <a class="delete"></a>
+        {{ notice.message }}
+      </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 
@@ -40,6 +46,17 @@
         } catch (e) {
           // Ignore invalid URLs
         }
+      });
+
+      /*
+      * Close notification when the delete button is clicked.
+      */
+      (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+        const $notification = $delete.parentNode;
+
+        $delete.addEventListener('click', () => {
+          $notification.parentNode.removeChild($notification);
+        });
       });
     });
   </script>

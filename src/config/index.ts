@@ -22,6 +22,7 @@ export const MONGO_URI = `${MONGO_PROTOCOL}://${MONGO_AUTH}${MONGO_HOST_AND_PORT
 export const MONGO_DB_NAME = getEnvironmentValue("MONGO_DBNAME","services_dashboard");
 export const MONGO_COLLECTION_PROJECTS = getEnvironmentValue("MONGO_COLLECTION_PROJECTS","projects");
 export const MONGO_COLLECTION_CONFIG = getEnvironmentValue("MONGO_COLLECTION_CONFIG","config");
+export const MONGO_COLLECTION_NOTICES = getEnvironmentValue("MONGO_COLLECTION_NOTICES","notices");
 export const MONGO_COLLECTION_LINKS = getEnvironmentValue("MONGO_COLLECTION_LINKS","projects_links");
 export const MONGO_CONFIG_SINGLETON = getEnvironmentValue("MONGO_CONFIG_SINGLETON","singletonConfig");
 
