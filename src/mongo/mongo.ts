@@ -276,7 +276,7 @@ async function fetchConfig() {
 
 export async function getNotice(): Promise<Notice | null> {
    try {
-      const collection = getDb().collection<Notice>(config.MONGO_COLLECTION_NOTICES!);
+      const collection = getDb().collection<Notice>(config.MONGO_COLLECTION_NOTICES);
       const document = await collection.findOne();
 
       if (!document) return null;
