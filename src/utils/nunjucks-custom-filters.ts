@@ -7,7 +7,7 @@ export const daysAgo = (date: string | Date): string => {
     try {
       return formatDistanceToNow(new Date(date), { addSuffix: true });
     } catch (error) {
-      console.error(`Error in daysAgo filter: ${error} for date: ${date}`);
+      console.log(`Error in daysAgo filter: ${error} for date: ${date}`);
       return '';
     }
 };
