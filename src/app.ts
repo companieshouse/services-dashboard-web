@@ -24,7 +24,6 @@ nunjucksEnv.addGlobal("CDN_HOST", config.CDN_URL);
  // Add custom filters
 nunjucksEnv.addFilter("date", filters.date);
 nunjucksEnv.addFilter("daysAgo", filters.daysAgo);
-nunjucksEnv.addFilter("daysPassed", filters.daysPassed);
 nunjucksEnv.addFilter("setGlobal", filters.setGlobal);
 nunjucksEnv.addFilter("isEmpty", filters.isEmpty);
 

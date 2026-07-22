@@ -3,7 +3,7 @@
 {% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass, addVulnerabilityKey %}
 
 {% macro gitReleaseInfo(versionData, min, max) %}
-    {% set ReleaseDate = versionData.gitReleaseDate%}
+    {% set ReleaseDate = versionData.lastBomImport %}
     
     {% if ReleaseDate %}
         {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}

@@ -2,11 +2,10 @@
 import {
   date,
   daysAgo,
-  daysPassed,
   urlEncode,
   isEmpty,
   setGlobal,
-  getGlobal
+  getGlobal,
 } from '../src/utils/nunjucks-custom-filters';
 
 describe('nunjucks-custom-filters', () => {
@@ -38,13 +37,17 @@ describe('nunjucks-custom-filters', () => {
   });
 
   describe('daysAgo', () => {
-    it('returns "today" for current date', () => {
+    it('returns "less than a minute ago" for exact match date', () => {
       const today = new Date();
-      expect(daysAgo(today)).toBe('today');
+      expect(daysAgo(today)).toBe('less than a minute ago');
     });
     it('returns "yesterday" for one day ago', () => {
       const yesterday = new Date(Date.now() - 1000 * 60 * 60 * 24);
-      expect(daysAgo(yesterday)).toBe('yesterday');
+      expect(daysAgo(yesterday)).toBe('1 day ago');
+    });
+    it('returns "tomorrow" for one day from today', () => {
+      const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24);
+      expect(daysAgo(tomorrow)).toBe('in 1 day');
     });
     it('returns "N days ago" for past dates', () => {
       const days = 5;
@@ -54,21 +57,34 @@ describe('nunjucks-custom-filters', () => {
     it('returns "N days from now" for future dates', () => {
       const days = 3;
       const future = new Date(Date.now() + days * 1000 * 60 * 60 * 24);
-      expect(daysAgo(future)).toBe(`${days} days from now`);
+      expect(daysAgo(future)).toBe(`in ${days} days`);
+    });
+    it('returns "N months ago" for longer past dates', () => {
+      const months = 3;
+      const past = new Date();
+      past.setMonth(past.getMonth() - months);
+      expect(daysAgo(past)).toBe(`${months} months ago`);
+    });
+    it('returns "N months from now" for longer dates', () => {
+      const months = 3;
+      const future = new Date();
+      future.setMonth(future.getMonth() + months);
+      expect(daysAgo(future)).toBe(`in ${months} months`);
+    });
+    it('returns "N years ago" for past dates over a year', () => {
+      const years = 2;
+      const past = new Date();
+      past.setFullYear(past.getFullYear() - years);
+      expect(daysAgo(past)).toBe(`about ${years} years ago`);
+    });
+    it('returns "N years from now" for future dates over a year', () => {
+      const years = 2;
+      const future = new Date();
+      future.setFullYear(future.getFullYear() + years);
+      expect(daysAgo(future)).toBe(`in about ${years} years`);
     });
     it('returns empty string for invalid date', () => {
       expect(daysAgo('not-a-date')).toBe('');
-    });
-  });
-
-  describe('daysPassed', () => {
-    it('returns correct number of days for past date', () => {
-      const days = 7;
-      const past = new Date(Date.now() - days * 1000 * 60 * 60 * 24);
-      expect(daysPassed(past)).toBe(days);
-    });
-    it('returns NaN for invalid date', () => {
-      expect(daysPassed('invalid')).toBeNaN();
     });
   });
 
