@@ -115,3 +115,8 @@ variable "services_dashboard_web_version" {
   type        = string
   description = "The version of the services dashboard web container to run."
 }
+
+variable "services_dashboard_web_test_version" {
+  type        = string
+  description = "The version of the services dashboard web test container to run."
+}
