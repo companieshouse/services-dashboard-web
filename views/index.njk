@@ -4,12 +4,6 @@
 
 {% macro gitReleaseInfo(versionData, min, max) %}
     {% set ReleaseDate = versionData.lastBomImport %}
-    
-    {% if ReleaseDate %}
-        {% set ReleaseDate = ReleaseDate | date("YYYY-MM-DD") %}
-    {% else %}
-        {% set ReleaseDate = "no date loaded" %}
-    {% endif %}
 
     <div title="{{ ReleaseDate }}">
         {% if versionData.uuid %}
