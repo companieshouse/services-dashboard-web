@@ -1,13 +1,18 @@
 import nunjucksDate from "nunjucks-date-filter";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, differenceInHours } from "date-fns";
 
 export const date = nunjucksDate;
 
 export const daysAgo = (date: string | Date): string => {
     try {
-      return formatDistanceToNow(new Date(date), { addSuffix: true });
+      const parsed = new Date(date);
+      // Fudge the "today" definition to include any date within the last 24 hours, not just the exact current date.
+      if (differenceInHours(new Date(), parsed) < 24 && differenceInHours(new Date(), parsed) >= 0) {
+        return 'today';
+      }
+      return formatDistanceToNow(parsed, { addSuffix: true });
     } catch (error) {
-      console.log(`Error in daysAgo filter: ${error} for date: ${date}`);
+      console.debug(`Error in daysAgo filter: ${error} for date: ${date}`);
       return '';
     }
 };

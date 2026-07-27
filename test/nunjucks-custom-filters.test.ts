@@ -37,9 +37,17 @@ describe('nunjucks-custom-filters', () => {
   });
 
   describe('daysAgo', () => {
-    it('returns "less than a minute ago" for exact match date', () => {
+    it('returns "today" for exact match date', () => {
       const today = new Date();
-      expect(daysAgo(today)).toBe('less than a minute ago');
+      expect(daysAgo(today)).toBe('today');
+    });
+    it('returns "today" if within the past few hours', () => {
+      const today = new Date(Date.now() - 1000 * 60 * 60 * 2); // 2 hours ago
+      expect(daysAgo(today)).toBe('today');
+    });
+    it('returns "today" for a date 23 hours ago', () => {
+      const almostYesterday = new Date(Date.now() - 1000 * 60 * 60 * 23);
+      expect(daysAgo(almostYesterday)).toBe('today');
     });
     it('returns "yesterday" for one day ago', () => {
       const yesterday = new Date(Date.now() - 1000 * 60 * 60 * 24);
