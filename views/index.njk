@@ -156,12 +156,14 @@
                 {% if document %}
                     {% for service in document.services %}
                     {% if service %}
+                        {% set serviceOwner     = document._id %}
+                        {% set serviceArea      = service.gitInfo.serviceArea %}
                         {% set depTrackCritical = service.latestVersion.metrics.critical %}
                         {% set depTrackHigh     = service.latestVersion.metrics.high %}
                         {% set depTrackMedium   = service.latestVersion.metrics.medium %}
                         {% set depTrackLow      = service.latestVersion.metrics.low %}
                         <tr class="transparent_row"
-                            data-level1="{{ setStandardId(document._id) }}"
+                            data-level1="{{ setStandardId(serviceOwner) }}"
                             data-level2="{{ service.name }}"
                             data-critical="{{ depTrackCritical }}"
                             data-high="{{ depTrackHigh }}"
@@ -170,7 +172,12 @@
                         >
                         <td class="td-name">
                             <a href="{{basePath}}/service/{{ service.name }}">{{ service.name }}</a>
-                            <span>- {{ document._id }}</span>
+                            <div class="is-flex is-align-items-baseline tags">
+                                <span class="tag">{{ serviceOwner }}</span>
+                                {% if serviceArea %}
+                                    <span class="tag">{{ serviceArea }}</span>
+                                {% endif %}
+                            </div>
                         </td>
                         
                         <td class="td-runtime">
