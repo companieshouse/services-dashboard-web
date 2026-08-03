@@ -36,3 +36,11 @@ Run the following command from the terminal.
 docker run --env-file .env -it --rm -p 3000:3000 local-services-dashboard
 ```
 Access the service from  http://localhost:3000/dashboard in the browser.
+
+## AWS
+
+### Route to live
+This app differs from most CH services in that cidev is the live service and therefore the route to live stops at the first environment. To help support a test cycle 2 versions of the service are deployed to cidev; a test version and the live dashboard. Both will be accessible to all users with path matching keeping the test dashboard "hidden" to most.
+
+### Deployment
+To deploy the test service to cidev pin the source-code-release-tag to the desired version, to deploy the live service to cidev pin the standard deployment-release resource to the desired version.

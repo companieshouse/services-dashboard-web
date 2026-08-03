@@ -4,6 +4,7 @@ locals {
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "services-dashboard-web"
+  service_name_test           = "services-dashboard-web-test"
 
   stack_secrets_path          = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
   service_secrets_path        = "${local.stack_secrets_path}/services-dashboard"
@@ -12,8 +13,12 @@ locals {
   docker_repo                 = "services-dashboard-web"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_name                     = "alb-${var.environment}-dev-tools"
-  lb_listener_rule_priority   = 19
-  lb_listener_paths           = ["/dashboard","/dashboard/*"]
+
+  lb_listener_rule_priority_test  = 18
+  lb_listener_paths_test          = ["/dashboard-test","/dashboard-test/*"]
+  lb_listener_rule_priority       = 19
+  lb_listener_paths               = ["/dashboard","/dashboard/*"]
+
   healthcheck_path            = "/dashboard/healthcheck" #healthcheck path for overseas entities web
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
@@ -22,7 +27,9 @@ locals {
 
   # Environment Files
   use_set_environment_files   = var.use_set_environment_files
-  app_environment_filename    = "services-dashboard-web.env"
+
+  app_environment_filename      = "services-dashboard-web.env"
+  app_environment_filename_test = "services-dashboard-web-test.env"
 
   # Secrets
   stack_secrets               = jsondecode(data.vault_generic_secret.stack_secrets.data_json)

@@ -17,7 +17,7 @@ const server = http.createServer(app);
 // Listen on provided port, on all network interfaces.
 server.listen(config.PORT);
 server.on("error", onError);
-logger.info(`Server is running at http://localhost:${config.PORT}/dashboard`);
+logger.info(`Server is running at http://localhost:${config.PORT}/${config.ENDPOINT_DASHBOARD}`);
 
 
 // Event listener for HTTP server "error" event.

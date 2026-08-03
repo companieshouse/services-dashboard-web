@@ -83,3 +83,61 @@ module "ecs-service" {
 
   depends_on = [module.secrets]
 }
+
+module "ecs_service_test" {
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.361"
+
+  # Environmental configuration
+  environment             = var.environment
+  aws_region              = var.aws_region
+  aws_profile             = var.aws_profile
+  vpc_id                  = data.aws_vpc.vpc.id
+  ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
+  task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
+
+  # Load balancer configuration
+  lb_listener_arn           = data.aws_lb_listener.dev_tools_listener.arn
+  lb_listener_rule_priority = local.lb_listener_rule_priority_test
+  lb_listener_paths         = local.lb_listener_paths_test
+
+  # ECS Task container health check
+  use_task_container_healthcheck    = true
+  healthcheck_path                  = local.healthcheck_path
+  healthcheck_matcher               = local.healthcheck_matcher
+  health_check_grace_period_seconds = 300
+  healthcheck_healthy_threshold     = "2"
+
+  # Docker container details
+  docker_registry   = var.docker_registry
+  docker_repo       = local.docker_repo
+  container_version = var.services_dashboard_web_test_version
+  container_port    = local.container_port
+
+  # Service configuration
+  service_name = local.service_name_test
+  name_prefix  = local.name_prefix
+
+  # Service performance and scaling configs
+  desired_task_count                 = var.desired_task_count
+  max_task_count                     = var.max_task_count
+  required_cpus                      = var.required_cpus
+  required_memory                    = var.required_memory
+  service_autoscale_enabled          = var.service_autoscale_enabled
+  service_autoscale_target_value_cpu = var.service_autoscale_target_value_cpu
+  service_scaledown_schedule         = var.service_scaledown_schedule
+  service_scaleup_schedule           = var.service_scaleup_schedule
+  use_capacity_provider              = var.use_capacity_provider
+  use_fargate                        = var.use_fargate
+  fargate_subnets                    = local.application_subnet_ids
+
+  # Cloudwatch
+  cloudwatch_alarms_enabled = var.cloudwatch_alarms_enabled
+
+  # Service environment variable and secret configs
+  task_environment            = local.task_environment
+  task_secrets                = local.task_secrets
+  app_environment_filename    = local.app_environment_filename_test
+  use_set_environment_files   = local.use_set_environment_files
+
+  depends_on = [module.secrets]
+}
