@@ -5,6 +5,7 @@ locals {
   global_prefix               = "global-${var.environment}"
   service_name                = "services-dashboard-web"
   service_name_test           = "services-dashboard-web-test"
+  service_short_name_test     = "dashboard-test"
 
   stack_secrets_path          = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}-stack"
   service_secrets_path        = "${local.stack_secrets_path}/services-dashboard"

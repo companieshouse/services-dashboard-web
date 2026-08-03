@@ -114,8 +114,9 @@ module "ecs_service_test" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name = local.service_name_test
-  name_prefix  = local.name_prefix
+  service_name       = local.service_name_test
+  service_short_name = local.service_short_name_test
+  name_prefix        = local.name_prefix
 
   # Service performance and scaling configs
   desired_task_count                 = var.desired_task_count
