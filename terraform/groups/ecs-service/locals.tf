@@ -19,7 +19,8 @@ locals {
   lb_listener_rule_priority       = 19
   lb_listener_paths               = ["/dashboard","/dashboard/*"]
 
-  healthcheck_path            = "/dashboard/healthcheck" #healthcheck path for overseas entities web
+  healthcheck_path            = "/dashboard/healthcheck"
+  healthcheck_test_path       = "/dashboard-test/healthcheck"
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
   application_subnet_ids      = data.aws_subnets.application.ids
