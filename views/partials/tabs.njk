@@ -1,12 +1,12 @@
 <div class="tabs is-boxed">
   <ul>
-    <li class="{{ 'is-active' if active == 'teams' }}">
+    <li class="{{ 'is-active' if active == 'teams' }}" {{ 'aria-current="page"' if active == 'teams' }}>
       <a href="{{basePath}}">Services</a>
     </li>
-    <li class="{{ 'is-active' if active == 'runtimes' }}">
+    <li class="{{ 'is-active' if active == 'runtimes' }}" {{ 'aria-current="page"' if active == 'runtimes' }}>
       <a href="{{basePath}}/runtimes">Runtimes</a>
     </li>
-    <li class="{{ 'is-active' if active == 'help' }}">
+    <li class="{{ 'is-active' if active == 'help' }}" {{ 'aria-current="page"' if active == 'help' }}>
       <a href="{{basePath}}/help">Help</a>
     </li>
   </ul>
