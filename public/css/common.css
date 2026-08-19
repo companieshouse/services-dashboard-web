@@ -115,3 +115,8 @@ span[data-tooltip] {
   display: flex;
   gap: 0.25em;
 }
+
+:focus {
+  outline: 2px solid white;
+  box-shadow: 0 0 0 4px black;
+}
