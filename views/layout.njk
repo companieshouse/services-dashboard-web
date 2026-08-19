@@ -14,13 +14,14 @@
       <h1 class="title">Companies House Service Dashboard</h1>
       <p class="subtitle">Last scan: {{ lastScan | date("DD MMM YYYY - h:mm:ss A") }}</p>
     </div>
+    <a href="#main" class="skip">Skip to main content</a>
   </header>
   
   <nav aria-label="Navigation tabs">
     {% include "partials/tabs.njk" %}
   </nav>
 
-  <main>
+  <main id="main">
     {% if notice %}
       <div class="notification is-warning">
         <a class="delete"></a>
