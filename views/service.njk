@@ -76,7 +76,7 @@
                                     {% if service.sonarMetrics.newCode | isEmpty %}
                                         <p class='mt-2'>Missing new code stats</p>
                                     {% else %}
-                                        {{ buildSonarBlock('New Code', service.sonarMetrics.newCode) }}
+                                        {{ buildSonarBlock('New code', service.sonarMetrics.newCode) }}
                                     {% endif %}
                                 </td>
                             </tr>
