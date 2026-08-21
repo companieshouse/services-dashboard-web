@@ -2,13 +2,13 @@
 {% from "macros.njk" import addCoverageColorClass, addVulnerabilityKey %}
 
 {% macro buildSonarBlock(label, metrics) %}
-    <p>{{label}}: </p>
+    <p>{{label}} coverage: {{ metrics.coverage }}%</p>
     {% if metrics.coverage == 0 %}
         <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage on {{label}}">
             0
         </progress>
     {% else %}
-        <progress class="progress {{ addCoverageColorClass(metrics.coverage) }} has-tooltip" value="{{ metrics.coverage }}" max="100" data-tooltip="{{ metrics.coverage }}% {{ label }} Coverage">
+        <progress class="progress is-large {{ addCoverageColorClass(metrics.coverage) }} has-tooltip" value="{{ metrics.coverage }}" max="100" data-tooltip="{{ metrics.coverage }}% {{ label }} Coverage">
             {{ metrics.coverage }}
         </progress>
     {% endif %}
@@ -56,10 +56,10 @@
                             <th>Links</th>
                             <td>
                                 {% if gitInfo.repo %}
-                                    <a class="button" href="{{gitInfo.repo}}">GitHub</a>
+                                    <a class="button" href="{{gitInfo.repo}}" aria-label="View {{ serviceName }} in GitHub">GitHub</a>
                                 {% endif %}
                                 {% if service.sonarKey %}
-                                    <a class="button" href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}">SonarQube</a>
+                                    <a class="button" href="{{sonarUri}}/dashboard?id={{ service.sonarKey }}" aria-label="View {{ serviceName }} in SonarQube">SonarQube</a>
                                 {% endif %}
                             </td>
                         </tr>
