@@ -115,3 +115,17 @@ span[data-tooltip] {
   display: flex;
   gap: 0.25em;
 }
+
+:focus {
+  outline: 2px solid white;
+  box-shadow: 0 0 0 4px black;
+}
+
+.skip {
+  position: absolute;
+  top: auto;
+  left: -100000;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

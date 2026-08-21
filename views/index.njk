@@ -2,17 +2,17 @@
 {% set active = "teams" %}
 {% from "macros.njk" import addDaysAgo, sonarLink, depTrackLink, DepTrackMetrics, setStandardId, addCoverageColorClass, addVulnerabilityKey %}
 
-{% macro gitReleaseInfo(versionData, min, max) %}
+{% macro gitReleaseInfo(serviceName, versionData, min, max) %}
     {% set ReleaseDate = versionData.lastBomImport %}
 
     <div title="{{ ReleaseDate }}">
         {% if versionData.uuid %}
-            <a href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings">
+            <a href="{{depTrackUri}}/projects/{{versionData.uuid}}/findings" aria-label="View {{serviceName}} - {{versionData.version}} in Dependency Track">
                 {{ versionData.version }}
             </a>
             {{addDaysAgo( ReleaseDate ) }}
         {% else %}
-            <a href="{{devGuideDocumentationLink}}">
+            <a href="{{devGuideDocumentationLink}}" aria-label="Developer Guide">
                 {{ versionData.version }}
             </a>
             {{addDaysAgo( ReleaseDate ) }}
@@ -48,11 +48,12 @@
    {% endif %}
 {% endmacro %}
 
-{% macro buildServiceVersionCell(versionData) %}
+{% macro buildServiceVersionCell(serviceName, versionData) %}
     {% if versionData.version %}
         {% set metrics = versionData.metrics %}
         <td class="td-ecs {{ addDepTrackColorClass(metrics.critical, metrics.high, metrics.medium, metrics.low) }}">
             {{ gitReleaseInfo(
+                serviceName,
                 versionData,
                 thresholdsLive[0],
                 thresholdsLive[1]
@@ -107,7 +108,7 @@
             <input
                 id="table-search"
                 class="input"
-                type="text"
+                type="search"
                 placeholder="Search table..."
             >
         </div>
@@ -220,16 +221,16 @@
                         </td>
 
                         <!-- Latest Version -->
-                        {{ buildServiceVersionCell(service.latestVersion) }}
+                        {{ buildServiceVersionCell(service.name, service.latestVersion) }}
 
                         <!-- CI DEV -->
-                        {{ buildServiceVersionCell(service.ecs.cidev) }}
+                        {{ buildServiceVersionCell(service.name, service.ecs.cidev) }}
 
                         <!-- STAGING -->
-                        {{ buildServiceVersionCell(service.ecs.staging) }}
+                        {{ buildServiceVersionCell(service.name, service.ecs.staging) }}
 
                         <!-- LIVE -->
-                        {{ buildServiceVersionCell(service.ecs.live) }}
+                        {{ buildServiceVersionCell(service.name, service.ecs.live) }}
 
                         <!-- SONAR -->
                         {% if service.sonarMetrics.overall | isEmpty %}
