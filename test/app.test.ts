@@ -111,4 +111,12 @@ describe('App Tests', () => {
         expect(fetchDocument).toHaveBeenCalled();
         expect(response.text).toContain(`We couldn't find that service.`);
     });
+
+    it('should handle GET request for Statistics tab', async () => {
+        (fetchConfig as jest.Mock).mockResolvedValue({lastScan: Date.now()});
+
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+
+        expect(response.status).toBe(200);
+    });
 });

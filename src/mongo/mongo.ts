@@ -288,4 +288,71 @@ export async function getNotice(): Promise<Notice | null> {
    }
 }
 
+// Fetches statistics showing the number of services per scrum team, with the number of Dependency Track vulnerabilities per severity level for each service.
+export async function fetchStats() {
+   try {
+      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
+
+      const documents = await collection.aggregate([
+         {
+            // Isolate the latest version per service using sortArray,
+            // then project only the fields needed for stats
+            $project: {
+               name: 1,
+               gitInfo: 1,
+               latestVersion: {
+                  $arrayElemAt: [
+                     {
+                        $sortArray: {
+                           input: "$versions",
+                           sortBy: { lastBomImport: -1 }
+                        }
+                     },
+                     0
+                  ]
+               }
+            }
+         },
+         {
+            // Group services by scrum team, accumulating per-service breakdowns
+            // and team-level totals in a single pass
+            $group: {
+               _id: { $ifNull: ["$gitInfo.owner", "unassigned"] },
+               servicesCount: { $sum: 1 },
+               services: {
+                  $push: {
+                     name: "$name",
+                     critical:              "$latestVersion.metrics.critical",
+                     high:                  "$latestVersion.metrics.high",
+                     medium:                "$latestVersion.metrics.medium",
+                     low:                   "$latestVersion.metrics.low",
+                     vulnerabilities:       "$latestVersion.metrics.vulnerabilities",
+                     components:            "$latestVersion.metrics.components",
+                     policyViolationsTotal: "$latestVersion.metrics.policyViolationsTotal",
+                     policyViolationsFail:  "$latestVersion.metrics.policyViolationsFail",
+                     policyViolationsWarn:  "$latestVersion.metrics.policyViolationsWarn",
+                  }
+               },
+               // Team-level rollups, useful for high-level charts
+               totalCritical:              { $sum: "$latestVersion.metrics.critical" },
+               totalHigh:                  { $sum: "$latestVersion.metrics.high" },
+               totalMedium:                { $sum: "$latestVersion.metrics.medium" },
+               totalLow:                   { $sum: "$latestVersion.metrics.low" },
+               totalVulnerabilities:       { $sum: "$latestVersion.metrics.vulnerabilities" },
+               totalPolicyViolationsTotal: { $sum: "$latestVersion.metrics.policyViolationsTotal" },
+               totalPolicyViolationsFail:  { $sum: "$latestVersion.metrics.policyViolationsFail" },
+               totalPolicyViolationsWarn:  { $sum: "$latestVersion.metrics.policyViolationsWarn" },
+            }
+         },
+         {
+            $sort: { _id: 1 } // alphabetical by team name
+         }
+      ], { session: getSession() }).toArray();
+
+      return documents;
+   } catch (error) {
+      logErr(error, "Error fetching Stats:");
+      return null;
+   }
+}
 export { fetchDocumentsGoupedByScrum, fetchConfig };

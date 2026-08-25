@@ -1,4 +1,4 @@
-import { fetchDocument, getNotice, normaliseSonarMetrics, sortVersions } from "../src/mongo/mongo";
+import { fetchDocument, fetchStats, getNotice, normaliseSonarMetrics, sortVersions } from "../src/mongo/mongo";
 import * as dbModule from "../src/mongo/db";
 import * as config from "../src/config";
 
@@ -6,6 +6,94 @@ import * as config from "../src/config";
 jest.mock("../src/utils/check-eol", () => ({
   checkRuntimesVsEol: jest.fn().mockReturnValue("MOCK_RUNTIME_DATA")
 }));
+
+describe("stats()", () => {
+  const mockCollection = {
+    aggregate: jest.fn()
+  };
+
+  const mockDb = {
+    collection: jest.fn().mockReturnValue(mockCollection),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    jest.spyOn(dbModule, "getDb").mockReturnValue(mockDb as any);
+    jest.spyOn(dbModule, "getSession").mockReturnValue(undefined as any);
+
+    // ---- Mock config ----
+    (config as any).MONGO_COLLECTION_PROJECTS = "projects";
+  });
+
+  test("returns stats grouped by scrum team correctly", async () => {
+    const mockStats = [
+      {
+        _id: "teamA",
+        servicesCount: 2,
+        services: [
+          {
+            name: "service-a",
+            critical: 1, high: 2, medium: 3, low: 4,
+            vulnerabilities: 10, components: 50,
+            policyViolationsTotal: 5, policyViolationsFail: 2, policyViolationsWarn: 3,
+          },
+          {
+            name: "service-b",
+            critical: 0, high: 1, medium: 2, low: 3,
+            vulnerabilities: 6, components: 30,
+            policyViolationsTotal: 2, policyViolationsFail: 1, policyViolationsWarn: 1,
+          },
+        ],
+        totalCritical: 1, totalHigh: 3, totalMedium: 5, totalLow: 7,
+        totalVulnerabilities: 16,
+        totalPolicyViolationsTotal: 7, totalPolicyViolationsFail: 3, totalPolicyViolationsWarn: 4,
+      },
+      {
+        _id: "teamB",
+        servicesCount: 1,
+        services: [
+          {
+            name: "service-c",
+            critical: 5, high: 10, medium: 15, low: 20,
+            vulnerabilities: 50, components: 100,
+            policyViolationsTotal: 10, policyViolationsFail: 5, policyViolationsWarn: 5,
+          },
+        ],
+        totalCritical: 5, totalHigh: 10, totalMedium: 15, totalLow: 20,
+        totalVulnerabilities: 50,
+        totalPolicyViolationsTotal: 10, totalPolicyViolationsFail: 5, totalPolicyViolationsWarn: 5,
+      },
+    ];
+
+    mockCollection.aggregate.mockReturnValue({
+      toArray: jest.fn().mockResolvedValue(mockStats)
+    });
+
+    const result = await fetchStats();
+
+    expect(result).toHaveLength(2);
+
+    const platform = result![0];
+    expect(platform._id).toBe("teamA");
+    expect(platform.servicesCount).toBe(2);
+    expect(platform.services).toHaveLength(2);
+    expect(platform.services[0]).toMatchObject({ name: "service-a", critical: 1, high: 2, medium: 3, low: 4 });
+    expect(platform.services[1]).toMatchObject({ name: "service-b", critical: 0, policyViolationsTotal: 2 });
+    expect(platform.totalCritical).toBe(1);
+    expect(platform.totalHigh).toBe(3);
+    expect(platform.totalVulnerabilities).toBe(16);
+    expect(platform.totalPolicyViolationsFail).toBe(3);
+
+    const filing = result![1];
+    expect(filing._id).toBe("teamB");
+    expect(filing.servicesCount).toBe(1);
+    expect(filing.services[0]).toMatchObject({ name: "service-c", critical: 5, policyViolationsTotal: 10 });
+    expect(filing.totalCritical).toBe(5);
+    expect(filing.totalVulnerabilities).toBe(50);
+    expect(filing.totalPolicyViolationsWarn).toBe(5);
+  });
+});
 
 describe("notices()", () => {
   const mockCollection = {
