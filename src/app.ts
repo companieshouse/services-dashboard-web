@@ -165,8 +165,6 @@ app.get(`${config.ENDPOINT_DASHBOARD}/stats`, async (_: Request, res: Response) 
 
       const stats = await mongo.fetchStats();
 
-      // console.log(stats);
-
       res.render("stats.njk", {
          stats: JSON.stringify(stats), // Avoid nunjucks data wrangling
          title: config.APP_TITLE,
