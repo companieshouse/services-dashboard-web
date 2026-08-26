@@ -322,6 +322,7 @@ export async function fetchStats() {
                services: {
                   $push: {
                      name: "$name",
+                     serviceArea:           "$gitInfo.serviceArea",
                      critical:              "$latestVersion.metrics.critical",
                      high:                  "$latestVersion.metrics.high",
                      medium:                "$latestVersion.metrics.medium",

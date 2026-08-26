@@ -34,12 +34,14 @@ describe("stats()", () => {
         services: [
           {
             name: "service-a",
+            serviceArea: "area1",
             critical: 1, high: 2, medium: 3, low: 4,
             vulnerabilities: 10, components: 50,
             policyViolationsTotal: 5, policyViolationsFail: 2, policyViolationsWarn: 3,
           },
           {
             name: "service-b",
+            serviceArea: "area2",
             critical: 0, high: 1, medium: 2, low: 3,
             vulnerabilities: 6, components: 30,
             policyViolationsTotal: 2, policyViolationsFail: 1, policyViolationsWarn: 1,
@@ -55,6 +57,7 @@ describe("stats()", () => {
         services: [
           {
             name: "service-c",
+            serviceArea: "area1",
             critical: 5, high: 10, medium: 15, low: 20,
             vulnerabilities: 50, components: 100,
             policyViolationsTotal: 10, policyViolationsFail: 5, policyViolationsWarn: 5,
@@ -78,8 +81,8 @@ describe("stats()", () => {
     expect(platform._id).toBe("teamA");
     expect(platform.servicesCount).toBe(2);
     expect(platform.services).toHaveLength(2);
-    expect(platform.services[0]).toMatchObject({ name: "service-a", critical: 1, high: 2, medium: 3, low: 4 });
-    expect(platform.services[1]).toMatchObject({ name: "service-b", critical: 0, policyViolationsTotal: 2 });
+    expect(platform.services[0]).toMatchObject({ name: "service-a", serviceArea: "area1", critical: 1, high: 2, medium: 3, low: 4 });
+    expect(platform.services[1]).toMatchObject({ name: "service-b", serviceArea: "area2", critical: 0, policyViolationsTotal: 2 });
     expect(platform.totalCritical).toBe(1);
     expect(platform.totalHigh).toBe(3);
     expect(platform.totalVulnerabilities).toBe(16);
@@ -88,7 +91,7 @@ describe("stats()", () => {
     const filing = result![1];
     expect(filing._id).toBe("teamB");
     expect(filing.servicesCount).toBe(1);
-    expect(filing.services[0]).toMatchObject({ name: "service-c", critical: 5, policyViolationsTotal: 10 });
+    expect(filing.services[0]).toMatchObject({ name: "service-c", serviceArea: "area1", critical: 5, policyViolationsTotal: 10 });
     expect(filing.totalCritical).toBe(5);
     expect(filing.totalVulnerabilities).toBe(50);
     expect(filing.totalPolicyViolationsWarn).toBe(5);
