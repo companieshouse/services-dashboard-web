@@ -12,23 +12,15 @@
         </canvas>
     </div>
   </div>
-  <div class="column is-half">
+  <div class="column is-full">
     <div class="box">
-      <h3 class="subtitle">Critical Vulnerabilities per Team</h3>
-        <canvas id="chart-criticals-per-team" aria-label="Critical Vulnerabilities per Team" role="img">
-            <p>Critical Vulnerabilities per Team</p>
+      <h3 class="subtitle">Vulnerabilities per Service Area</h3>
+        <canvas id="chart-service-area-vulnerabilities" aria-label="Vulnerabilities per Service Area" role="img">
+            <p>Vulnerabilities per Service Area</p>
         </canvas>
     </div>
   </div>
-  <div class="column is-half">
-    <div class="box">
-      <h3 class="subtitle">High Vulnerabilities per Team</h3>
-        <canvas id="chart-highs-per-team" aria-label="High Vulnerabilities per Team" role="img">
-            <p>High Vulnerabilities per Team</p>
-        </canvas>
-    </div>
-  </div>
-  <div class="column is-half">
+  <div class="column is-full">
     <div class="box">
       <h3 class="subtitle">Services per Team</h3>
         <canvas id="chart-services-per-team" aria-label="Services per Team" role="img">
@@ -43,25 +35,15 @@
 <script src="{{ basePath }}/js/libs/chartjs/4.5.1/chart.umd.min.js"></script>
 <script>
     const stats = {{ stats | safe }}; // safe because it is coming from Mongo, not user input
-    new Chart(document.getElementById("chart-criticals-per-team"), {
-        type: "polarArea",
-        data: {
-        labels: stats.map(t => t._id),
-        datasets: [{ label: "Critical Vulnerabilities", data: stats.map(t => t.totalCritical), hoverOffset: 4 }]
-        }
-    });
-    new Chart(document.getElementById("chart-highs-per-team"), {
-        type: "polarArea",
-        data: {
-        labels: stats.map(t => t._id),
-        datasets: [{ label: "High Vulnerabilities", data: stats.map(t => t.totalHigh), hoverOffset: 4 }]
-        }
-    });
+    const averageNumberOfServices = stats.reduce((acc, t) => acc + t.servicesCount, 0) / stats.length;
     new Chart(document.getElementById("chart-services-per-team"), {
-        type: "pie",
+        type: "bar",
         data: {
-        labels: stats.map(t => t._id),
-        datasets: [{ data: stats.map(t => t.servicesCount) }]
+          labels: stats.map(t => t._id),
+          datasets: [
+            { label: "Number of Services", data: stats.map(t => t.servicesCount), type: "bar", backgroundColor: "rgba(67, 206, 60, 0.61)", borderColor: "rgb(16, 144, 40)", borderWidth: 1 },
+            { label: "Average Number of Services (all teams)", data: stats.map(t => averageNumberOfServices), type: "line", borderColor: "rgb(8, 99, 99)", borderWidth: 2, fill: false }
+          ]
         }
     });
     new Chart(document.getElementById("chart-team-vulnerabilities"), {
@@ -69,12 +51,45 @@
         data: {
         labels: stats.map(s => s._id),
         datasets: [
-            { label: "Critical",          data: stats.map(s => s.totalCritical),              borderColor: "rgb(255, 99, 132)",  tension: 0.1 },
-            { label: "High",              data: stats.map(s => s.totalHigh),                  borderColor: "rgb(255, 159, 64)",  tension: 0.1 },
-            { label: "Medium",            data: stats.map(s => s.totalMedium),                borderColor: "rgb(255, 205, 86)",  tension: 0.1 },
-            { label: "Low",               data: stats.map(s => s.totalLow),                   borderColor: "rgb(75,  192, 192)", tension: 0.1 },
-            { label: "Policy Violations", data: stats.map(s => s.totalPolicyViolationsTotal), borderColor: "rgb(153, 102, 255)", tension: 0.1 },
+            { label: "Critical",          data: stats.map(s => s.totalCritical),              borderColor: "#d21919",  tension: 0.1 },
+            { label: "High",              data: stats.map(s => s.totalHigh),                  borderColor: "#f9a805",  tension: 0.1 },
+            { label: "Medium",            data: stats.map(s => s.totalMedium),                borderColor: "#f9e10b",  tension: 0.1 },
+            { label: "Low",               data: stats.map(s => s.totalLow),                   borderColor: "#6b6b6b", tension: 0.1 },
+            { label: "Policy Violations", data: stats.map(s => s.totalPolicyViolationsTotal), borderColor: "#1557d1", tension: 0.1 },
         ]
+        },
+        options: {
+        scales: { y: { beginAtZero: true } }
+        }
+    });
+    const serviceAreaMap = {};
+    stats.forEach(team => {
+        (team.services || []).forEach(service => {
+            const area = service.serviceArea || "No-Service-Area";
+            if (!serviceAreaMap[area]) {
+                serviceAreaMap[area] = { critical: 0, high: 0, medium: 0, low: 0, policyViolationsTotal: 0 };
+            }
+            serviceAreaMap[area].critical              += service.critical              || 0;
+            serviceAreaMap[area].high                  += service.high                  || 0;
+            serviceAreaMap[area].medium                += service.medium                || 0;
+            serviceAreaMap[area].low                   += service.low                   || 0;
+            serviceAreaMap[area].policyViolationsTotal += service.policyViolationsTotal || 0;
+        });
+    });
+    const serviceAreaLabels = Object.keys(serviceAreaMap).sort();
+    const serviceAreaStats  = serviceAreaLabels.map(k => serviceAreaMap[k]);
+
+    new Chart(document.getElementById("chart-service-area-vulnerabilities"), {
+        type: "line",
+        data: {
+          labels: serviceAreaLabels,
+          datasets: [
+              { label: "Critical",          data: serviceAreaStats.map(s => s.critical),              borderColor: "#d21919",  tension: 0.1 },
+              { label: "High",              data: serviceAreaStats.map(s => s.high),                  borderColor: "#f9a805",  tension: 0.1 },
+              { label: "Medium",            data: serviceAreaStats.map(s => s.medium),                borderColor: "#f9e10b",  tension: 0.1 },
+              { label: "Low",               data: serviceAreaStats.map(s => s.low),                   borderColor: "#6b6b6b", tension: 0.1 },
+              { label: "Policy Violations", data: serviceAreaStats.map(s => s.policyViolationsTotal), borderColor: "#1557d1", tension: 0.1 },
+          ]
         },
         options: {
         scales: { y: { beginAtZero: true } }
