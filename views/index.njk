@@ -26,26 +26,26 @@
    {% else %}
     {% if (bugs == 0) and (vulnerabilities == 0) and (coverage > 80) %}
         is-clear-vuln
-    {% elseif (bugs < 10) and (vulnerabilities == 0) %}
-        is-medium-vuln
-    {% else %}
-        is-critical-vuln
+     {% elseif (bugs < 10) and (vulnerabilities == 0) %}
+         is-medium-vuln
+     {% else %}
+         is-critical-vuln
+     {% endif %}
     {% endif %}
-   {% endif %}
 {% endmacro %}
 
 {% macro addDepTrackColorClass(critical, high, medium, low) %}
    {% if critical != 0 %}
       is-critical-vuln
-   {% elseif high != 0 %}
+    {% elseif high != 0 %}
       is-high-vuln
-   {% elseif medium != 0 %}
+    {% elseif medium != 0 %}
       is-medium-vuln
-   {% elseif low != 0 %}
+    {% elseif low != 0 %}
       is-low-vuln
-   {% else %}
+    {% else %}
       is-clear-vuln
-   {% endif %}
+    {% endif %}
 {% endmacro %}
 
 {% macro buildServiceVersionCell(serviceName, versionData) %}
@@ -71,7 +71,7 @@
                     </span>
                     <span class="tag level-item is-low-vuln has-tooltip-bottom" data-tooltip="Low">
                         {{ versionData.metrics.low }}
-                    </span>                    
+                    </span>
                 </div>
                 {% if versionData.metrics.policyViolationsTotal > 0 %}
                 <div class="level mt-1">
@@ -99,10 +99,10 @@
     <div class="field mb-4">
         <div class="control has-icons-left">
             <label for="table-search">
-                Search 
-                {# Just a default value, the actual number of services is 
+                Search
+                {# Just a default value, the actual number of services is
                    calculated in the filter() function after initial render. #}
-                <span id="service-count">{{ documents | length }}</span> 
+                <span id="service-count">{{ documents | length }}</span>
                 services:
             </label>
             <input
@@ -180,7 +180,7 @@
                                 {% endif %}
                             </div>
                         </td>
-                        
+
                         <td class="td-runtime">
                             {% set lang = service.latestVersion.lang %}
                             <div id="runtime-tags" class="is-flex-direction-column">
@@ -189,28 +189,28 @@
                                         {% if info.color == "red" %}
                                             <span class="tag is-critical-vuln">
                                                 {% if lang === 'go' %}
-                                                    {{lang}} - 
+                                                    {{lang}} -
                                                 {% endif %}
                                                 {{ info.value }}
                                             </span>
                                         {% elseif info.color == "green" %}
                                             <span class="tag is-clear-vuln">
                                                 {% if lang === 'go' %}
-                                                    {{lang}} - 
+                                                    {{lang}} -
                                                 {% endif %}
                                                 {{ info.value }}
                                             </span>
                                         {% elseif info.color == "yellow" %}
                                             <span class="tag is-medium-vuln">
                                                 {% if lang === 'go' %}
-                                                    {{lang}} - 
+                                                    {{lang}} -
                                                 {% endif %}
                                                 {{ info.value }}
                                             </span>
                                         {% elseif info.color == "grey" %}
                                             <span class="tag is-low-vuln">
                                                 {% if lang === 'go' %}
-                                                    {{lang}} - 
+                                                    {{lang}} -
                                                 {% endif %}
                                                 {{ info.value }}
                                             </span>
@@ -374,6 +374,40 @@ document.addEventListener("DOMContentLoaded", () => {
     filter();
   }
 
+  // Parse team names from URL query parameters
+  function getTeamsFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const teams = params.getAll("team");
+    return new Set(teams.map(t => t.toLowerCase()));
+  }
+
+  // Build URL with current team selections
+  function buildUrlWithTeams(selectedTeams) {
+    const params = new URLSearchParams();
+    selectedTeams.forEach(team => {
+      params.append("team", team);
+    });
+
+    const queryString = params.toString();
+    return queryString ? `?${queryString}` : '';
+  }
+
+  // Update URL to reflect current checkbox state
+  function updateUrl() {
+    const activeTeams = checkboxes
+      .filter(cb => cb.checked)
+      .map(cb => cb.id);
+
+    // Check if all teams are selected or none are selected
+    const allTeamsSelected = activeTeams.length === 0 || activeTeams.length === checkboxes.length;
+
+    const newUrl = allTeamsSelected
+      ? window.location.pathname
+      : buildUrlWithTeams(activeTeams);
+
+    window.history.replaceState(null, "", newUrl);
+  }
+
   // Apply filters based on selected teams and search term
   function filter() {
     const activeTeams = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.id));
@@ -398,6 +432,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update service count
     const visibleCount = rows.filter(row => row.style.display !== "none").length;
     serviceCount.textContent = visibleCount;
+
+    // Update URL to reflect current selections
+    updateUrl();
   }
 
   // Master checkbox toggles all
@@ -427,6 +464,14 @@ document.addEventListener("DOMContentLoaded", () => {
       sortRowsByColumn(colIndex);
     });
   });
+
+  // Initialize from URL parameters
+  const urlTeams = getTeamsFromUrl();
+  if (urlTeams.size > 0) {
+    checkboxes.forEach(cb => {
+      cb.checked = urlTeams.has(cb.id);
+    });
+  }
 
   filter(); // initial render
 });
