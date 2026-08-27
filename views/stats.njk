@@ -1,33 +1,98 @@
 {% extends "layout.njk" %}
 {% set active = "stats" %}
 
+{% macro render_chart(titleId, title, description, canvasId) %}
+    <div class="column is-half">
+        <div class="box">
+        <h3 class="subtitle">
+            <a id="{{ titleId }}" href="#{{ titleId }}">{{ title }}</a>
+        </h3>
+            <p>
+                {{ description }}
+            </p>
+            <canvas id="{{ canvasId }}" aria-label="{{ title }}" role="img">
+                <p>{{ title }}</p>
+            </canvas>
+        </div>
+    </div>
+{% endmacro %}
+
 {% block content %}
 <h2 class="title">Statistics</h2>
+<p class="subtitle is-size-6">
+    Stats data last fetched from the database: <strong>{{ statsCachedAt }}</strong>. Refreshes automatically every 30 minutes.
+</p>
+</br>
+<p>
+    The following charts show statistics based on the <strong>most recent SBOM</strong> for each service. 
+    They <strong>do not necessarily</strong> show data for services running in CI-Dev/Staging/Live.
+</p>
+</br>
 <div class="columns is-multiline">
-  <div class="column is-full">
-    <div class="box">
-      <h3 class="subtitle">Vulnerabilities per Team</h3>
-        <canvas id="chart-team-vulnerabilities" aria-label="Vulnerabilities per Team" role="img">
-            <p>Vulnerabilities per Team</p>
-        </canvas>
-    </div>
-  </div>
-  <div class="column is-full">
-    <div class="box">
-      <h3 class="subtitle">Vulnerabilities per Service Area</h3>
-        <canvas id="chart-service-area-vulnerabilities" aria-label="Vulnerabilities per Service Area" role="img">
-            <p>Vulnerabilities per Service Area</p>
-        </canvas>
-    </div>
-  </div>
-  <div class="column is-full">
-    <div class="box">
-      <h3 class="subtitle">Services per Team</h3>
-        <canvas id="chart-services-per-team" aria-label="Services per Team" role="img">
-            <p>Services per Team</p>
-        </canvas>
-    </div>
-  </div>
+    {{ render_chart(
+        "services-per-team", 
+        "Services per Team", 
+        "Shows how many services each team is responsible for. The line shows the average across all teams — bars above the line indicate teams managing a larger-than-average number of services, which may affect their capacity to address vulnerabilities.", 
+        "chart-services-per-team") 
+    }}
+    {{ render_chart(
+        "services-with-zero-vulnerabilities-per-team", 
+        "Services with Zero Vulnerabilities per Team", 
+        "Shows how many of each team's services are completely free of known vulnerabilities (green) versus those that have at least one (red). More green is better. A team where most services are red has broad remediation work to do, even if overall vulnerability counts appear low.", 
+        "chart-zero-vuln-services") 
+    }}
+
+    {{ render_chart(
+        "top10-services", 
+        "Top 10 Services by Critical + High Vulnerabilities", 
+        "Highlights the 10 individual services with the most severe unresolved vulnerabilities (Critical and High combined). These may represent the highest risk and should be the first targets for remediation. Shorter bars — or an empty chart — indicate a healthy posture.", 
+        "chart-top10-services") 
+    }}
+    {{ render_chart(
+        "vulnerability-severity-composition-per-team", 
+        "Vulnerability Severity Composition per Team", 
+        "Shows each team's total vulnerability count broken down by severity. A tall bar dominated by red (Critical) or orange (High) segments is more concerning than one of the same height made up mostly of grey (Low). Teams should aim to reduce the critical and high portions first.", 
+        "chart-severity-composition-team") 
+    }}
+
+    {{ render_chart(
+        "vulnerabilities-per-service-area", 
+        "Vulnerabilities per Service Area", 
+        "Shows how vulnerability exposure is spread across service areas. Each line represents a severity level — a rising line for Critical or High in an area indicates unresolved severe issues that should be prioritised.", 
+        "chart-service-area-vulnerabilities") 
+    }}
+    {{ render_chart(
+        "vulnerability-density-per-team", 
+        "Vulnerability Density per Team (vulnerabilities per service)", 
+        "Shows the average number of vulnerabilities per service for each team, normalising for team size. A team with many services will naturally have a higher total vulnerability count — this chart reveals whether individual services are well-maintained regardless of team size. Lower is better.", 
+        "chart-vuln-density-team") 
+    }}
+    
+    {{ render_chart(
+        "vulnerability-density-by-components", 
+        "Vulnerability Density by Components (vulnerabilities per component)", 
+        "Compares vulnerability counts against the total number of tracked dependencies (components) across each team's services. A team with many dependencies is expected to have more vulnerabilities — this chart shows whether vulnerabilities are proportionate to dependency footprint. Lower is better.", 
+        "chart-vuln-density-components") 
+    }}
+    {{ render_chart(
+        "missing-deployed-sbom-per-team",
+        "Missing Deployed SBOMs per Team",
+        "Shows the number of services per team where a version currently deployed to an environment (CI-Dev, Staging, or Live) has no matching SBOM in Dependency Track. Any bar above zero indicates a misconfigured pipeline — deployed code that is entirely invisible to vulnerability scanning and deserves immediate attention.",
+        "chart-missing-deployed-sbom") 
+    }}
+    {{ render_chart(
+        "vulnerability-severity-composition-per-language",
+        "Vulnerability Severity Composition per Language",
+        "Shows the total vulnerability count broken down by severity for each language ecosystem. Languages with a large fleet of services will naturally dominate — this chart shows where the bulk of the vulnerability volume sits across the estate. Compare with the density chart alongside to understand whether a language is problematic or simply popular.",
+        "chart-severity-composition-language") 
+    }}
+    {{ render_chart(
+        "vulnerability-density-per-language",
+        "Vulnerability Density per Language (vulnerabilities per service)",
+        "Shows the average number of vulnerabilities per service for each language, normalising for fleet size. A language with few services can still rank highly here if those services are poorly maintained. Use this alongside the composition chart to distinguish a volume problem from a hygiene problem. Lower is better.",
+        "chart-vuln-density-language") 
+    }}
+
 </div>
 {% endblock %}
 
@@ -52,6 +117,7 @@
             legend: { labels: { color: textColor } }
         }
     };
+    // Chart 1: Services per team with average line
     const averageNumberOfServices = stats.reduce((acc, t) => acc + t.servicesCount, 0) / stats.length;
     new Chart(document.getElementById("chart-services-per-team"), {
         type: "bar",
@@ -64,20 +130,75 @@
         },
         options: chartOptions
     });
-    new Chart(document.getElementById("chart-team-vulnerabilities"), {
-        type: "line",
+
+    // Chart 2: Count of services with zero vulnerabilities per team
+    new Chart(document.getElementById("chart-zero-vuln-services"), {
+        type: "bar",
         data: {
-        labels: stats.map(s => s._id),
-        datasets: [
-            { label: "Critical",          data: stats.map(s => s.totalCritical),              backgroundColor: criticalColor, borderColor: criticalColor,  tension: 0.1 },
-            { label: "High",              data: stats.map(s => s.totalHigh),                  backgroundColor: highColor, borderColor: highColor,  tension: 0.1 },
-            { label: "Medium",            data: stats.map(s => s.totalMedium),                backgroundColor: mediumColor, borderColor: mediumColor,  tension: 0.1 },
-            { label: "Low",               data: stats.map(s => s.totalLow),                   backgroundColor: lowColor, borderColor: lowColor, tension: 0.1 },
-            { label: "Policy Violations", data: stats.map(s => s.totalPolicyViolationsTotal), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, tension: 0.1 },
-        ]
+            labels: stats.map(t => t._id),
+            datasets: [
+                { label: "Services with Zero Vulnerabilities", data: stats.map(t => (t.services || []).filter(s => !s.vulnerabilities).length), backgroundColor: "#1E521E", borderColor: "#1E521E", borderWidth: 1 },
+                { label: "Services with Vulnerabilities",      data: stats.map(t => (t.services || []).filter(s =>  s.vulnerabilities).length), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 }
+            ]
         },
-        options: chartOptions
+        options: {
+            ...chartOptions,
+            scales: {
+                x: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { beginAtZero: true, stacked: true, ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+        }
     });
+
+    // Chart 3: Top 10 services by combined critical + high vulnerability count
+    const allServices = stats.flatMap(t => (t.services || []).map(s => ({ ...s, team: t._id })));
+    const top10Services = allServices
+        .map(s => ({ ...s, criticalPlusHigh: (s.critical || 0) + (s.high || 0) }))
+        .sort((a, b) => b.criticalPlusHigh - a.criticalPlusHigh)
+        .slice(0, 10);
+    new Chart(document.getElementById("chart-top10-services"), {
+        type: "bar",
+        data: {
+            labels: top10Services.map(s => s.name),
+            datasets: [
+                { label: "Critical", data: top10Services.map(s => s.critical || 0), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 },
+                { label: "High",     data: top10Services.map(s => s.high     || 0), backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 }
+            ]
+        },
+        options: {
+            ...chartOptions,
+            indexAxis: "y",
+            scales: {
+                x: { beginAtZero: true, stacked: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } }
+            },
+            plugins: { legend: { labels: { color: textColor } } }
+        }
+    });
+
+    // Chart 4: Stacked bar showing severity composition per team
+    new Chart(document.getElementById("chart-severity-composition-team"), {
+        type: "bar",
+        data: {
+            labels: stats.map(t => t._id),
+            datasets: [
+                { label: "Critical", data: stats.map(t => t.totalCritical),                  backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 },
+                { label: "High",     data: stats.map(t => t.totalHigh),                      backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 },
+                { label: "Medium",   data: stats.map(t => t.totalMedium),                    backgroundColor: mediumColor,   borderColor: mediumColor,   borderWidth: 1 },
+                { label: "Low",      data: stats.map(t => t.totalLow),                       backgroundColor: lowColor,      borderColor: lowColor,      borderWidth: 1 },
+                { label: "Policy Violations", data: stats.map(t => t.totalPolicyViolationsTotal), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, borderWidth: 1 }
+            ]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                x: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { beginAtZero: true, stacked: true, ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+        }
+    });
+
+    // Chart 5: Vulnerabilities per service area
     const serviceAreaMap = {};
     stats.forEach(team => {
         (team.services || []).forEach(service => {
@@ -106,6 +227,100 @@
               { label: "Low",               data: serviceAreaStats.map(s => s.low),                   backgroundColor: lowColor, borderColor: lowColor, tension: 0.1 },
               { label: "Policy Violations", data: serviceAreaStats.map(s => s.policyViolationsTotal), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, tension: 0.1 },
           ]
+        },
+        options: chartOptions
+    });
+
+    // Chart 6: Vulnerability density (total vulnerabilities / number of services) per team
+    new Chart(document.getElementById("chart-vuln-density-team"), {
+        type: "bar",
+        data: {
+            labels: stats.map(t => t._id),
+            datasets: [
+                { label: "Vulnerabilities per Service", data: stats.map(t => t.servicesCount > 0 ? parseFloat((t.totalVulnerabilities / t.servicesCount).toFixed(2)) : 0), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, borderWidth: 1 }
+            ]
+        },
+        options: chartOptions
+    });
+
+    // Chart 7: Vulnerability density relative to SBOM component count per team
+    const componentDensityLabels = stats.map(t => t._id);
+    const componentDensityData = stats.map(t => {
+        const totalComponents    = (t.services || []).reduce((acc, s) => acc + (s.components || 0), 0);
+        const totalVulnerabilities = t.totalVulnerabilities || 0;
+        return totalComponents > 0 ? parseFloat((totalVulnerabilities / totalComponents).toFixed(4)) : 0;
+    });
+    new Chart(document.getElementById("chart-vuln-density-components"), {
+        type: "bar",
+        data: {
+            labels: componentDensityLabels,
+            datasets: [
+                { label: "Vulnerabilities per Component", data: componentDensityData, backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, borderWidth: 1 }
+            ]
+        },
+        options: chartOptions
+    });
+
+    // Chart 8: Services with a deployed version missing from Dependency Track, per team
+    new Chart(document.getElementById("chart-missing-deployed-sbom"), {
+        type: "bar",
+        data: {
+            labels: stats.map(t => t._id),
+            datasets: [
+                { label: "Services with Missing Deployed SBOM", data: stats.map(t => t.totalMissingDeployedSbom || 0), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 }
+            ]
+        },
+        options: chartOptions
+    });
+
+    // Build a per-language rollup from per-service lang data across all teams
+    const langMap = {};
+    stats.forEach(team => {
+        (team.services || []).forEach(s => {
+            const lang = s.lang || "Unknown";
+            if (!langMap[lang]) {
+                langMap[lang] = { critical: 0, high: 0, medium: 0, low: 0, vulnerabilities: 0, serviceCount: 0 };
+            }
+            langMap[lang].critical      += s.critical      || 0;
+            langMap[lang].high          += s.high          || 0;
+            langMap[lang].medium        += s.medium        || 0;
+            langMap[lang].low           += s.low           || 0;
+            langMap[lang].vulnerabilities += s.vulnerabilities || 0;
+            langMap[lang].serviceCount  += 1;
+        });
+    });
+    const langLabels = Object.keys(langMap).sort();
+    const langStats  = langLabels.map(k => langMap[k]);
+
+    // Chart 9: Raw severity composition per language
+    new Chart(document.getElementById("chart-severity-composition-language"), {
+        type: "bar",
+        data: {
+            labels: langLabels,
+            datasets: [
+                { label: "Critical", data: langStats.map(l => l.critical), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 },
+                { label: "High",     data: langStats.map(l => l.high),     backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 },
+                { label: "Medium",   data: langStats.map(l => l.medium),   backgroundColor: mediumColor,   borderColor: mediumColor,   borderWidth: 1 },
+                { label: "Low",      data: langStats.map(l => l.low),      backgroundColor: lowColor,      borderColor: lowColor,      borderWidth: 1 }
+            ]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                x: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { beginAtZero: true, stacked: true, ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+        }
+    });
+
+    // Chart 10: Vulnerability density (vulnerabilities per service) per language
+    new Chart(document.getElementById("chart-vuln-density-language"), {
+        type: "bar",
+        data: {
+            labels: langLabels,
+            datasets: [
+                { label: "Vulnerabilities per Service", data: langStats.map(l => l.serviceCount > 0 ? parseFloat((l.vulnerabilities / l.serviceCount).toFixed(2)) : 0), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, borderWidth: 1 }
+            ]
         },
         options: chartOptions
     });
