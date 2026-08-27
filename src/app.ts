@@ -9,6 +9,22 @@ const app = express();
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 
+const STATS_CACHE_TTL_MS = 30 * 60 * 1000;
+let statsCache: { data: Awaited<ReturnType<typeof mongo.fetchStats>>; cachedAt: number } | null = null;
+
+async function getCachedStats() {
+   const now = Date.now();
+   if (statsCache && now - statsCache.cachedAt < STATS_CACHE_TTL_MS) {
+      return statsCache;
+   }
+   const data = await mongo.fetchStats();
+   statsCache = { data, cachedAt: now };
+   return statsCache;
+}
+
+// exported for testing only
+export function resetStatsCache() { statsCache = null; }
+
 
 const nunjucksEnv = nunjucks.configure([
    "views",
@@ -163,10 +179,11 @@ app.get(`${config.ENDPOINT_DASHBOARD}/stats`, async (_: Request, res: Response) 
    try {
       const configData = await mongo.fetchConfig();
 
-      const stats = await mongo.fetchStats();
+      const { data: stats, cachedAt } = await getCachedStats();
 
       res.render("stats.njk", {
          stats: JSON.stringify(stats), // Avoid nunjucks data wrangling
+         statsCachedAt: new Date(cachedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
          title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "N/A",
