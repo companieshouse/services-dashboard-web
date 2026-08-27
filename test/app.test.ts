@@ -1,8 +1,8 @@
 import request from 'supertest';
 import * as config from '../src/config';
-import { fetchConfig, fetchDocument, fetchDocumentsGoupedByScrum } from '../src/mongo/mongo';
+import { fetchConfig, fetchDocument, fetchDocumentsGoupedByScrum, fetchStats } from '../src/mongo/mongo';
 import * as dbModule from "../src/mongo/db";
-import  app  from '../src/app';
+import  app, { resetStatsCache }  from '../src/app';
 
 jest.mock('../src/mongo/db');
 jest.mock('../src/mongo/mongo');
@@ -110,5 +110,59 @@ describe('App Tests', () => {
         expect(response.status).toBe(200);
         expect(fetchDocument).toHaveBeenCalled();
         expect(response.text).toContain(`We couldn't find that service.`);
+    });
+
+    it('should handle GET request for Statistics tab', async () => {
+        (fetchConfig as jest.Mock).mockResolvedValue({lastScan: Date.now()});
+
+        const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+
+        expect(response.status).toBe(200);
+    });
+
+    describe('Stats cache', () => {
+        const mockStats = [{ _id: 'teamA', services: [] }];
+        // Use a fixed base time far in the future so any real cachedAt from outside this block is always stale
+        const BASE_TIME = 1e15;
+        let dateNowSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+            resetStatsCache();
+            dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(BASE_TIME);
+            (fetchConfig as jest.Mock).mockResolvedValue({ lastScan: BASE_TIME });
+            (fetchStats as jest.Mock).mockResolvedValue(mockStats);
+        });
+
+        afterEach(() => {
+            dateNowSpy.mockRestore();
+        });
+
+        it('fetches from the database on a cold cache', async () => {
+            const response = await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+
+            expect(response.status).toBe(200);
+            expect(fetchStats).toHaveBeenCalledTimes(1);
+            expect(response.text).toContain('Stats data last fetched from the database');
+        });
+
+        it('serves from cache on subsequent requests within TTL', async () => {
+            await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+            jest.clearAllMocks();
+            (fetchConfig as jest.Mock).mockResolvedValue({ lastScan: BASE_TIME });
+
+            await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+
+            expect(fetchStats).not.toHaveBeenCalled();
+        });
+
+        it('re-fetches after TTL expires', async () => {
+            await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+            dateNowSpy.mockReturnValue(BASE_TIME + 31 * 60 * 1000);
+            (fetchStats as jest.Mock).mockResolvedValue(mockStats);
+
+            await request(app).get(`${config.ENDPOINT_DASHBOARD}/stats`);
+
+            expect(fetchStats).toHaveBeenCalledTimes(2);
+        });
     });
 });

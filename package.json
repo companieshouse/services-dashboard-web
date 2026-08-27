@@ -23,6 +23,7 @@
     "@companieshouse/structured-logging-node": "^2.0.15",
     "@types/mongodb": "^4.0.6",
     "@types/nunjucks": "^3.2.6",
+    "chart.js": "^4.5.1",
     "cookie": "^1.0.0",
     "date-fns": "^4.4.0",
     "dotenv": "^17.2.3",

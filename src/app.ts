@@ -9,6 +9,22 @@ const app = express();
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 
+const STATS_CACHE_TTL_MS = 30 * 60 * 1000;
+let statsCache: { data: Awaited<ReturnType<typeof mongo.fetchStats>>; cachedAt: number } | null = null;
+
+async function getCachedStats() {
+   const now = Date.now();
+   if (statsCache && now - statsCache.cachedAt < STATS_CACHE_TTL_MS) {
+      return statsCache;
+   }
+   const data = await mongo.fetchStats();
+   statsCache = { data, cachedAt: now };
+   return statsCache;
+}
+
+// exported for testing only
+export function resetStatsCache() { statsCache = null; }
+
 
 const nunjucksEnv = nunjucks.configure([
    "views",
@@ -29,14 +45,7 @@ nunjucksEnv.addFilter("isEmpty", filters.isEmpty);
 
 nunjucksEnv.addGlobal("getGlobal", filters.getGlobal);
 
-// map tab-functions
-const tabs = [
-   { key: "teams", name: "Teams" },
-   { key: "details", name: "Details" },
-   { key: "runtimes", name: "Runtimes" },
-];
-
-app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (req, res) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/healthcheck`, (_, res) => {
    res.status(200).send('OK');
  });
 
@@ -70,14 +79,13 @@ app.get(config.ENDPOINT_DASHBOARD, async (_: Request, res: Response) => {
    }
 });
 
-app.get(`${config.ENDPOINT_DASHBOARD}/help`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/help`, async (_: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       res.render("help.njk", {
       title: config.APP_TITLE,
       basePath: config.ENDPOINT_DASHBOARD,
       lastScan: configData?.lastScan ?? "N/A",
-      tabs,
       devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
    });
    } catch (error) {
@@ -112,7 +120,7 @@ const prepareEolData = (endols: any) => {
    }
 }
 
-app.get(`${config.ENDPOINT_DASHBOARD}/runtimes`, async (req: Request, res: Response) => {
+app.get(`${config.ENDPOINT_DASHBOARD}/runtimes`, async (_: Request, res: Response) => {
    try {
       const configData = await mongo.fetchConfig();
       const endols = configData?.endol ?? {};
@@ -161,6 +169,24 @@ app.get(`${config.ENDPOINT_DASHBOARD}/service/:serviceName`, async (req: Request
          depTrackUri: config.DEP_TRACK_URI,
          devGuideDocumentationLink: config.DEV_GUIDE_DOCUMENTATION_LINK,
          sonarUri: config.SONAR_URI
+      });
+   } catch (error) {
+      logErr(error);
+   }
+});
+
+app.get(`${config.ENDPOINT_DASHBOARD}/stats`, async (_: Request, res: Response) => {
+   try {
+      const configData = await mongo.fetchConfig();
+
+      const { data: stats, cachedAt } = await getCachedStats();
+
+      res.render("stats.njk", {
+         stats: JSON.stringify(stats), // Avoid nunjucks data wrangling
+         statsCachedAt: new Date(cachedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
+         title: config.APP_TITLE,
+         basePath: config.ENDPOINT_DASHBOARD,
+         lastScan: configData?.lastScan ?? "N/A",
       });
    } catch (error) {
       logErr(error);

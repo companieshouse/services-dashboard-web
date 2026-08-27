@@ -288,4 +288,85 @@ export async function getNotice(): Promise<Notice | null> {
    }
 }
 
+// Fetches statistics showing the number of services per scrum team, with the number of Dependency Track vulnerabilities per severity level for each service.
+export async function fetchStats() {
+   try {
+      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS);
+
+      const documents = await collection.aggregate([
+         {
+            // Isolate the latest version per service using sortArray,
+            // then project only the fields needed for stats
+            $project: {
+               name: 1,
+               gitInfo: 1,
+               latestVersion: {
+                  $arrayElemAt: [
+                     {
+                        $sortArray: {
+                           input: "$versions",
+                           sortBy: { lastBomImport: -1 }
+                        }
+                     },
+                     0
+                  ]
+               },
+               // true if any deployed environment's version has no matching SBOM metrics in Dependency Track
+               // uses $gt with "" rather than null so that empty-string versions (e.g. libraries) are not counted
+               missingDeployedSbom: {
+                  $or: [
+                     { $and: [{ $gt: ["$ecs.cidev.version",   ""] }, { $eq: [{ $size: { $filter: { input: { $ifNull: ["$versions", []] }, as: "v", cond: { $and: [{ $eq: ["$$v.version", "$ecs.cidev.version"]   }, { $gt: ["$$v.metrics", null] }] } } } }, 0] }] },
+                     { $and: [{ $gt: ["$ecs.staging.version", ""] }, { $eq: [{ $size: { $filter: { input: { $ifNull: ["$versions", []] }, as: "v", cond: { $and: [{ $eq: ["$$v.version", "$ecs.staging.version"] }, { $gt: ["$$v.metrics", null] }] } } } }, 0] }] },
+                     { $and: [{ $gt: ["$ecs.live.version",    ""] }, { $eq: [{ $size: { $filter: { input: { $ifNull: ["$versions", []] }, as: "v", cond: { $and: [{ $eq: ["$$v.version", "$ecs.live.version"]    }, { $gt: ["$$v.metrics", null] }] } } } }, 0] }] },
+                  ]
+               }
+            }
+         },
+         {
+            // Group services by scrum team, accumulating per-service breakdowns
+            // and team-level totals in a single pass
+            $group: {
+               _id: { $ifNull: ["$gitInfo.owner", "unassigned"] },
+               servicesCount: { $sum: 1 },
+               services: {
+                  $push: {
+                     name: "$name",
+                     serviceArea:           "$gitInfo.serviceArea",
+                     critical:              "$latestVersion.metrics.critical",
+                     high:                  "$latestVersion.metrics.high",
+                     medium:                "$latestVersion.metrics.medium",
+                     low:                   "$latestVersion.metrics.low",
+                     vulnerabilities:       "$latestVersion.metrics.vulnerabilities",
+                     components:            "$latestVersion.metrics.components",
+                     policyViolationsTotal: "$latestVersion.metrics.policyViolationsTotal",
+                     policyViolationsFail:  "$latestVersion.metrics.policyViolationsFail",
+                     policyViolationsWarn:  "$latestVersion.metrics.policyViolationsWarn",
+                     missingDeployedSbom:   "$missingDeployedSbom",
+                     lang:                   "$latestVersion.lang",
+                     runtime:                "$latestVersion.runtime"
+                  }
+               },
+               // Team-level rollups, useful for high-level charts
+               totalCritical:              { $sum: "$latestVersion.metrics.critical" },
+               totalHigh:                  { $sum: "$latestVersion.metrics.high" },
+               totalMedium:                { $sum: "$latestVersion.metrics.medium" },
+               totalLow:                   { $sum: "$latestVersion.metrics.low" },
+               totalVulnerabilities:       { $sum: "$latestVersion.metrics.vulnerabilities" },
+               totalPolicyViolationsTotal: { $sum: "$latestVersion.metrics.policyViolationsTotal" },
+               totalPolicyViolationsFail:  { $sum: "$latestVersion.metrics.policyViolationsFail" },
+               totalPolicyViolationsWarn:  { $sum: "$latestVersion.metrics.policyViolationsWarn" },
+               totalMissingDeployedSbom:   { $sum: { $cond: ["$missingDeployedSbom", 1, 0] } },
+            }
+         },
+         {
+            $sort: { _id: 1 } // alphabetical by team name
+         }
+      ], { session: getSession() }).toArray();
+
+      return documents;
+   } catch (error) {
+      logErr(error, "Error fetching Stats:");
+      return null;
+   }
+}
 export { fetchDocumentsGoupedByScrum, fetchConfig };
