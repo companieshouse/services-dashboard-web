@@ -291,7 +291,7 @@ export async function getNotice(): Promise<Notice | null> {
 // Fetches statistics showing the number of services per scrum team, with the number of Dependency Track vulnerabilities per severity level for each service.
 export async function fetchStats() {
    try {
-      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS!);
+      const collection = getDb().collection(config.MONGO_COLLECTION_PROJECTS);
 
       const documents = await collection.aggregate([
          {
