@@ -310,6 +310,15 @@ export async function fetchStats() {
                      },
                      0
                   ]
+               },
+               // true if any deployed environment's version has no matching SBOM metrics in Dependency Track
+               // uses $gt with "" rather than null so that empty-string versions (e.g. libraries) are not counted
+               missingDeployedSbom: {
+                  $or: [
+                     { $and: [{ $gt: ["$ecs.cidev.version",   ""] }, { $eq: [{ $size: { $filter: { input: { $ifNull: ["$versions", []] }, as: "v", cond: { $and: [{ $eq: ["$$v.version", "$ecs.cidev.version"]   }, { $gt: ["$$v.metrics", null] }] } } } }, 0] }] },
+                     { $and: [{ $gt: ["$ecs.staging.version", ""] }, { $eq: [{ $size: { $filter: { input: { $ifNull: ["$versions", []] }, as: "v", cond: { $and: [{ $eq: ["$$v.version", "$ecs.staging.version"] }, { $gt: ["$$v.metrics", null] }] } } } }, 0] }] },
+                     { $and: [{ $gt: ["$ecs.live.version",    ""] }, { $eq: [{ $size: { $filter: { input: { $ifNull: ["$versions", []] }, as: "v", cond: { $and: [{ $eq: ["$$v.version", "$ecs.live.version"]    }, { $gt: ["$$v.metrics", null] }] } } } }, 0] }] },
+                  ]
                }
             }
          },
@@ -332,6 +341,9 @@ export async function fetchStats() {
                      policyViolationsTotal: "$latestVersion.metrics.policyViolationsTotal",
                      policyViolationsFail:  "$latestVersion.metrics.policyViolationsFail",
                      policyViolationsWarn:  "$latestVersion.metrics.policyViolationsWarn",
+                     missingDeployedSbom:   "$missingDeployedSbom",
+                     lang:                   "$latestVersion.lang",
+                     runtime:                "$latestVersion.runtime"
                   }
                },
                // Team-level rollups, useful for high-level charts
@@ -343,6 +355,7 @@ export async function fetchStats() {
                totalPolicyViolationsTotal: { $sum: "$latestVersion.metrics.policyViolationsTotal" },
                totalPolicyViolationsFail:  { $sum: "$latestVersion.metrics.policyViolationsFail" },
                totalPolicyViolationsWarn:  { $sum: "$latestVersion.metrics.policyViolationsWarn" },
+               totalMissingDeployedSbom:   { $sum: { $cond: ["$missingDeployedSbom", 1, 0] } },
             }
          },
          {

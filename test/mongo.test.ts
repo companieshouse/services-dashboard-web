@@ -38,6 +38,7 @@ describe("stats()", () => {
             critical: 1, high: 2, medium: 3, low: 4,
             vulnerabilities: 10, components: 50,
             policyViolationsTotal: 5, policyViolationsFail: 2, policyViolationsWarn: 3,
+            missingDeployedSbom: false,
           },
           {
             name: "service-b",
@@ -45,11 +46,13 @@ describe("stats()", () => {
             critical: 0, high: 1, medium: 2, low: 3,
             vulnerabilities: 6, components: 30,
             policyViolationsTotal: 2, policyViolationsFail: 1, policyViolationsWarn: 1,
+            missingDeployedSbom: true,
           },
         ],
         totalCritical: 1, totalHigh: 3, totalMedium: 5, totalLow: 7,
         totalVulnerabilities: 16,
         totalPolicyViolationsTotal: 7, totalPolicyViolationsFail: 3, totalPolicyViolationsWarn: 4,
+        totalMissingDeployedSbom: 1,
       },
       {
         _id: "teamB",
@@ -61,11 +64,13 @@ describe("stats()", () => {
             critical: 5, high: 10, medium: 15, low: 20,
             vulnerabilities: 50, components: 100,
             policyViolationsTotal: 10, policyViolationsFail: 5, policyViolationsWarn: 5,
+            missingDeployedSbom: false,
           },
         ],
         totalCritical: 5, totalHigh: 10, totalMedium: 15, totalLow: 20,
         totalVulnerabilities: 50,
         totalPolicyViolationsTotal: 10, totalPolicyViolationsFail: 5, totalPolicyViolationsWarn: 5,
+        totalMissingDeployedSbom: 0,
       },
     ];
 
@@ -81,20 +86,22 @@ describe("stats()", () => {
     expect(platform._id).toBe("teamA");
     expect(platform.servicesCount).toBe(2);
     expect(platform.services).toHaveLength(2);
-    expect(platform.services[0]).toMatchObject({ name: "service-a", serviceArea: "area1", critical: 1, high: 2, medium: 3, low: 4 });
-    expect(platform.services[1]).toMatchObject({ name: "service-b", serviceArea: "area2", critical: 0, policyViolationsTotal: 2 });
+    expect(platform.services[0]).toMatchObject({ name: "service-a", serviceArea: "area1", critical: 1, high: 2, medium: 3, low: 4, missingDeployedSbom: false });
+    expect(platform.services[1]).toMatchObject({ name: "service-b", serviceArea: "area2", critical: 0, policyViolationsTotal: 2, missingDeployedSbom: true });
     expect(platform.totalCritical).toBe(1);
     expect(platform.totalHigh).toBe(3);
     expect(platform.totalVulnerabilities).toBe(16);
     expect(platform.totalPolicyViolationsFail).toBe(3);
+    expect(platform.totalMissingDeployedSbom).toBe(1);
 
     const filing = result![1];
     expect(filing._id).toBe("teamB");
     expect(filing.servicesCount).toBe(1);
-    expect(filing.services[0]).toMatchObject({ name: "service-c", serviceArea: "area1", critical: 5, policyViolationsTotal: 10 });
+    expect(filing.services[0]).toMatchObject({ name: "service-c", serviceArea: "area1", critical: 5, policyViolationsTotal: 10, missingDeployedSbom: false });
     expect(filing.totalCritical).toBe(5);
     expect(filing.totalVulnerabilities).toBe(50);
     expect(filing.totalPolicyViolationsWarn).toBe(5);
+    expect(filing.totalMissingDeployedSbom).toBe(0);
   });
 });
 
