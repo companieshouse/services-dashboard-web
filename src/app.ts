@@ -183,7 +183,7 @@ app.get(`${config.ENDPOINT_DASHBOARD}/stats`, async (_: Request, res: Response) 
 
       res.render("stats.njk", {
          stats: JSON.stringify(stats), // Avoid nunjucks data wrangling
-         statsCachedAt: new Date(cachedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
+         statsCachedAt: new Date(cachedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/London" }),
          title: config.APP_TITLE,
          basePath: config.ENDPOINT_DASHBOARD,
          lastScan: configData?.lastScan ?? "N/A",
