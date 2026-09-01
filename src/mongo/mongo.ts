@@ -359,6 +359,12 @@ export async function fetchStats() {
             }
          },
          {
+            // Teams that own services but have no active maintenance capability
+            $addFields: {
+               isCommonComponents: { $in: ["$_id", ["Photon", "Element", "Fission", "Coblyn", "CHIPS", "Test"]] }
+            }
+         },
+         {
             $sort: { _id: 1 } // alphabetical by team name
          }
       ], { session: getSession() }).toArray();

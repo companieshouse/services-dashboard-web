@@ -55,7 +55,8 @@ describe("stats()", () => {
         totalMissingDeployedSbom: 1,
       },
       {
-        _id: "teamB",
+        _id: "Test",
+        isCommonComponents: true,
         servicesCount: 1,
         services: [
           {
@@ -82,26 +83,27 @@ describe("stats()", () => {
 
     expect(result).toHaveLength(2);
 
-    const platform = result![0];
-    expect(platform._id).toBe("teamA");
-    expect(platform.servicesCount).toBe(2);
-    expect(platform.services).toHaveLength(2);
-    expect(platform.services[0]).toMatchObject({ name: "service-a", serviceArea: "area1", critical: 1, high: 2, medium: 3, low: 4, missingDeployedSbom: false });
-    expect(platform.services[1]).toMatchObject({ name: "service-b", serviceArea: "area2", critical: 0, policyViolationsTotal: 2, missingDeployedSbom: true });
-    expect(platform.totalCritical).toBe(1);
-    expect(platform.totalHigh).toBe(3);
-    expect(platform.totalVulnerabilities).toBe(16);
-    expect(platform.totalPolicyViolationsFail).toBe(3);
-    expect(platform.totalMissingDeployedSbom).toBe(1);
+    const teamA = result![0];
+    expect(teamA._id).toBe("teamA");
+    expect(teamA.servicesCount).toBe(2);
+    expect(teamA.services).toHaveLength(2);
+    expect(teamA.services[0]).toMatchObject({ name: "service-a", serviceArea: "area1", critical: 1, high: 2, medium: 3, low: 4, missingDeployedSbom: false });
+    expect(teamA.services[1]).toMatchObject({ name: "service-b", serviceArea: "area2", critical: 0, policyViolationsTotal: 2, missingDeployedSbom: true });
+    expect(teamA.totalCritical).toBe(1);
+    expect(teamA.totalHigh).toBe(3);
+    expect(teamA.totalVulnerabilities).toBe(16);
+    expect(teamA.totalPolicyViolationsFail).toBe(3);
+    expect(teamA.totalMissingDeployedSbom).toBe(1);
 
-    const filing = result![1];
-    expect(filing._id).toBe("teamB");
-    expect(filing.servicesCount).toBe(1);
-    expect(filing.services[0]).toMatchObject({ name: "service-c", serviceArea: "area1", critical: 5, policyViolationsTotal: 10, missingDeployedSbom: false });
-    expect(filing.totalCritical).toBe(5);
-    expect(filing.totalVulnerabilities).toBe(50);
-    expect(filing.totalPolicyViolationsWarn).toBe(5);
-    expect(filing.totalMissingDeployedSbom).toBe(0);
+    const testTeam = result![1];
+    expect(testTeam._id).toBe("Test");
+    expect(testTeam.isCommonComponents).toBe(true);
+    expect(testTeam.servicesCount).toBe(1);
+    expect(testTeam.services[0]).toMatchObject({ name: "service-c", serviceArea: "area1", critical: 5, policyViolationsTotal: 10, missingDeployedSbom: false });
+    expect(testTeam.totalCritical).toBe(5);
+    expect(testTeam.totalVulnerabilities).toBe(50);
+    expect(testTeam.totalPolicyViolationsWarn).toBe(5);
+    expect(testTeam.totalMissingDeployedSbom).toBe(0);
   });
 });
 

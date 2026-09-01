@@ -28,6 +28,10 @@
     They <strong>do not necessarily</strong> show data for services running in CI-Dev/Staging/Live.
 </p>
 </br>
+<p>
+    Teams marked with (CC) are common components teams. These teams own services but do not have a dedicated maintenance developer, so their figures are not always directly comparable with other teams.
+</p>
+</br>
 <div class="columns is-multiline">
     {{ render_chart(
         "services-per-team", 
@@ -64,7 +68,7 @@
     {{ render_chart(
         "vulnerability-density-per-team", 
         "Vulnerability Density per Team (vulnerabilities per service)", 
-        "Shows the average number of vulnerabilities per service for each team, normalising for team size. A team with many services will naturally have a higher total vulnerability count — this chart reveals whether individual services are well-maintained regardless of team size. Lower is better.", 
+        "Shows the average number of vulnerabilities per service for each team. A team with many services will naturally have a higher total vulnerability count — this chart reveals whether individual services are well-maintained regardless of team size. Lower is better.", 
         "chart-vuln-density-team") 
     }}
     
@@ -100,6 +104,9 @@
 <script src="{{ basePath }}/js/libs/chartjs/4.5.1/chart.umd.min.js"></script>
 <script>
     const stats = {{ stats | safe }}; // safe because it is coming from Mongo, not user input
+
+    const teamLabel = t => t.isCommonComponents ? `${t._id} (CC)` : t._id;
+
     const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const textColor = isDarkMode ? "#FFF" : "#000";
     const gridColor = isDarkMode ? "#444" : "#e0e0e0";
@@ -122,7 +129,7 @@
     new Chart(document.getElementById("chart-services-per-team"), {
         type: "bar",
         data: {
-          labels: stats.map(t => t._id),
+          labels: stats.map(teamLabel),
           datasets: [
             { label: "Average Number of Services (all teams)", data: stats.map(t => averageNumberOfServices), type: "line", backgroundColor: highColor, borderColor: highColor, borderWidth: 2, fill: false },
             { label: "Number of Services", data: stats.map(t => t.servicesCount), type: "bar", backgroundColor: "#1E521E", borderColor: "#1E521E", borderWidth: 1 }
@@ -135,7 +142,7 @@
     new Chart(document.getElementById("chart-zero-vuln-services"), {
         type: "bar",
         data: {
-            labels: stats.map(t => t._id),
+            labels: stats.map(teamLabel),
             datasets: [
                 { label: "Services with Zero Vulnerabilities", data: stats.map(t => (t.services || []).filter(s => !s.vulnerabilities).length), backgroundColor: "#1E521E", borderColor: "#1E521E", borderWidth: 1 },
                 { label: "Services with Vulnerabilities",      data: stats.map(t => (t.services || []).filter(s =>  s.vulnerabilities).length), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 }
@@ -180,7 +187,7 @@
     new Chart(document.getElementById("chart-severity-composition-team"), {
         type: "bar",
         data: {
-            labels: stats.map(t => t._id),
+            labels: stats.map(teamLabel),
             datasets: [
                 { label: "Critical", data: stats.map(t => t.totalCritical),                  backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 },
                 { label: "High",     data: stats.map(t => t.totalHigh),                      backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 },
@@ -235,7 +242,7 @@
     new Chart(document.getElementById("chart-vuln-density-team"), {
         type: "bar",
         data: {
-            labels: stats.map(t => t._id),
+            labels: stats.map(teamLabel),
             datasets: [
                 { label: "Vulnerabilities per Service", data: stats.map(t => t.servicesCount > 0 ? parseFloat((t.totalVulnerabilities / t.servicesCount).toFixed(2)) : 0), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, borderWidth: 1 }
             ]
@@ -244,7 +251,7 @@
     });
 
     // Chart 7: Vulnerability density relative to SBOM component count per team
-    const componentDensityLabels = stats.map(t => t._id);
+    const componentDensityLabels = stats.map(teamLabel);
     const componentDensityData = stats.map(t => {
         const totalComponents    = (t.services || []).reduce((acc, s) => acc + (s.components || 0), 0);
         const totalVulnerabilities = t.totalVulnerabilities || 0;
@@ -265,7 +272,7 @@
     new Chart(document.getElementById("chart-missing-deployed-sbom"), {
         type: "bar",
         data: {
-            labels: stats.map(t => t._id),
+            labels: stats.map(teamLabel),
             datasets: [
                 { label: "Services with Missing Deployed SBOM", data: stats.map(t => t.totalMissingDeployedSbom || 0), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 }
             ]
