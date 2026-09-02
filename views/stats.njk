@@ -125,11 +125,15 @@
         }
     };
     // Chart 1: Services per team
+    const nonCCTeams = stats.filter(t => !t.isCommonComponents);
+    const avgServicesPerTeam = nonCCTeams.length > 0 ? nonCCTeams.reduce((sum, t) => sum + t.servicesCount, 0) / nonCCTeams.length : 0;
+    
     new Chart(document.getElementById("chart-services-per-team"), {
         type: "bar",
         data: {
           labels: stats.map(teamLabel),
           datasets: [
+            { label: "Average excluding CC teams (" + avgServicesPerTeam.toFixed(2) + ")", data: stats.map(() => parseFloat(avgServicesPerTeam.toFixed(2))), type: "line", borderColor: "#FF6B35", backgroundColor: "#FF6B35", borderWidth: 2, fill: false, tension: 0.1, pointRadius: 0 },
             { label: "Number of Services", data: stats.map(t => t.servicesCount), type: "bar", backgroundColor: "#1E521E", borderColor: "#1E521E", borderWidth: 1 }
           ]
         },
