@@ -36,7 +36,7 @@
     {{ render_chart(
         "services-per-team", 
         "Services per Team", 
-        "Shows how many services each team is responsible for. The line shows the average across all teams — bars above the line indicate teams managing a larger-than-average number of services, which may affect their capacity to address vulnerabilities.", 
+        "Shows how many services each team owns.", 
         "chart-services-per-team") 
     }}
     {{ render_chart(
@@ -124,14 +124,12 @@
             legend: { labels: { color: textColor } }
         }
     };
-    // Chart 1: Services per team with average line
-    const averageNumberOfServices = stats.reduce((acc, t) => acc + t.servicesCount, 0) / stats.length;
+    // Chart 1: Services per team
     new Chart(document.getElementById("chart-services-per-team"), {
         type: "bar",
         data: {
           labels: stats.map(teamLabel),
           datasets: [
-            { label: "Average Number of Services (all teams)", data: stats.map(t => averageNumberOfServices), type: "line", backgroundColor: highColor, borderColor: highColor, borderWidth: 2, fill: false },
             { label: "Number of Services", data: stats.map(t => t.servicesCount), type: "bar", backgroundColor: "#1E521E", borderColor: "#1E521E", borderWidth: 1 }
           ]
         },
