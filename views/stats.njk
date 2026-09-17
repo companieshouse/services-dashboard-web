@@ -55,7 +55,7 @@
     {{ render_chart(
         "vulnerability-severity-composition-per-team", 
         "Vulnerability Severity Composition per Team", 
-        "Shows each team's total vulnerability count broken down by severity. A tall bar dominated by red (Critical) or orange (High) segments is more concerning than one of the same height made up mostly of grey (Low). Teams should aim to reduce the critical and high portions first.", 
+        "Shows each team's total vulnerability count broken down by severity. A tall bar dominated by red (Critical) or orange (High) segments is more concerning than one of the same height made up mostly of grey (Low). Teams should aim to reduce the critical and high portions first. Unassigned (purple) covers findings that Dependency Track has not given a severity — they still count towards a team's totals.", 
         "chart-severity-composition-team") 
     }}
 
@@ -87,7 +87,7 @@
     {{ render_chart(
         "vulnerability-severity-composition-per-language",
         "Vulnerability Severity Composition per Language",
-        "Shows the total vulnerability count broken down by severity for each language ecosystem. Languages with a large fleet of services will naturally dominate — this chart shows where the bulk of the vulnerability volume sits across the estate. Compare with the density chart alongside to understand whether a language is problematic or simply popular.",
+        "Shows the total vulnerability count broken down by severity for each language ecosystem. Languages with a large fleet of services will naturally dominate — this chart shows where the bulk of the vulnerability volume sits across the estate. Compare with the density chart alongside to understand whether a language is problematic or simply popular. Unassigned (purple) covers findings that Dependency Track has not given a severity.",
         "chart-severity-composition-language") 
     }}
     {{ render_chart(
@@ -96,6 +96,30 @@
         "Shows the average number of vulnerabilities per service for each language, normalising for fleet size. A language with few services can still rank highly here if those services are poorly maintained. Use this alongside the composition chart to distinguish a volume problem from a hygiene problem. Lower is better.",
         "chart-vuln-density-language") 
     }}
+
+    <div class="column is-full">
+        <div class="box">
+            <h3 class="subtitle">
+                <a id="vulnerabilities-per-service-for-a-team" href="#vulnerabilities-per-service-for-a-team">Vulnerabilities per Service for a Team</a>
+            </h3>
+            <p>
+                Shows the vulnerability breakdown for every service owned by the selected team that has at least one known vulnerability. Services with no vulnerabilities are omitted. Use this to identify which of a team's services need remediation first.
+            </p>
+            </br>
+            <div class="field">
+                <label class="label" for="team-vuln-select">Team</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="team-vuln-select" aria-label="Select a team"></select>
+                    </div>
+                </div>
+            </div>
+            <p id="team-vuln-empty" class="has-text-weight-semibold" hidden>This team has no services with known vulnerabilities.</p>
+            <canvas id="chart-team-service-vulnerabilities" aria-label="Vulnerabilities per Service for a Team" role="img">
+                <p>Vulnerabilities per Service for a Team</p>
+            </canvas>
+        </div>
+    </div>
 
 </div>
 {% endblock %}
@@ -114,7 +138,12 @@
     const highColor = "#f9a805";
     const mediumColor = "#f9e10b";
     const lowColor = "#6b6b6b";
+    const unassignedColor = "#8a4fbf";
     const policyViolationsColor = "#1557d1";
+
+    // Dependency Track's total vulnerability count includes findings with no severity assigned
+    const unassignedCount = (total, critical, high, medium, low) =>
+        Math.max(0, (total || 0) - ((critical || 0) + (high || 0) + (medium || 0) + (low || 0)));
     const chartOptions = {
         scales: {
             y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
@@ -195,6 +224,7 @@
                 { label: "High",     data: stats.map(t => t.totalHigh),                      backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 },
                 { label: "Medium",   data: stats.map(t => t.totalMedium),                    backgroundColor: mediumColor,   borderColor: mediumColor,   borderWidth: 1 },
                 { label: "Low",      data: stats.map(t => t.totalLow),                       backgroundColor: lowColor,      borderColor: lowColor,      borderWidth: 1 },
+                { label: "Unassigned", data: stats.map(t => unassignedCount(t.totalVulnerabilities, t.totalCritical, t.totalHigh, t.totalMedium, t.totalLow)), backgroundColor: unassignedColor, borderColor: unassignedColor, borderWidth: 1 },
                 { label: "Policy Violations", data: stats.map(t => t.totalPolicyViolationsTotal), backgroundColor: policyViolationsColor, borderColor: policyViolationsColor, borderWidth: 1 }
             ]
         },
@@ -288,12 +318,13 @@
         (team.services || []).forEach(s => {
             const lang = s.lang || "Unknown";
             if (!langMap[lang]) {
-                langMap[lang] = { critical: 0, high: 0, medium: 0, low: 0, vulnerabilities: 0, serviceCount: 0 };
+                langMap[lang] = { critical: 0, high: 0, medium: 0, low: 0, unassigned: 0, vulnerabilities: 0, serviceCount: 0 };
             }
             langMap[lang].critical      += s.critical      || 0;
             langMap[lang].high          += s.high          || 0;
             langMap[lang].medium        += s.medium        || 0;
             langMap[lang].low           += s.low           || 0;
+            langMap[lang].unassigned    += unassignedCount(s.vulnerabilities, s.critical, s.high, s.medium, s.low);
             langMap[lang].vulnerabilities += s.vulnerabilities || 0;
             langMap[lang].serviceCount  += 1;
         });
@@ -310,7 +341,8 @@
                 { label: "Critical", data: langStats.map(l => l.critical), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 },
                 { label: "High",     data: langStats.map(l => l.high),     backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 },
                 { label: "Medium",   data: langStats.map(l => l.medium),   backgroundColor: mediumColor,   borderColor: mediumColor,   borderWidth: 1 },
-                { label: "Low",      data: langStats.map(l => l.low),      backgroundColor: lowColor,      borderColor: lowColor,      borderWidth: 1 }
+                { label: "Low",      data: langStats.map(l => l.low),      backgroundColor: lowColor,      borderColor: lowColor,      borderWidth: 1 },
+                { label: "Unassigned", data: langStats.map(l => l.unassigned), backgroundColor: unassignedColor, borderColor: unassignedColor, borderWidth: 1 }
             ]
         },
         options: {
@@ -333,6 +365,53 @@
         },
         options: chartOptions
     });
+
+    // Chart 11: Severity composition per service for a single, user-selected team
+    const teamSelect = document.getElementById("team-vuln-select");
+    const teamVulnEmpty = document.getElementById("team-vuln-empty");
+    const teamVulnCanvas = document.getElementById("chart-team-service-vulnerabilities");
+
+    stats.forEach((t, i) => {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = teamLabel(t);
+        teamSelect.appendChild(option);
+    });
+
+    const teamServiceVulnChart = new Chart(teamVulnCanvas, {
+        type: "bar",
+        data: { labels: [], datasets: [] },
+        options: {
+            ...chartOptions,
+            scales: {
+                x: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { beginAtZero: true, stacked: true, ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+        }
+    });
+
+    const renderTeamServiceVulnChart = () => {
+        const team = stats[Number(teamSelect.value)];
+        const services = (team ? team.services || [] : [])
+            .filter(s => (s.vulnerabilities || 0) > 0)
+            .sort((a, b) => (b.vulnerabilities || 0) - (a.vulnerabilities || 0));
+
+        teamVulnEmpty.hidden = services.length > 0;
+        teamVulnCanvas.hidden = services.length === 0;
+
+        teamServiceVulnChart.data.labels = services.map(s => s.name);
+        teamServiceVulnChart.data.datasets = [
+            { label: "Critical", data: services.map(s => s.critical || 0), backgroundColor: criticalColor, borderColor: criticalColor, borderWidth: 1 },
+            { label: "High",     data: services.map(s => s.high     || 0), backgroundColor: highColor,     borderColor: highColor,     borderWidth: 1 },
+            { label: "Medium",   data: services.map(s => s.medium   || 0), backgroundColor: mediumColor,   borderColor: mediumColor,   borderWidth: 1 },
+            { label: "Low",      data: services.map(s => s.low      || 0), backgroundColor: lowColor,      borderColor: lowColor,      borderWidth: 1 },
+            { label: "Unassigned", data: services.map(s => unassignedCount(s.vulnerabilities, s.critical, s.high, s.medium, s.low)), backgroundColor: unassignedColor, borderColor: unassignedColor, borderWidth: 1 }
+        ];
+        teamServiceVulnChart.update();
+    };
+
+    teamSelect.addEventListener("change", renderTeamServiceVulnChart);
+    renderTeamServiceVulnChart();
 </script>
 
 {% endblock %}
