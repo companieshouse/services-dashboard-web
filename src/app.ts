@@ -6,6 +6,8 @@ import * as mongo from "./mongo/mongo";
 import * as filters from "./utils/nunjucks-custom-filters";
 
 const app = express();
+app.disable("x-powered-by");
+
 app.use(config.ENDPOINT_DASHBOARD, express.static("public"));
 app.use(express.text());   // to parse text/plain requests
 
@@ -111,7 +113,7 @@ const prepareEolData = (endols: any) => {
          // cycle.lts is a string that contains one of; 'true', 'false' or a date
          const ltsValue = cycle.lts;
          if (ltsValue !== 'true' && ltsValue !== 'false') {
-            // it must be a date value, however those date values don't seem to correspond 
+            // it must be a date value, however those date values don't seem to correspond
             // to any date in the eol DB, so convert them to 'true' and store the date off
             cycle.ltsDate = ltsValue;
             cycle.lts = 'true';
