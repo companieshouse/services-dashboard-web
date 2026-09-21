@@ -18,9 +18,9 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_ecs-service"></a> [ecs-service](#module\_ecs-service) | git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service | 1.0.361 |
-| <a name="module_ecs_service_test"></a> [ecs\_service\_test](#module\_ecs\_service\_test) | git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service | 1.0.361 |
-| <a name="module_secrets"></a> [secrets](#module\_secrets) | git@github.com:companieshouse/terraform-modules//aws/parameter-store | 1.0.361 |
+| <a name="module_ecs-service"></a> [ecs-service](#module\_ecs-service) | git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service | 1.0.427 |
+| <a name="module_ecs_service_test"></a> [ecs\_service\_test](#module\_ecs\_service\_test) | git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service | 1.0.427 |
+| <a name="module_secrets"></a> [secrets](#module\_secrets) | git@github.com:companieshouse/terraform-modules//aws/parameter-store | 1.0.427 |
 
 ## Resources
 
