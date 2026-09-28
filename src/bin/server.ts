@@ -8,6 +8,7 @@ import app from "../app";
 import { closeDb, connectToDb } from '../mongo/db';
 
 const forcefullyShutdownMS = 10000;
+let isShuttingDown = false;
 // Get port from environment and store in Express.
 app.set("port", config.PORT);
 
@@ -43,19 +44,27 @@ function onError(error: any) {
 }
 
 // Graceful shutdown
-function gracefulShutdown() {
-  logger.info("Shutting down gracefully...");
-  server.close(async () => {
-    await closeDb();
-    logger.info("Closed out remaining connections.");
-    process.exit(0);
-  });
+async function gracefulShutdown() {
+  if (isShuttingDown) {
+    return;
+  }
 
-  // forcefully shut down after 10 sec
-  setTimeout(() => {
+  isShuttingDown = true;
+  logger.info("Shutting down gracefully...");
+  const forceShutdownTimer = setTimeout(() => {
     logger.error("Could not close connections in time, forcefully shutting down");
     process.exit(1);
   }, forcefullyShutdownMS);
+
+  const closeDbPromise = closeDb();
+
+  server.close(async () => {
+    await closeDbPromise;
+    clearTimeout(forceShutdownTimer);
+    logger.info("Closed out remaining connections.");
+    process.exit(0);
+  });
+  server.closeIdleConnections();
 }
 
 // Initialize MongoDB connection
