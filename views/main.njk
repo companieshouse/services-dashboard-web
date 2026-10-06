@@ -3,6 +3,7 @@
 <head>
    <meta charset="UTF-8">
    <title>{{ title }}</title>
+   <link rel="icon" type="image/svg+xml" href="//{{CDN_HOST}}/favicon.svg">
    <script> window.compressedState = "{{ compressedState | default('') }}"; </script>
    <script src="{{basePath}}/js/libs/pako/2.0.4/pako.min.js"></script>
    <script src="{{basePath}}/js/common.js"></script>
@@ -10,7 +11,6 @@
 </head>
 <body>
    <header class="fixed-hf fixed-header">
-      <link rel="SHORTCUT ICON" href="//{{CDN_HOST}}/images/favicon.ico" />
       <div class="header-container">
          <div class="header-left-content">
                <img src="//{{CDN_HOST}}/images/royal-coat-of-arms-white.svg" alt="Logo" class="header-logo">
