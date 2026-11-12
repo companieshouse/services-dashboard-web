@@ -1,4 +1,4 @@
-# services-dashboard-web
+# services-dashboard-web 
 
 This service is the web component of the services dashboard.
 _(Please refer to the main documentation in [services-dashboard-api](https://github.com/companieshouse/services-dashboard-api/) for an overview)._
