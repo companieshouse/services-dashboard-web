@@ -20,13 +20,13 @@
     </div>
 {% endmacro %}
 
-{% macro addSonarColorClass(bugs, coverage, vulnerabilities) %}
-   {% if coverage == 0 %}
-      is-medium-vuln
-   {% else %}
-    {% if (bugs == 0) and (vulnerabilities == 0) and (coverage > 80) %}
+{% macro addSonarColorClass(metrics, coverage) %}
+    {% if coverage == 0 %}
+        is-medium-vuln
+    {% else %}
+     {% if (metrics.software_quality_security_issues == 0) and (metrics.software_quality_reliability_issues == 0) and (metrics.software_quality_maintainability_issues == 0) and (metrics.coverage > 80) %}
         is-clear-vuln
-     {% elseif (bugs < 10) and (vulnerabilities == 0) %}
+         {% elseif (metrics.software_quality_maintainability_issues < 10) and (metrics.software_quality_security_issues == 0) %}
          is-medium-vuln
      {% else %}
          is-critical-vuln
@@ -238,11 +238,9 @@
                                 Sonar not configured
                             </td>
                         {% else %}
-                            {% set sonarBugs = service.sonarMetrics.overall.bugs %}
                             {% set coverage = service.sonarMetrics.overall.coverage %}
-                            {% set vulnerabilities = service.sonarMetrics.overall.vulnerabilities %}
-                            {% set code_smells = service.sonarMetrics.overall.code_smells %}
-                            <td class="td-sonar-metrics {{ addSonarColorClass(sonarBugs, coverage, vulnerabilities) }}">
+                            {% set metrics = service.sonarMetrics.overall %}
+                            <td class="td-sonar-metrics {{ addSonarColorClass(metrics, coverage) }}">
                                 {% if coverage == 0 %}
                                     <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
                                         0
@@ -253,15 +251,27 @@
                                     </progress>
                                 {% endif %}
                                 <div class="level">
-                                    <span class="tag level-item is-critical-vuln has-tooltip-bottom" data-tooltip="Vulnerabilities">
-                                        {{ vulnerabilities }}
-                                    </span>
-                                    <span class="tag level-item is-medium-vuln has-tooltip-bottom" data-tooltip="Bugs">
-                                        {{ sonarBugs }}
-                                    </span>
-                                    <span class="tag level-item is-low-vuln has-tooltip-bottom" data-tooltip="Code Smells">
-                                        {{ code_smells }}
-                                    </span>
+                                    {% if metrics.software_quality_security_issues is defined %}
+                                        <span class="tag level-item has-tooltip-bottom" data-tooltip="Security issues">
+                                            Security: {{ metrics.software_quality_security_issues }}
+                                        </span>
+                                        <span class="tag level-item has-tooltip-bottom" data-tooltip="Reliability issues">
+                                            Reliability: {{ metrics.software_quality_reliability_issues }}
+                                        </span>
+                                        <span class="tag level-item has-tooltip-bottom" data-tooltip="Maintainability issues">
+                                            Maintainability: {{ metrics.software_quality_maintainability_issues }}
+                                        </span>
+                                    {% else %}
+                                        <span class="tag level-item is-critical-vuln has-tooltip-bottom" data-tooltip="Vulnerabilities">
+                                            {{ metrics.vulnerabilities }}
+                                        </span>
+                                        <span class="tag level-item is-medium-vuln has-tooltip-bottom" data-tooltip="Bugs">
+                                            {{ metrics.bugs }}
+                                        </span>
+                                        <span class="tag level-item is-low-vuln has-tooltip-bottom" data-tooltip="Code Smells">
+                                            {{ metrics.code_smells }}
+                                        </span>
+                                    {% endif %}
                                 </div>
                             </td>
                         {% endif%}

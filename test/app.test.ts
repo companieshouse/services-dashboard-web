@@ -91,7 +91,26 @@ describe('App Tests', () => {
 
     it('should handle GET request for a service', async () => {
         const serviceName = 'some-service-name';
-        (fetchDocument as jest.Mock).mockResolvedValue({name: serviceName});
+        (fetchDocument as jest.Mock).mockResolvedValue({
+            name: serviceName,
+            gitInfo: {},
+            ecs: {},
+            versions: [],
+            sonarMetrics: {
+                overall: {
+                    coverage: 85,
+                    software_quality_security_issues: 1,
+                    software_quality_reliability_issues: 2,
+                    software_quality_maintainability_issues: 3,
+                },
+                newCode: {
+                    coverage: 90,
+                    software_quality_security_issues: 0,
+                    software_quality_reliability_issues: 1,
+                    software_quality_maintainability_issues: 2,
+                },
+            },
+        });
         (fetchConfig as jest.Mock).mockResolvedValue({lastScan: Date.now()});
         
         const response = await request(app).get(`${config.ENDPOINT_DASHBOARD!}/service/${serviceName}`);
@@ -99,6 +118,10 @@ describe('App Tests', () => {
         expect(response.status).toBe(200);
         expect(fetchDocument).toHaveBeenCalled();
         expect(response.text).toContain(serviceName);
+        expect(response.text).toContain('Security issues: 1');
+        expect(response.text).toContain('Reliability issues: 2');
+        expect(response.text).toContain('Maintainability issues: 3');
+        expect(response.text).not.toContain('Vulnerabilities:');
     });
 
     it('should display error message for a missing service', async () => {

@@ -13,14 +13,14 @@
         </progress>
     {% endif %}
     <div class="level">
-        <span class="tag level-item is-critical-vuln has-tooltip" data-tooltip="Vulnerabilities">
-            Vulnerabilities: {{ metrics.vulnerabilities }}
+        <span class="tag level-item is-critical-vuln has-tooltip" data-tooltip="Security issues">
+            Security issues: {{ metrics.software_quality_security_issues }}
         </span>
-        <span class="tag level-item is-medium-vuln has-tooltip" data-tooltip="Bugs">
-            Bugs: {{ metrics.bugs }}
+        <span class="tag level-item is-medium-vuln has-tooltip" data-tooltip="Reliability issues">
+            Reliability issues: {{ metrics.software_quality_reliability_issues }}
         </span>
-        <span class="tag level-item is-low-vuln has-tooltip" data-tooltip="Code Smells">
-            Code Smells: {{ metrics.code_smells }}
+        <span class="tag level-item is-low-vuln has-tooltip" data-tooltip="Maintainability issues">
+            Maintainability issues: {{ metrics.software_quality_maintainability_issues }}
         </span>
     </div>
 {% endmacro %}

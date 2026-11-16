@@ -293,6 +293,33 @@ describe("fetchDocument()", () => {
         }
       );
     });
+    it('handles MQR overall and new-code stats without renaming categories', () => {
+      const sonarMetrics = {
+        software_quality_security_issues: 3,
+        software_quality_reliability_issues: 4,
+        software_quality_maintainability_issues: 20,
+        coverage: 85.5,
+        new_software_quality_security_issues: 1,
+        new_software_quality_reliability_issues: 2,
+        new_software_quality_maintainability_issues: 8,
+        new_coverage: 90.5,
+      };
+
+      expect(normaliseSonarMetrics(sonarMetrics)).toEqual({
+        overall: {
+          software_quality_security_issues: 3,
+          software_quality_reliability_issues: 4,
+          software_quality_maintainability_issues: 20,
+          coverage: 85.5,
+        },
+        newCode: {
+          software_quality_security_issues: 1,
+          software_quality_reliability_issues: 2,
+          software_quality_maintainability_issues: 8,
+          coverage: 90.5,
+        },
+      });
+    });
   });
 
   describe('sortVersions', () => {
