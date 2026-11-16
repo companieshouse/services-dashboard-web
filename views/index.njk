@@ -253,13 +253,13 @@
                                 <div class="level">
                                     {% if metrics.software_quality_security_issues is defined %}
                                         <span class="tag level-item has-tooltip-bottom" data-tooltip="Security issues">
-                                            Security: {{ metrics.software_quality_security_issues }}
+                                            {{ metrics.software_quality_security_issues }}
                                         </span>
                                         <span class="tag level-item has-tooltip-bottom" data-tooltip="Reliability issues">
-                                            Reliability: {{ metrics.software_quality_reliability_issues }}
+                                            {{ metrics.software_quality_reliability_issues }}
                                         </span>
                                         <span class="tag level-item has-tooltip-bottom" data-tooltip="Maintainability issues">
-                                            Maintainability: {{ metrics.software_quality_maintainability_issues }}
+                                            {{ metrics.software_quality_maintainability_issues }}
                                         </span>
                                     {% else %}
                                         <span class="tag level-item is-critical-vuln has-tooltip-bottom" data-tooltip="Vulnerabilities">
