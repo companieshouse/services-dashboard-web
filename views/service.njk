@@ -1,5 +1,5 @@
 {% extends "layout.njk" %}
-{% from "macros.njk" import addCoverageColorClass, addVulnerabilityKey %}
+{% from "macros.njk" import addCoverageColorClass, addVulnerabilityKey, addDaysAgo %}
 
 {% macro buildSonarBlock(label, metrics) %}
     <p>{{label}} coverage: {{ metrics.coverage }}%</p>
@@ -187,7 +187,7 @@
                             <span class="tag is-info">{{value}}</span>
                         {% endfor %}
                     </td>
-                    <td>{{version.lastBomImport | date(dateFormat)}}</td>
+                    <td>{{version.lastBomImport | date(dateFormat)}} {{ addDaysAgo(version.lastBomImport) }}</td>
                     <td>{{version.lang}}</td>
                     <td>
                         {% for info in version.runtimeData.runtime%}
