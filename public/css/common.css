@@ -129,3 +129,7 @@ span[data-tooltip] {
   height: 1px;
   overflow: hidden;
 }
+
+.td-sonar-metrics {
+  background-color: #80808040 !important;
+}

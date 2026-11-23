@@ -234,16 +234,16 @@
 
                         <!-- SONAR -->
                         {% if service.sonarMetrics.overall | isEmpty %}
-                            <td>
+                            <td class="td-sonar-metrics">
                                 Sonar not configured
                             </td>
                         {% else %}
                             {% set coverage = service.sonarMetrics.overall.coverage %}
                             {% set metrics = service.sonarMetrics.overall %}
-                            <td class="td-sonar-metrics {{ addSonarColorClass(metrics, coverage) }}">
+                            <td class="td-sonar-metrics">
                                 {% if coverage == 0 %}
-                                    <progress class="progress" value="0" max="100" data-tooltip="Unknown Coverage">
-                                        0
+                                    <progress class="progress is-danger has-tooltip" value="100" max="100" data-tooltip="Unknown Coverage">
+                                        100
                                     </progress>
                                 {% else %}
                                     <progress class="progress {{ addCoverageColorClass(coverage) }} has-tooltip" value="{{coverage}}" max="100" data-tooltip="{{ coverage }}% Overall Coverage">
@@ -252,13 +252,13 @@
                                 {% endif %}
                                 <div class="level">
                                     {% if metrics.software_quality_security_issues is defined %}
-                                        <span class="tag level-item has-tooltip-bottom" data-tooltip="Security issues">
+                                        <span class="tag level-item has-tooltip-bottom is-critical-vuln" data-tooltip="Security issues">
                                             {{ metrics.software_quality_security_issues }}
                                         </span>
-                                        <span class="tag level-item has-tooltip-bottom" data-tooltip="Reliability issues">
+                                        <span class="tag level-item has-tooltip-bottom is-high-vuln" data-tooltip="Reliability issues">
                                             {{ metrics.software_quality_reliability_issues }}
                                         </span>
-                                        <span class="tag level-item has-tooltip-bottom" data-tooltip="Maintainability issues">
+                                        <span class="tag level-item has-tooltip-bottom is-low-vuln" data-tooltip="Maintainability issues">
                                             {{ metrics.software_quality_maintainability_issues }}
                                         </span>
                                     {% else %}
