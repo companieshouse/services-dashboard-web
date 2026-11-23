@@ -22,11 +22,11 @@
 
 {% macro addSonarColorClass(metrics, coverage) %}
     {% if coverage == 0 %}
-        is-high-vuln
+        is-medium-vuln
     {% else %}
-     {% if (metrics.software_quality_security_issues == 0) and (metrics.software_quality_reliability_issues == 0) and (metrics.software_quality_maintainability_issues == 0) and (metrics.coverage >= 80) %}
+     {% if (metrics.software_quality_security_issues == 0) and (metrics.software_quality_reliability_issues == 0) and (metrics.software_quality_maintainability_issues == 0) and (metrics.coverage > 80) %}
         is-clear-vuln
-         {% elseif (metrics.software_quality_maintainability_issues < 25) and (metrics.software_quality_security_issues == 0) %}
+         {% elseif (metrics.software_quality_maintainability_issues < 10) and (metrics.software_quality_security_issues == 0) %}
          is-medium-vuln
      {% else %}
          is-critical-vuln
